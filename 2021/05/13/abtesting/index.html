@@ -18,28 +18,28 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#f8f8f8">
-  <title>A/B Testing简析 - 屹然的空间</title>
+  <title>A/B Testing 基础知识 - 屹然的空间</title>
 
   
 
   
-    <meta name="description" content="本文为A&#x2F;B测试的基础教程，基本根据udacity的学习课程 Udacity A&#x2F;B testing by Google。">
+    <meta name="description" content="本文为A&#x2F;B测试的基础知识，基本根据udacity的学习课程 Udacity A&#x2F;B testing by Google。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="A&#x2F;B Testing简析">
+<meta property="og:title" content="A&#x2F;B Testing 基础知识">
 <meta property="og:url" content="http://example.com/2021/05/13/abtesting/index.html">
 <meta property="og:site_name" content="屹然的空间">
-<meta property="og:description" content="本文为A&#x2F;B测试的基础教程，基本根据udacity的学习课程 Udacity A&#x2F;B testing by Google。">
+<meta property="og:description" content="本文为A&#x2F;B测试的基础知识，基本根据udacity的学习课程 Udacity A&#x2F;B testing by Google。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/25043032-29b4c45f6fa5686f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="c:/Users/Yiran/Desktop/blog/source/image/image-20220403181043108.png">
 <meta property="og:image" content="https://upload-images.jianshu.io/upload_images/25043032-e88d9a214b484b9d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 <meta property="article:published_time" content="2021-05-13T09:57:00.000Z">
-<meta property="article:modified_time" content="2022-04-03T09:34:27.163Z">
+<meta property="article:modified_time" content="2022-04-03T10:21:13.043Z">
 <meta property="article:author" content="lifanyiran">
 <meta property="article:tag" content="A&#x2F;B Testing">
 <meta property="article:tag" content="Data Science">
 <meta property="article:tag" content="Data Analysis">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/25043032-29b4c45f6fa5686f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta name="twitter:image" content="c:/Users/Yiran/Desktop/blog/source/image/image-20220403181043108.png">
   
   
 
@@ -75,7 +75,7 @@
 
 <div class="widgets">
 
-<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%BB%80%E4%B9%88%E6%98%AFAB%E6%B5%8B%E8%AF%95"><span class="toc-text">1.1  什么是AB测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-AB%E6%B5%8B%E8%AF%95%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-text">1.2 AB测试的应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="toc-text">1.3 测试结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E9%A3%8E%E9%99%A9-Risk"><span class="toc-text">2.1 风险(Risk)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%94%B6%E7%9B%8A-Benefit"><span class="toc-text">2.2 收益(Benefit)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%9B%BF%E4%BB%A3-Alternatives"><span class="toc-text">2.3 替代(Alternatives)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E6%95%B0%E6%8D%AE%E6%95%8F%E6%84%9F%E6%80%A7-Data-Sensitvity"><span class="toc-text">2.4 数据敏感性(Data Sensitvity)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%AE%9A%E4%B9%89%E6%8C%87%E6%A0%87"><span class="toc-text">3.1 定义指标</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-1-%E6%8C%87%E6%A0%87%E6%A3%80%E6%B5%8B"><span class="toc-text">3.1.1 指标检测</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-2-%E5%AE%9A%E4%B9%89%E6%8C%87%E6%A0%87"><span class="toc-text">3.1.2 定义指标</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-3-%E6%8C%87%E6%A0%87%E7%BB%9F%E8%AE%A1%E9%87%8F"><span class="toc-text">3.1.3 指标统计量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-4-%E5%A4%9A%E6%8C%87%E6%A0%87"><span class="toc-text">3.1.4 多指标</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-5-%E7%AD%9B%E9%80%89%E6%95%B0%E6%8D%AE"><span class="toc-text">3.1.5 筛选数据</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%95%8F%E6%84%9F%E6%80%A7-Sensitivity-%E4%B8%8E%E9%B2%81%E6%A3%92%E6%80%A7-Robustness"><span class="toc-text">3.2 敏感性(Sensitivity)与鲁棒性(Robustness)</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#a-%E6%B5%8B%E8%AF%95"><span class="toc-text">a) 测试</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#b-%E5%9B%9E%E9%A1%BE%E5%88%86%E6%9E%90-Retrospective-Analysis"><span class="toc-text">b) 回顾分析(Retrospective Analysis)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%8F%98%E5%BC%82%E6%80%A7-Variability"><span class="toc-text">3.3 变异性(Variability)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%88%86%E6%B5%81%E5%AF%B9%E8%B1%A1"><span class="toc-text">4.1 分流对象</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-1-%E4%B8%80%E8%87%B4%E6%80%A7-Consistency"><span class="toc-text">4.1.1 一致性(Consistency)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-2-%E4%BC%A6%E7%90%86%E6%80%A7-Ethical"><span class="toc-text">4.1.2 伦理性(Ethical)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4-1-3-%E5%8F%98%E5%BC%82%E6%80%A7-Variability"><span class="toc-text">4.1.3 变异性(Variability)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E9%80%89%E6%8B%A9%E7%BE%A4%E4%BD%93"><span class="toc-text">4.2 选择群体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E6%A0%B7%E6%9C%AC%E9%87%8F%E4%B8%8E%E5%91%A8%E6%9C%9F"><span class="toc-text">4.3 样本量与周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%90%88%E7%90%86%E6%80%A7%E6%A3%80%E9%AA%8C-Sanity-Test"><span class="toc-text">5.1 合理性检验(Sanity Test)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%8D%95%E4%B8%80%E6%8C%87%E6%A0%87"><span class="toc-text">5.2 单一指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E5%A4%9A%E4%B8%AA%E6%8C%87%E6%A0%87"><span class="toc-text">5.3 多个指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-Ramp-Up"><span class="toc-text">5.4 Ramp-Up</span></a></li></ol></div></div></div>
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-A-B%E6%B5%8B%E8%AF%95%E7%AE%80%E4%BB%8B"><span class="toc-text">1. A&#x2F;B测试简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%B5%8B%E8%AF%95%E5%87%86%E5%88%99%E4%BB%A5%E5%8F%8A%E9%81%93%E5%BE%B7%E9%97%AE%E9%A2%98"><span class="toc-text">2. 测试准则以及道德问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AE%9A%E4%B9%89%E4%B8%8E%E9%80%89%E6%8B%A9%E6%8C%87%E6%A0%87"><span class="toc-text">3. 定义与选择指标</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%AE%9A%E4%B9%89%E6%8C%87%E6%A0%87"><span class="toc-text">3.1 定义指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%95%8F%E6%84%9F%E6%80%A7-Sensitivity-%E4%B8%8E%E9%B2%81%E6%A3%92%E6%80%A7-Robustness"><span class="toc-text">3.2 敏感性(Sensitivity)与鲁棒性(Robustness)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%8F%98%E5%BC%82%E6%80%A7-Variability"><span class="toc-text">3.3 变异性(Variability)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%AE%BE%E8%AE%A1%E5%AE%9E%E9%AA%8C"><span class="toc-text">4. 设计实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%88%86%E6%B5%81%E5%AF%B9%E8%B1%A1"><span class="toc-text">4.1 分流对象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E9%80%89%E6%8B%A9%E7%BE%A4%E4%BD%93"><span class="toc-text">4.2 选择群体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E6%A0%B7%E6%9C%AC%E9%87%8F%E4%B8%8E%E5%91%A8%E6%9C%9F"><span class="toc-text">4.3 样本量与周期</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E9%AA%8C%E8%AF%81%E7%BB%93%E6%9E%9C"><span class="toc-text">5. 验证结果</span></a></li></ol></div></div></div>
 
 
 </div>
@@ -90,15 +90,17 @@
 <div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/A-B-Testing/">A/B Testing</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-05-13T09:57:00.000Z">2021-05-13</time></div></div>
 
 <article class='content md post'>
-<h1 class="article-title"><span>A/B Testing简析</span></h1>
-<p>本文为A/B测试的基础教程，基本根据udacity的学习课程 <a target="_blank" rel="noopener" href="https://www.udacity.com/course/ab-testing--ud257">Udacity A/B testing by Google</a>。</p>
+<h1 class="article-title"><span>A/B Testing 基础知识</span></h1>
+<p>本文为A/B测试的基础知识，基本根据udacity的学习课程 <a target="_blank" rel="noopener" href="https://www.udacity.com/course/ab-testing--ud257">Udacity A/B testing by Google</a>。</p>
 <span id="more"></span>
-<h1 id="1-A-B测试简介"><a href="#1-A-B测试简介" class="headerlink" title="1. A/B测试简介"></a>1. A/B测试简介</h1><h3 id="1-1-什么是AB测试"><a href="#1-1-什么是AB测试" class="headerlink" title="1.1  什么是AB测试"></a>1.1  什么是AB测试</h3><p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/A/B%E6%B8%AC%E8%A9%A6">A/B测试</a>为一种<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/w/index.php?title=%E9%9A%A8%E6%A9%9F%E6%B8%AC%E8%A9%A6&amp;action=edit&amp;redlink=1">随机测试</a>，将两个不同的东西（即A和B）进行假设比较。该测试运用<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E7%B5%B1%E8%A8%88%E5%AD%B8" title="统计学">统计学</a>上的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%81%87%E8%A8%AD%E6%AA%A2%E5%AE%9A" title="假设检定">假设检定</a>和<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/w/index.php?title=%E9%9B%99%E6%AF%8D%E9%AB%94%E5%81%87%E8%A8%AD%E6%AA%A2%E5%AE%9A&amp;action=edit&amp;redlink=1">双母体假设检定</a>。 A/B测试可以用来测试某一个变量两个不同版本的差异，一般是让A和B只有该变量不同，再测试其他人对于A和B的反应差异，再判断A和B的方式何者较佳。在这里先推荐一下udacity的学习课程 <a target="_blank" rel="noopener" href="https://www.udacity.com/course/ab-testing--ud257">Udacity A/B testing by Google</a></p>
+<h2 id="1-A-B测试简介"><a href="#1-A-B测试简介" class="headerlink" title="1. A/B测试简介"></a>1. A/B测试简介</h2><p>1.1 什么是AB测试?</p>
+<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/A/B%E6%B8%AC%E8%A9%A6">A/B测试</a>为一种<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/w/index.php?title=%E9%9A%A8%E6%A9%9F%E6%B8%AC%E8%A9%A6&amp;action=edit&amp;redlink=1">随机测试</a>，将两个不同的东西（即A和B）进行假设比较。该测试运用<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E7%B5%B1%E8%A8%88%E5%AD%B8" title="统计学">统计学</a>上的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%81%87%E8%A8%AD%E6%AA%A2%E5%AE%9A" title="假设检定">假设检定</a>和<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/w/index.php?title=%E9%9B%99%E6%AF%8D%E9%AB%94%E5%81%87%E8%A8%AD%E6%AA%A2%E5%AE%9A&amp;action=edit&amp;redlink=1">双母体假设检定</a>。 A/B测试可以用来测试某一个变量两个不同版本的差异，一般是让A和B只有该变量不同，再测试其他人对于A和B的反应差异，再判断A和B的方式何者较佳。在这里先推荐一下udacity的学习课程 <a target="_blank" rel="noopener" href="https://www.udacity.com/course/ab-testing--ud257">Udacity A/B testing by Google</a></p>
 <blockquote>
 <p>简单来讲，和<strong>控制变量法</strong>基本一致，起源于医学中的双盲试验</p>
 </blockquote>
-<h3 id="1-2-AB测试的应用"><a href="#1-2-AB测试的应用" class="headerlink" title="1.2 AB测试的应用"></a>1.2 AB测试的应用</h3><p>一般在数据分析工作中，对一个产品不同阶段的转化程度，会使用<strong>漏斗模型</strong>来分析。例如以下为一个酒店预订网站的漏斗模型：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upload-images.jianshu.io/upload_images/25043032-29b4c45f6fa5686f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>一般在数据分析工作中，对一个产品不同阶段的转化程度，会使用<strong>漏斗模型</strong>来分析。例如以下为一个酒店预订网站的漏斗模型：</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="C:\Users\Yiran\Desktop\blog\source\image\image-20220403181043108.png" alt="image-20220403181043108"></p>
+<p>1.2 A/B测试的应用</p>
 <p>我们的目标是尽可能多的让用户转化到下一个阶段。而AB测试则可以测试不同的功能/配置/界面等对一个用户转化程度的提升，从而改进我们的产品。<br>在设计AB测试的初期，我们需要寻找某个指标，作为测量值。例如进行一个网页点击情况的测试，可用以下指标：</p>
 <ul>
 <li>CTR(click-through rate)，点击数/浏览数，一般用来测量可用性(usability)</li>
@@ -107,47 +109,56 @@
 <blockquote>
 <p>rate和probability对应的中文一般均为<em>率</em>，实际则不同。rate更倾向于概率，例如我们丢一个无偏的硬币，正面向上的可能性是50%；probability更倾向于可能性，例如我们丢10000次无偏的硬币，正面向上的次数服从伯努利分布。</p>
 </blockquote>
-<h3 id="1-3-测试结果"><a href="#1-3-测试结果" class="headerlink" title="1.3 测试结果"></a>1.3 测试结果</h3><ul>
+<ul>
+<li>测试结果</li>
 <li>统计上显著(statistical significant)vs.现实中显著(pratical significant)<br>统计上显著代表着可重复性(repeatability)，而现实中显著则根据不同业务来界定。</li>
 <li>$\alpha$代表$H_0$正确，但是拒绝掉$H_0$的概率，一般取值为$0.05$。也就是本来有用，但是有5%的可能测试结果是没用。</li>
 <li>$\beta$代表$H_0$错误，但是接受$H_0$的概率，一般取值为$0.20$。也就是本来没用，但是有20%的可能测试结果是有用。</li>
 <li>小样本量，低$\alpha$，高$\beta$；大样本量，低$\alpha$，低$\beta$</li>
 </ul>
-<h1 id="2-测试准则以及道德问题"><a href="#2-测试准则以及道德问题" class="headerlink" title="2. 测试准则以及道德问题"></a>2. 测试准则以及道德问题</h1><h3 id="2-1-风险-Risk"><a href="#2-1-风险-Risk" class="headerlink" title="2.1 风险(Risk)"></a>2.1 风险(Risk)</h3><p>受试者是否需要承担任何风险？例如金钱、情感、身体等等。阈值根据具体业务场景定义，如果超过某个阈值，则需要告知受试者。</p>
+<h2 id="2-测试准则以及道德问题"><a href="#2-测试准则以及道德问题" class="headerlink" title="2. 测试准则以及道德问题"></a>2. 测试准则以及道德问题</h2><p>2.1 风险(Risk)</p>
+<p>受试者是否需要承担任何风险？例如金钱、情感、身体等等。阈值根据具体业务场景定义，如果超过某个阈值，则需要告知受试者。</p>
 <blockquote>
 <p>医学上的部分临床试验会分测试组与对照组，广义上也是A/B测试，均会告知受试者并签署协议。</p>
 </blockquote>
-<h3 id="2-2-收益-Benefit"><a href="#2-2-收益-Benefit" class="headerlink" title="2.2 收益(Benefit)"></a>2.2 收益(Benefit)</h3><p>测试是否带来任何收益？</p>
-<h3 id="2-3-替代-Alternatives"><a href="#2-3-替代-Alternatives" class="headerlink" title="2.3 替代(Alternatives)"></a>2.3 替代(Alternatives)</h3><p>除了测试外，受试者是否有其他选择？如果有其他选择，例如对一个App进行测试，受试者是否会被影响从而流失转往竞品？有多少会流失？成本是多少？</p>
-<h3 id="2-4-数据敏感性-Data-Sensitvity"><a href="#2-4-数据敏感性-Data-Sensitvity" class="headerlink" title="2.4 数据敏感性(Data Sensitvity)"></a>2.4 数据敏感性(Data Sensitvity)</h3><ul>
+<p>2.2 收益(Benefit)</p>
+<p>测试是否带来任何收益？</p>
+<p>2.3 替代(Alternatives)</p>
+<p>除了测试外，受试者是否有其他选择？如果有其他选择，例如对一个App进行测试，受试者是否会被影响从而流失转往竞品？有多少会流失？成本是多少？</p>
+<p>2.4 数据敏感性(Data Sensitvity)</p>
+<ul>
 <li>收集的数据是否具有敏感性？是否有保险措施？</li>
 <li>这部分数据将用于什么用途？如何保护数据不会用于其他用途？</li>
 <li>如果需要公开部分数据，是否会带来额外的风险？</li>
 </ul>
-<h1 id="3-定义与选择指标"><a href="#3-定义与选择指标" class="headerlink" title="3. 定义与选择指标"></a>3. 定义与选择指标</h1><p>指标(Metrics)是用来衡量业务的一个参数，例如上文所说的<strong>点击率</strong>，或者<strong>用户量</strong>，GMV均为指标。在A/B测试中，我们需要考虑如何可以科学有效的定义或选择一个指标。</p>
-<h3 id="3-1-定义指标"><a href="#3-1-定义指标" class="headerlink" title="3.1 定义指标"></a>3.1 定义指标</h3><h5 id="3-1-1-指标检测"><a href="#3-1-1-指标检测" class="headerlink" title="3.1.1 指标检测"></a>3.1.1 指标检测</h5><p>合理性：指标符合业务上的理解，例如漏斗中的转化率不高于100%。<br>稳定性：两个分组如果没有区别，指标的表现应该是相同的。</p>
+<h2 id="3-定义与选择指标"><a href="#3-定义与选择指标" class="headerlink" title="3. 定义与选择指标"></a>3. 定义与选择指标</h2><p>指标(Metrics)是用来衡量业务的一个参数，例如上文所说的<strong>点击率</strong>，或者<strong>用户量</strong>，GMV均为指标。在A/B测试中，我们需要考虑如何可以科学有效的定义或选择一个指标。</p>
+<h3 id="3-1-定义指标"><a href="#3-1-定义指标" class="headerlink" title="3.1 定义指标"></a>3.1 定义指标</h3><p>3.1.1 指标检测</p>
+<p>合理性：指标符合业务上的理解，例如漏斗中的转化率不高于100%。<br>稳定性：两个分组如果没有区别，指标的表现应该是相同的。</p>
 <blockquote>
 <p>有时会使用A/A test，来检测两个分组内各特征是否分布均匀。两个分组如果没有区别，指标应该在统计上是没有显著差别的，如果有则说明两个分组内的分布不均匀，例如新老客比例、男女分布等。</p>
 </blockquote>
-<h5 id="3-1-2-定义指标"><a href="#3-1-2-定义指标" class="headerlink" title="3.1.2 定义指标"></a>3.1.2 定义指标</h5><p>通常会自上而下的来定义指标</p>
+<p>3.1.2 定义指标</p>
+<p>通常会自上而下的来定义指标</p>
 <ul>
 <li>第一步：高层次、低抽象、更广义且贴近商业、业务的指标。例如日活(日活跃用户量)、CTR。</li>
 <li>第二步：更细节的指标。例如日活用户是由哪些组成？不同城市？不同版本APP？老用户回归？</li>
 </ul>
-<h5 id="3-1-3-指标统计量"><a href="#3-1-3-指标统计量" class="headerlink" title="3.1.3 指标统计量"></a>3.1.3 指标统计量</h5><ul>
+<p>3.1.3 指标统计量</p>
+<ul>
 <li>聚合指标，例如日活、点击量。</li>
 <li>分布指标，例如平均数、分位数。</li>
 <li>概率、可能性、和比值</li>
 </ul>
-<h5 id="3-1-4-多指标"><a href="#3-1-4-多指标" class="headerlink" title="3.1.4 多指标"></a>3.1.4 多指标</h5><p>根据不同的公司/团队文化（对于数据的接受程度），我们可以考虑是否需要使用多个指标。<br>如果要使用多个指标，可以考虑制定一个综合评价标准(OEC Overall Evaluation Criterion) - 对所有指标的一个加权平均值。</p>
+<p>3.1.4 多指标</p>
+<p>根据不同的公司/团队文化（对于数据的接受程度），我们可以考虑是否需要使用多个指标。<br>如果要使用多个指标，可以考虑制定一个综合评价标准(OEC Overall Evaluation Criterion) - 对所有指标的一个加权平均值。</p>
 <blockquote>
-<p>通常情况不建议这么做，因为加权系数难以定义；个别指标增长导致整体增长，所以业务方可能仅持续优化某个指标等等</p>
-<h5 id="3-1-5-筛选数据"><a href="#3-1-5-筛选数据" class="headerlink" title="3.1.5 筛选数据"></a>3.1.5 筛选数据</h5><p>我们需要根据不同的原因，来筛选掉不需要的数据。</p>
+<p>通常情况不建议这么做，因为加权系数难以定义；个别指标增长导致整体增长，所以业务方可能仅持续优化某个指标等等<br>3.1.5 筛选数据</p>
+</blockquote>
+<p>我们需要根据不同的原因，来筛选掉不需要的数据。</p>
 <ul>
 <li>外部原因：导致数据被污染的原因。例如用户的恶意操作，其他实验导致的流量异常等。</li>
 <li>内部原因：导致数据仅能反映部分实验的原因。例如实验仅可以影响分组中的新用户。</li>
 </ul>
-</blockquote>
 <p>如何确定数据是否有偏差的呢？</p>
 <ul>
 <li>拆分各种维度，观测流量是否受某个维度所影响。</li>
@@ -159,9 +170,13 @@
 </blockquote>
 <p>例如：<strong>均值</strong>对于离群值较为敏感，而<strong>中位数</strong>则不易收到离群值的影响，所以拥有更强的鲁棒性；但是如果数据集中的仅部分用户的数据发生变化，<strong>中位数</strong>可能不会有任何变化，所以敏感性较低。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upload-images.jianshu.io/upload_images/25043032-e88d9a214b484b9d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
 <p>那么，该如何验证指标的敏感性和鲁棒性呢？</p>
-<h5 id="a-测试"><a href="#a-测试" class="headerlink" title="a) 测试"></a>a) 测试</h5><ul>
+<p>a) 测试</p>
+<ul>
 <li>使用历史测试进行验证</li>
-<li>A/A测试<h5 id="b-回顾分析-Retrospective-Analysis"><a href="#b-回顾分析-Retrospective-Analysis" class="headerlink" title="b) 回顾分析(Retrospective Analysis)"></a>b) 回顾分析(Retrospective Analysis)</h5></li>
+<li>A/A测试</li>
+</ul>
+<p>b) 回顾分析(Retrospective Analysis)</p>
+<ul>
 <li>观测指标在历史数据上的变化，分析造成变化的原因</li>
 </ul>
 <h3 id="3-3-变异性-Variability"><a href="#3-3-变异性-Variability" class="headerlink" title="3.3 变异性(Variability)"></a>3.3 变异性(Variability)</h3><p>不同的指标拥有不同的可变性，有些指标尽管在业务上十分合理，但是可变性过强，会使该指标没有应用意义。</p>
@@ -218,7 +233,7 @@
 </blockquote>
 </li>
 </ul>
-<h1 id="4-设计实验"><a href="#4-设计实验" class="headerlink" title="4. 设计实验"></a>4. 设计实验</h1><p>实验设计通常需要确定以下几个部分：</p>
+<h2 id="4-设计实验"><a href="#4-设计实验" class="headerlink" title="4. 设计实验"></a>4. 设计实验</h2><p>实验设计通常需要确定以下几个部分：</p>
 <ul>
 <li>分流对象(Subject)：哪些是你的实验对象？例如，需要分流为两个组。</li>
 <li>选择群体(Population)：实验对象是哪些群体？例如，中国用户。</li>
@@ -238,7 +253,8 @@
 <li>IP地址</li>
 </ul>
 <p>在选择分流方式时，通常需要考虑以下三点：</p>
-<h5 id="4-1-1-一致性-Consistency"><a href="#4-1-1-一致性-Consistency" class="headerlink" title="4.1.1 一致性(Consistency)"></a>4.1.1 一致性(Consistency)</h5><p>对于用户可感知的测试，用户ID可以保证一个用户即使在多次访问一个界面，任然会被分在同一个组内；而对于用户不可感知测试，例如不同搜索排序算法的测试，则可以使用事件分流。<br>例：各种实验为了确定一致性，可以选择哪种分流方式？</p>
+<p>4.1.1 一致性(Consistency)</p>
+<p>对于用户可感知的测试，用户ID可以保证一个用户即使在多次访问一个界面，任然会被分在同一个组内；而对于用户不可感知测试，例如不同搜索排序算法的测试，则可以使用事件分流。<br>例：各种实验为了确定一致性，可以选择哪种分流方式？</p>
 <div class="table-container">
 <table>
 <thead>
@@ -257,7 +273,6 @@
 <td style="text-align:center"></td>
 <td style="text-align:center"></td>
 <td style="text-align:center">$\checkmark$</td>
-<td></td>
 </tr>
 <tr>
 <td style="text-align:center">更改按钮的颜色或大小</td>
@@ -265,7 +280,6 @@
 <td style="text-align:center"></td>
 <td style="text-align:center">$\checkmark$</td>
 <td style="text-align:center"></td>
-<td></td>
 </tr>
 <tr>
 <td style="text-align:center">更改搜索结果的排序</td>
@@ -273,7 +287,6 @@
 <td style="text-align:center"></td>
 <td style="text-align:center"></td>
 <td style="text-align:center">$\checkmark$</td>
-<td></td>
 </tr>
 <tr>
 <td style="text-align:center">考试前增加一份复习资料</td>
@@ -281,13 +294,14 @@
 <td style="text-align:center">$\checkmark$</td>
 <td style="text-align:center"></td>
 <td style="text-align:center"></td>
-<td></td>
 </tr>
 </tbody>
 </table>
 </div>
-<h5 id="4-1-2-伦理性-Ethical"><a href="#4-1-2-伦理性-Ethical" class="headerlink" title="4.1.2 伦理性(Ethical)"></a>4.1.2 伦理性(Ethical)</h5><p>如果使用用户id进行分流，可能会有信息告知、披露的问题需要考虑，而使用cookie分流则不需要。</p>
-<h5 id="4-1-3-变异性-Variability"><a href="#4-1-3-变异性-Variability" class="headerlink" title="4.1.3 变异性(Variability)"></a>4.1.3 变异性(Variability)</h5><p>分流单位需要和测试单位(指标的分母，也就是多少单位进入了测试)一致，否则计算出的变异性要远远小于实际的变异性。这是因为我们在计算变异性时，其实在假设数据的分布是独立的。</p>
+<p>4.1.2 伦理性(Ethical)</p>
+<p>如果使用用户id进行分流，可能会有信息告知、披露的问题需要考虑，而使用cookie分流则不需要。</p>
+<p>4.1.3 变异性(Variability)</p>
+<p>分流单位需要和测试单位(指标的分母，也就是多少单位进入了测试)一致，否则计算出的变异性要远远小于实际的变异性。这是因为我们在计算变异性时，其实在假设数据的分布是独立的。</p>
 <blockquote>
 <p>例如使用用户ID分流，一个用户会有多个事件，然后指标是根据事件维度的，则两个分组内的数据，则不是独立的。因为用户和事件是相关的。</p>
 </blockquote>
@@ -310,21 +324,28 @@
 <li>对于未知结果的新功能上线，先小流量测试</li>
 <li>长周期小流量的安全性 &gt; 短周期大流量</li>
 </ul>
-<h1 id="5-验证结果"><a href="#5-验证结果" class="headerlink" title="5. 验证结果"></a>5. 验证结果</h1><h3 id="5-1-合理性检验-Sanity-Test"><a href="#5-1-合理性检验-Sanity-Test" class="headerlink" title="5.1 合理性检验(Sanity Test)"></a>5.1 合理性检验(Sanity Test)</h3><p>收集到数据后的首当其冲我们要做的就是，检测数据的合理性，对照组和测试组的样本量需要是可对比的。<br>例如$se = $, $se = \sqrt{ \frac{0.5<em>0.5}{x</em>y} } $，$ margin = \frac{x}{x+y} - \frac{y}{x+y} $<br>如果$se$大于$margin$则说明统计上是不显著的。</p>
-<h3 id="5-2-单一指标"><a href="#5-2-单一指标" class="headerlink" title="5.2 单一指标"></a>5.2 单一指标</h3><p>使用单一指标验证测试结果，我们可以使用简单的T检验或者Z检验，亦或是ANOVA和卡方检验均可。值得注意的是，在验证结果时，可能需要进行维度拆分，因为实验结果可能仅作用于某个子集。</p>
+<h2 id="5-验证结果"><a href="#5-验证结果" class="headerlink" title="5. 验证结果"></a>5. 验证结果</h2><p>5.1 合理性检验(Sanity Test)</p>
+<p>收集到数据后的首当其冲我们要做的就是，检测数据的合理性，对照组和测试组的样本量需要是可对比的。例如</p>
+<script type="math/tex; mode=display">
+se = \sqrt{ \frac{0.5 \times 0.5}{x \times y} }, \ \ margin = \frac{x}{x+y} - \frac{y}{x+y}</script><p>如果$se$大于$margin$则说明统计上是不显著的。</p>
+<p>5.2 单一指标</p>
+<p>使用单一指标验证测试结果，我们可以使用简单的T检验或者Z检验，亦或是ANOVA和卡方检验均可。值得注意的是，在验证结果时，可能需要进行维度拆分，因为实验结果可能仅作用于某个子集。</p>
 <blockquote>
 <p>注意辛普森悖论(Simpson’s Paradox)：两个组见每个子集均表现出差异，但是整体无差异，说明两个组中每个子集的占比不同</p>
 </blockquote>
-<h3 id="5-3-多个指标"><a href="#5-3-多个指标" class="headerlink" title="5.3 多个指标"></a>5.3 多个指标</h3><p>使用多个指标验证测试结果，可能碰到的问题是，我们更有可能让测试的差异显著。也就是说，每一次进行测试结果的验证，都有一个几率，让我们的结果显著，而多次验证则会放大这个机率，也就是所谓的<strong>Type II Error</strong>。<br>解决方法是使用<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bonferroni_correction">Bonferroni correction</a>：缩小单个测试的置信区间，以获得合理的整体置信区间。例如进行三个指标的验证，而整体我们想要的置信水平$p_{overall}=0.05$，则单个指标的置信水平$p_{individual}=0.05/3=0.016$</p>
+<p>5.3 多个指标</p>
+<p>使用多个指标验证测试结果，可能碰到的问题是，我们更有可能让测试的差异显著。也就是说，每一次进行测试结果的验证，都有一个几率，让我们的结果显著，而多次验证则会放大这个机率，也就是所谓的<strong>Type II Error</strong>。<br>解决方法是使用<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bonferroni_correction">Bonferroni correction</a>：缩小单个测试的置信区间，以获得合理的整体置信区间。例如进行三个指标的验证，而整体我们想要的置信水平$p_{overall}=0.05$，则单个指标的置信水平$p_{individual}=0.05/3=0.016$</p>
 <blockquote>
 <p>很明显，Bonferroni correction会使整个测试过于保守，其他有效的方法为 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Closed_testing_procedure">closed testing procedure</a>, <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Boole%27s_inequality">Boole-Bonferroni bound</a>和<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method">Holm-Bonferroni method</a>，抑或是上文提到的综合评价标准(OEC）</p>
 </blockquote>
-<h3 id="5-4-Ramp-Up"><a href="#5-4-Ramp-Up" class="headerlink" title="5.4 Ramp-Up"></a>5.4 Ramp-Up</h3><p>通常AB测试的上线，我们会从1%等比较低的流量开始，然后慢慢上升到全部流量，达到功能的正式上线。在整个Ramp-Up过程中，可能会有一些原因导致测试之前是显著的，但是之后是不显著的：</p>
+<p>5.4 Ramp-Up</p>
+<p>通常AB测试的上线，我们会从1%等比较低的流量开始，然后慢慢上升到全部流量，达到功能的正式上线。在整个Ramp-Up过程中，可能会有一些原因导致测试之前是显著的，但是之后是不显著的：</p>
 <ul>
 <li>季节效应：节假日等带来的数据波动。解决方法是保留一个组，持续的作为对照组。</li>
 <li>新奇效应以及变化厌恶：变化所带来的对用户行为本身的影响，例如新功能的上线导致客人更喜欢使用或厌恶使用产品。解决方案是以使用留存用户(cohort)进行测试，或者在测试前与测试后均进行A/A测试。</li>
 </ul>
-<p><em>Reference:</em><br>Tang, Diane, et al. “<a target="_blank" rel="noopener" href="https://research.google/pubs/pub36500/">Overlapping experiment infrastructure: More, better, faster experimentation</a>.” Proceedings of the 16th ACM SIGKDD international conference on Knowledge discovery and data mining. 2010.<br><a target="_blank" rel="noopener" href="https://www.udacity.com/course/ab-testing--ud257">Udacity A/B testing by Google</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bootstrapping_(statistics">Bootstrapping by wikipedia</a>)<br><a href="ttps://netflixtechblog.com/interleaving-in-online-experiments-at-netflix-a04ee392ec55">Interleaved in online Experiments at Netflix</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bonferroni_correction">Bonferroni correction</a></p>
+<hr>
+<p>Reference:<br>Tang, Diane, et al. “<a target="_blank" rel="noopener" href="https://research.google/pubs/pub36500/">Overlapping experiment infrastructure: More, better, faster experimentation</a>.” Proceedings of the 16th ACM SIGKDD international conference on Knowledge discovery and data mining. 2010.<br><a target="_blank" rel="noopener" href="https://www.udacity.com/course/ab-testing--ud257">Udacity A/B testing by Google</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bootstrapping_(statistics">Bootstrapping by wikipedia</a>)<br><a href="ttps://netflixtechblog.com/interleaving-in-online-experiments-at-netflix-a04ee392ec55">Interleaved in online Experiments at Netflix</a><br><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bonferroni_correction">Bonferroni correction</a></p>
 
 
 <div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
