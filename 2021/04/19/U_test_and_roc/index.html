@@ -4,7 +4,7 @@
 <head>
   <meta name="generator" content="Hexo 5.4.1">
   <meta charset="utf-8">
-  <meta name="robots" content="noindex,follow">
+  
 
   <meta http-equiv='x-dns-prefetch-control' content='on' />
   <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
@@ -18,18 +18,28 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#f8f8f8">
-  <title>标签：A/B Testing - 屹然的空间</title>
+  <title>Mann-Whitney U Test 与 ROC曲线 - 屹然的空间</title>
 
   
 
   
-    <meta property="og:type" content="website">
-<meta property="og:title" content="屹然的空间">
-<meta property="og:url" content="http://example.com/tags/A-B-Testing/index.html">
+    <meta name="description" content="在了解U统计量与AUC之间的关系前，先来复习一下Mann-Whitney U Test。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mann-Whitney U Test 与 ROC曲线">
+<meta property="og:url" content="http://example.com/2021/04/19/U_test_and_roc/index.html">
 <meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="在了解U统计量与AUC之间的关系前，先来复习一下Mann-Whitney U Test。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s3.bmp.ovh/imgs/2022/04/24/4e23732d77382c3f.webp">
+<meta property="og:image" content="https://s3.bmp.ovh/imgs/2022/04/24/43e38c580a6d6fd6.webp">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/25043032-b721244c2f30854c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2021-04-19T07:56:00.000Z">
+<meta property="article:modified_time" content="2022-04-24T10:05:43.370Z">
 <meta property="article:author" content="lifanyiran">
-<meta name="twitter:card" content="summary">
+<meta property="article:tag" content="Data Science">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://s3.bmp.ovh/imgs/2022/04/24/4e23732d77382c3f.webp">
   
   
 
@@ -51,8 +61,10 @@
   
 
 
+
+
   <div class='l_body' id='start'>
-    <aside class='l_left' layout=''>
+    <aside class='l_left' layout='post'>
     
 
 
@@ -62,57 +74,82 @@
 <nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/more/">更多</a></nav></header>
 
 <div class="widgets">
-<div class="widget-wrap" id="markdown"><div class="widget-header cap dis-select"><span class="name">Greeting</span></div><div class="widget-body fs14"><p>这里是一个个人博客，主要为生活记录以及学习笔记。</p>
-</div></div>
 
-<div class="widget-wrap" id="recent"><div class="widget-header cap dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><div class="more-item"><a class="title" href="/2021/04/19/U_test_and_roc/">Mann-Whitney U Test 与 ROC曲线</a></div><div class="more-item"><a class="title" href="/2021/08/25/The_Last_non_NULL_Puzzle/">复制最后一个非空值 The Last non-NULL Puzzle</a></div><div class="more-item"><a class="title" href="/2021/05/13/abtesting_intro/">A/B Testing 基础</a></div><div class="more-item"><a class="title" href="/2021/11/05/regexp_intro/">正则表达式基础</a></div></div></div>
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Mann-Whitney-U-Test"><span class="toc-text">1. Mann-Whitney U Test</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Roc%E9%9D%A2%E7%A7%AF%E4%B8%8EMann-Whitney-U%E7%BB%9F%E8%AE%A1%E9%87%8F"><span class="toc-text">2. Roc面积与Mann-Whitney U统计量</span></a></li></ol></div></div></div>
+
+
 </div>
 
 
     </aside>
-    <div class='l_main list'>
+    <div class='l_main'>
       
-  
-
-<header class="header mobile-only">
-
-<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F202004%2F24%2F20200424180257_epbvw.thumb.1000_0.jpeg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1649171377&t=c66e1c496f64309b13571c99481a0d0b" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
-</header>
-
-
 
       
 
-  
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Machine-Learning/">Machine Learning</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-04-19T07:56:00.000Z">2021-04-19</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>Mann-Whitney U Test 与 ROC曲线</span></h1>
+<p>在了解U统计量与AUC之间的关系前，先来复习一下Mann-Whitney U Test。</p>
+<span id="more"></span>
+<p>首先放上AUC在统计上的意义：</p>
+<blockquote>
+<p><strong>随机选取一个正例和一个负例，分类器给正例的打分大于分类器给负例的打分的概率</strong></p>
+</blockquote>
+<h2 id="1-Mann-Whitney-U-Test"><a href="#1-Mann-Whitney-U-Test" class="headerlink" title="1. Mann-Whitney U Test"></a>1. Mann-Whitney U Test</h2><p>Mann-Whitney U Test常常用来判断两个群体间的分布是否相同。在统计学上，该检验的null hypothesis与alternative hypothesis为：</p>
+<script type="math/tex; mode=display">\begin{aligned}
+H_0: 两个群体的分布相同 \\ 
+H_1: 两个群体的分布不同
+\end{aligned}</script><p>1.1 例子：龟兔赛跑</p>
+<p>假设伊索不满意龟兔赛跑的结果，他想要一个具有泛性的比赛结果。于是他找来了8只乌龟，8只兔子，让他们同时赛跑，最后的比赛名次为：<br>兔、兔、兔、兔、兔、兔、兔、龟、龟、龟、龟、龟、龟、龟、龟、兔。</p>
+<p>每只乌龟战胜的兔子量为：1、1、1、1、1、1、1、1，则$U_1 = 8$。<br>每只兔子战胜的乌龟量为：8、8、8、8、8、8、8、0，则$U_2 = 56$。<br>则：</p>
+<script type="math/tex; mode=display">U_1 + U_2 = 64</script><p>更加泛性上来讲，U统计量的计算方式如下：</p>
+<script type="math/tex; mode=display">\begin{aligned}
+U_1 &= R_1 - \frac{n_1(n_1+1)}{2} \\ 
+U_2 &= R_2 - \frac{n_2(n_2+1)}{2} 
+\end{aligned}</script><p>其中$R$代表名次之和，$n$代表样本量。</p>
+<script type="math/tex; mode=display">\begin{aligned}
+U_1 + U_2 &= R_1 - \frac{n_1(n_1+1)}{2} + R_2 - \frac{n_2(n_2+1)}{2} 
+\end{aligned}</script><p>因为$R_1, R_2$均为排名之和，所以$R_1+R_2 = N(N+1)/2$，并且$N = n_1 + n_2$，所以</p>
+<script type="math/tex; mode=display">U_1 + U_2 = n_1n_2</script><p>回到龟兔赛跑的例子中，$U_1 + U_2 = 8 \times 8 = 64$。<br>解下来我们需要根据求得的U去决定结论是否显著，$U = min([U_1, U_2]) = 8$，从<a target="_blank" rel="noopener" href="https://math.usask.ca/~laverty/S245/Tables/wmw.pdf">Mann-Whitney U test临界值表</a>上可以看到，$n_1 = 8, n_2 = 8$在$\alpha = 0.05 $的情况下$U = 13$。因为$8 &lt; 13$，所以我们便可以拒绝零假设，说明两个组的分布是不同的（均值/中位数不同），所以我们便可以认为兔子确实跑的比乌龟快。</p>
+<h2 id="2-Roc面积与Mann-Whitney-U统计量"><a href="#2-Roc面积与Mann-Whitney-U统计量" class="headerlink" title="2. Roc面积与Mann-Whitney U统计量"></a>2. Roc面积与Mann-Whitney U统计量</h2><p>假设我们的分类器结果如以下表</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://s3.bmp.ovh/imgs/2022/04/24/4e23732d77382c3f.webp" alt=""></p>
+<p>$n =$总样本量<br>$e =$预测为正的样本<br>$e’=$预测为负的样本</p>
+<p>在不考虑排名相同的情况下（如上述表），我们预测的阈值每越过一个样本：</p>
+<ul>
+<li>初始为100%，则没有预测为正的样本，则TPR与FPR均为0； </li>
+<li>越过一个样本，阈值为95.2 - 98.4的任何数，则我们有一个TP（预测为正的样本，且该样本实际为正），则TPR上升，FPR不变，以此类推</li>
+</ul>
+<p>如果越过一个FP（预测为正的样本，但实际为负的样本），则TPR不变，FPR上升。我们将越过FP的数量，记为$f$。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://s3.bmp.ovh/imgs/2022/04/24/43e38c580a6d6fd6.webp" alt=""></p>
+<p>所以，每次越过一个样本，ROC曲线增加的面积为：</p>
+<script type="math/tex; mode=display">area \ gained = \frac{e'-f}{e'e}</script><p>整体ROC曲线下的面积，即$AUC$为：</p>
+<script type="math/tex; mode=display">\begin{aligned}
+AUC&= \sum_i^e \frac{e'-f_i}{e'e} \\
+AUC&= 1- \frac{1}{e'e}\sum_i^e f_i \\
+\end{aligned}</script><p>下一步我们需要计算$\sum_i^e f_i$。与上面龟兔赛跑的例子类似，我们可以使用两种方法计算</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upload-images.jianshu.io/upload_images/25043032-b721244c2f30854c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="分类器Output"></p>
+<p>通过排名我们可以看到：<br>每个0超过的1的数量为：4，1，1，1，0，0，0，则$U_0 = 7$。<br>每个1超过的0的数量为：8，8，8，7，7，7，4，则$U_1 = 49$。<br>则$U = 7$</p>
+<p>泛性的公式如下：</p>
+<script type="math/tex; mode=display">\begin{aligned}
+F &= \sum_{i=1}^{e}f_i \\
+&= \sum_{i=1}^{e}(ri - i) \\
+&= \sum_{i=1}^{e}ri - \frac{e(e+1)}{2}\\
+&= 7 \\
+\end{aligned}</script><p>则$AUC = 1 - \frac{1}{7\times 8} \times 7 = 0.775$</p>
+<p><em>reference:</em><br><a target="_blank" rel="noopener" href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.458.8392&amp;rep=rep1&amp;type=pdf">Areas beneath the relative operating characteristics (ROC) and relative operating levels (ROL) curves: Statistical significance and interpretation</a></p>
 
 
-  <div class='nav-wrap'>
-  <nav class='sub post cap'>
-    
-      <a href='/'>近期发布</a>
-    
-    
-      
-        <a href='/categories'>分类</a>
-      
-    
-    
-      
-        <a class='active' href='/tags'>标签：A/B Testing</a>
-      
-    
-    
-      
-        <a href='/archives'>归档</a>
-      
-    
-  </nav>
-</div>
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
 
-  <div class="post-list post"><a class="post-card post " href="/2021/05/13/abtesting_intro/">
-<article class="md"><div class="post-cover"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://s3.bmp.ovh/imgs/2022/04/24/38ca6ff5b0fdd24b.jpg"/></div><h2 class="post-title">A/B Testing 基础</h2><div class="excerpt"><p>本文为A/B测试的基础知识，基本根据udacity的学习课程 Udacity A/B testing by Google。</p></div><div class="meta cap"><span class="cap" id="post-meta">发布于&nbsp;<time datetime="2021-05-13T09:57:00.000Z">2021-05-13</time></span><span class="cap breadcrumb">A/B Testing</span></div></article>
-</a></div>
-  
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><div class="line"></div><a id="prev" href="/2021/05/13/abtesting_intro/">A/B Testing 基础<span class="note">较新</span></a></section></div>
+
+
+
 
 
 
