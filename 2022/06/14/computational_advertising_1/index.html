@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>计算广告 - 综述 - 屹然的空间</title>
+
+  
+
+  
+    <meta name="description" content="在线广告，也称为网络广告、互联网广告，顾名思义，指的是在线媒体上投放的广告。与传统广告不同的是，在线广告在其短短十几年的发展过程中、已经形成了以人群为投放 目标、以产品为导向的技术型投放模式。在线广告不仅为广告主带来了以准确接触目标受 众为方法论的全新的营销渠道，也为互联网免费产品和媒体提供商们找到了规模化变现的手段。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算广告 - 综述">
+<meta property="og:url" content="http://lifanyiran.com/2022/06/14/computational_advertising_1/index.html">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="在线广告，也称为网络广告、互联网广告，顾名思义，指的是在线媒体上投放的广告。与传统广告不同的是，在线广告在其短短十几年的发展过程中、已经形成了以人群为投放 目标、以产品为导向的技术型投放模式。在线广告不仅为广告主带来了以准确接触目标受 众为方法论的全新的营销渠道，也为互联网免费产品和媒体提供商们找到了规模化变现的手段。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.bmp.ovh/imgs/2022/06/14/c67f9ffac1754298.png">
+<meta property="og:image" content="https://i.bmp.ovh/imgs/2022/06/15/b99cd84a337908d7.png">
+<meta property="og:image" content="https://i.bmp.ovh/imgs/2022/06/15/81ffb75c3c995357.png">
+<meta property="article:published_time" content="2022-06-14T10:00:00.000Z">
+<meta property="article:modified_time" content="2022-06-28T08:39:43.845Z">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Notes">
+<meta property="article:tag" content="Data Science">
+<meta property="article:tag" content="Computational Advertising">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://i.bmp.ovh/imgs/2022/06/14/c67f9ffac1754298.png">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/%5Bobject%20Object%5D">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F202004%2F24%2F20200424180257_epbvw.thumb.1000_0.jpeg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1649171377&t=c66e1c496f64309b13571c99481a0d0b" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E5%9C%A8%E7%BA%BF%E5%B9%BF%E5%91%8A%E7%AE%80%E5%8F%B2"><span class="toc-text">1.1 在线广告简史</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%B9%BF%E5%91%8A%E6%9C%89%E6%95%88%E6%80%A7%E5%8E%9F%E5%88%99"><span class="toc-text">2.1 广告有效性原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E4%BA%92%E8%81%94%E7%BD%91%E5%B9%BF%E5%91%8A%E7%9A%84%E6%8A%80%E6%9C%AF%E7%89%B9%E7%82%B9"><span class="toc-text">2.2 互联网广告的技术特点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E8%AE%A1%E7%AE%97%E5%B9%BF%E5%91%8A%E7%9A%84%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98"><span class="toc-text">2.3 计算广告的核心问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-1-%E5%B9%BF%E5%91%8A%E6%94%B6%E5%85%A5%E7%9A%84%E5%88%86%E8%A7%A3"><span class="toc-text">2.3.1 广告收入的分解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B9%BF%E5%91%8A%E7%BB%93%E7%AE%97%E6%96%B9%E5%BC%8F"><span class="toc-text">广告结算方式</span></a></li></ol></li></ol></div></div></div>
+
+
+</div>
+
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Advertising/">Advertising</a></div><div id="post-meta">发布于&nbsp;<time datetime="2022-06-14T10:00:00.000Z">2022-06-14</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>计算广告 - 综述</span></h1>
+<p>在线广告，也称为网络广告、互联网广告，顾名思义，指的是在线媒体上投放的广告。与传统广告不同的是，在线广告在其短短十几年的发展过程中、已经形成了以人群为投放 目标、以产品为导向的技术型投放模式。在线广告不仅为广告主带来了以准确接触目标受 众为方法论的全新的营销渠道，也为互联网免费产品和媒体提供商们找到了规模化变现的手段。</p>
+<span id="more"></span>
+<h1 id="1-综述"><a href="#1-综述" class="headerlink" title="1. 综述"></a>1. 综述</h1><p>什么是广告？<br>定义：广告是由已确定的出资人通过各种媒介进行的有关产品的，通常是有偿的、有组织的、综合的、劝服性的非人员的信息活动。<br>广告活动的主要参与方，由出资人（sponsor）、媒体（medium）和受众（audience）组成，这三者的利益博弈关系是广告活动永远的主线，这一主线将贯穿与商业和产品形态的整个演化过程。<br>广告根据不同的情况，会有不同的商业目的：</p>
+<ul>
+<li>品牌广告（brand awareness）：例如在传统媒体时代，供给方（supply）和需求方（demand）在市场地位上有相当的距离，比如杂志、电视台等，都与大多数广告主需要的转化行为有相当大的距离。这一阶段的广告的目的是借助媒体的力量来快速接触大量用户，达到宣传品牌形象，提升中长期购买率与利润空间。</li>
+<li>直接效果广告（direct response）：广告商利用广告手段马上带来大量的购买和其他转化行为，简称为效果广告。<blockquote>
+<p>供给方是指提供广告的平台、媒体等；需求方是指广告主，或者广告代理商等。<br>对于描述广告活动的根本目的，《当代广告学》中表示：广告的根本目的是广告主通过媒体达到低成本的用户解除。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="1-1-在线广告简史"><a href="#1-1-在线广告简史" class="headerlink" title="1.1 在线广告简史"></a>1.1 在线广告简史</h2><ul>
+<li><p>展示广告（display advertising）<br>展示广告的售卖模式称为合约广告（agreement-based advertising），在网站的HTML界面中，插入广告位。</p>
+</li>
+<li><p>定向广告（targeted advertising）<br>媒体发现让一个广告位提价的策略：对不同的人展示不同的价格。这样的广告系统对计算技术产生了两个具体需求：</p>
+<ul>
+<li>受众定向（audience targeting），通过技术手段标定用户的标签。</li>
+<li>广告投放（ad serving），将广告投送由嵌入页面变为实时响应前端的请求。<br>由于是从传统广告衍生而来，仍然以合约的方式进行，即担保式投送（guaranteed delivery, GD）：保证某个投放量，确定价格，投放量不足则给予赔偿。主要遵循千次展示收费（Cost per Mille, CPM）。<br>合约广告有一个重要问题，即在满足各合约目标受众量要求的同时尽可能为所有广告商分配到质更好的流量，即在线分配（online allocation）。这个问题有两个难点：</li>
+<li>如何将有效的流量分配至各个合约交叉的人群覆盖上？</li>
+<li>在在线的环境下完成每一次展示决策。<br>如果将合约的量看作约束条件，将某种度量下的质看作目标函数，可以录用带约束优化（constrained optimization）的数学框架来解决该问题。<br>解决了问题后，定向广告的发展有两个趋势：</li>
+<li>定向标签与来越精准</li>
+<li>广告主的数量不断膨胀<br>这样继续按照合约会产生问题：</li>
+<li>很难对细颗粒度标签组合的流量做准确的预估</li>
+<li>当一次展示同时满足多个合约，仅仅按照量约束下的在线分配策略进行决策有可能浪费掉了很多本来可以卖得更贵的流量。<br>为了解决这个问题，提出了新的广告产品模式。</li>
+</ul>
+</li>
+<li>竞价广告（auction-based advertising）<br>供给方只向广告主保证质即的那位流量的成本，但不再以合约的方式给出量的保证。换言之，对每一次展示都基本按照收益最高的原则来展示。没有了合约的保证，大量的广告主处在一个多方博弈的环境中。关于定价机制的深入研究，产生了广义第二高价（Generalized Second Price，GSP）这一竞价重要的理论。</li>
+<li>广告网络（ad Networ，ADN）<br>基于竞价机制和精准人群定向的这两个核心功能，分化出的新市场形态。它批量地运营媒体的广告位资源，按照人群或上下文标签售卖给需求方，并用竞价的方式决定流量分配，广告网络的结算以按点击付费（Cost per Click，CPC）的方式为主。它使得大量中小互联网媒体有了切实可行的变现手段：这些媒体有一定的流量，但还不值得建立自己的销售团队面向品牌广告商售卖，直接把自己的 广告库存（inventory）托管给 ADN，借助 ADN 的销售和代理团队为自己的流量变现。</li>
+<li>交易终端（Trading Desk， TD）<br>当 ADN 产生以后，代理公司当然也要对广告采买方式做出调整，因为此时的流量采买发生了几点显著变化：<ul>
+<li>更多地面向受众而非媒体或广告位进行采买，这当然是与受众定向的流行有直接关系。</li>
+<li>是需求方的代理需要采用技术的手段保证广告主量的要求，并在此基础上帮助广告主优化效果。<br>由于只能在 ADN 定义好的定向标签组合上预 先指定出价，而不能控制每一次展示的出价，因此，市场看起来像一个黑盒子，需求方只能靠选择合适的标签组合以及阶段性调整出价来间接控制效果。这种面向多个 ADN或媒体按人群一站式采买广告并优化投入产出比的需求方产品，我们称为交易终端。<br>在 ADN 中，核心的竞价逻辑是封闭的，这不能满足需求方越来越明确的利益要求。</li>
+</ul>
+</li>
+<li>实时竞价 （Real Time Bidding，RTB）<br>是将拍卖的过程由广告主预先出价，变成每次展示时实时出价。于是，市场上产生了大量聚合各媒体的剩余流量并采用实时竞价方式为他们变现的产品形态——广告交易平台（ad Exchange，ADX）。<blockquote>
+<p>如果ADN看作为股票的场外交易市场，则ADX类似股票交易所。</p>
+</blockquote>
+</li>
+<li><p>需求方平台 （Demand Side Platform，DSP）<br>通过实时竞价的方式，按照定制化的人群标签购买广告的产品。由于实时竞价主要采用按展示次数计费的方式，DSP 需要尽可能准确地估计每一次展示带来的期望价值。在这一点上，DSP 比 TD 要方便多了，因为充分的环境信息使得深入的计算和估计成为可能。<br>基于 DSP 的广告采买非常类似于股票市场上的程序交易，我们把这样的广告采买方式也叫作程序化交易（programmatic trade）。除了RTB 以外，还有其他几种程序购买的交易方 式，如优选（preferred deals）以及私有交易市场（Private Market Place，PMP）等。</p>
+<h1 id="2-计算广告基础"><a href="#2-计算广告基础" class="headerlink" title="2. 计算广告基础"></a>2. 计算广告基础</h1><h2 id="2-1-广告有效性原则"><a href="#2-1-广告有效性原则" class="headerlink" title="2.1 广告有效性原则"></a>2.1 广告有效性原则</h2><p>广告有效性模型，是一个三个大阶段、六个小阶段的漏斗模型。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://i.bmp.ovh/imgs/2022/06/14/c67f9ffac1754298.png" alt=""></p>
+</li>
+<li>选择（selection）<ul>
+<li>曝光（exposure）： 广告物理上展现出来的过程</li>
+<li>关注（attention）：是受众从物理上接触到广告到意识上注意到它的过程</li>
+</ul>
+</li>
+<li>理解（interpretation ）<ul>
+<li>解释（conprehension）：受众理解广告传达的信息的过程</li>
+<li>接受（acceptence）：受众认可信息的过程</li>
+</ul>
+</li>
+<li>态度（attitude）<ul>
+<li>保持（retention）：受众对广告长久记忆的过程</li>
+<li>决策（decision）：受众转化的过程<h2 id="2-2-互联网广告的技术特点"><a href="#2-2-互联网广告的技术特点" class="headerlink" title="2.2 互联网广告的技术特点"></a>2.2 互联网广告的技术特点</h2></li>
+</ul>
+</li>
+<li>技术和计算导向<br>受众定向在线下广告也尝试过，比如试图把信用卡纸质账单背面的广告按照信用卡用户的年龄和性 别做一些定制化，但由于成本过高，无法规模化。</li>
+<li>效果的可衡量性<br>可以以展示和点击日志的形式直接记录广告效果，并且可以利用这些日志优化广告效果。</li>
+<li>创意和投放方式的标准化<br>标准化的驱动力来自于受众定向与程序购买。既然需求方关心的是人群而非广告位，创意尺寸的统一化与一些关键接口的标准化非常关键。 这些接口标准中，比较典型的有视频广告的 VAST 标准和实时竞价的 OpenRTB 标准等。</li>
+<li>媒体概念的多样化<br>如果一家电商只用返利 网作为线上广告渠道，ROI 一定可以做到很高，但这样的营销不能给他带来大量潜在用户。所以需要在多样的媒体上投放广告，比如门户网站、垂直网站、搜索引擎、电商网站、返利网等。</li>
+<li>数据驱动的投放决策<br>互联网化的根本驱动力可以认为是数据的深入加工和利用。广泛收集用户的行为数据和广告反馈数据，利用云计算的基础设施对用户打上合适的标签，同样根据数据在多个广告竞争同一次展示时作出决策，再将投放的结果统计数据反馈给广告操作人员以调整投放策略，这已经成为在线广告的基本投放逻辑。<h2 id="2-3-计算广告的核心问题"><a href="#2-3-计算广告的核心问题" class="headerlink" title="2.3 计算广告的核心问题"></a>2.3 计算广告的核心问题</h2><strong>计算广告的核心问题，是为一系列用户与环境的组合找到最合适的广告投放策略以优化整体广告活动的利润。</strong><br>使用数学的方式表述：</li>
+</ul>
+<script type="math/tex; mode=display">
+\max \sum ^T _{i=1} (r_i - q_i)</script><p>$i$ 代表从第 $1$ 次到第 $T$ 次之间的某一次广告展示，我们优化的目标就是在这 $T$ 次展示上的总收入 $r$ 与总成本 $q$ 的差值，即广告活动的利润。进一步考虑收入与成本具体依赖的因素，上面的优化问题可以写成：</p>
+<script type="math/tex; mode=display">
+\max \sum ^T _{i=1} (r({a_i, u_i, c_i}) - q({a_i, u_i, c_i}))</script><p>其中，${a_i, u_i, c_i}$ 分别表示广告、用户、与环境，即广告活动中参与的三个主体。</p>
+<h3 id="2-3-1-广告收入的分解"><a href="#2-3-1-广告收入的分解" class="headerlink" title="2.3.1 广告收入的分解"></a>2.3.1 广告收入的分解</h3><p>点击率（Click Through Rate，CTR）$=$ 广告点击量 $/$ 广告曝光量<br>转化率（Conversion Rate，CVR）$=$ 广告转化次数 $/$ 广告点击量<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://i.bmp.ovh/imgs/2022/06/15/b99cd84a337908d7.png" alt=""></p>
+<script type="math/tex; mode=display">
+eCPM = r(a,u,c) = \mu(a,u,c) \cdot v(a,u,c)</script><p>以上公式为千次展示期望收入（expected Cost Per Mille，eCPM）的计算公式，这是计算广告中的核核心量化指标。其中，$\mu$ 代表点击率，$v$ 代表点击价值（click value ），即单次点击为广告产品带来的收益。</p>
+<h3 id="广告结算方式"><a href="#广告结算方式" class="headerlink" title="广告结算方式"></a>广告结算方式</h3><ul>
+<li>CPM（Cost Per Mille），千次展示结算<br>双方约定好千次展示的价格。对于品牌广告，由于目标是较长期的利益，所以点击率不是一个重要的因素，在这种情况下，按照CPM比较合理。大多数互联网的品牌广告，CPM都是主流的结算方式。</li>
+<li>CPC（Cost Per Click），点击结算<br>这种方式最早产生于搜索广告，并很快为大多数效果类广告产品所普遍采用。在这种方式结算方式下，点击率的估计是由交给供给方（或者中间市场）完成的。点击价值的估计则由需求方完成，并通过点击出价的方式向市场通知自己的估价。这样的分工对于互联网广告，特别是以效果为导向的互联网广告而言，有着清晰的合理性。</li>
+<li>CPS（Cost Per Sale）/CPA（Cost Per Action）/ROI，按照转化/动作/收入产出比结算<br>这是一种比较极端的 结算方式，即需求方只按照最后的转化收益来结算，从而在最大程度上规避了风险。这种结算方式存在两个问题：<ul>
+<li>转化行为为用户在广告商站内的行 为，并非供给方能够直接监测和控制，因此无法进行准确的估计和优化。只有那些转化流程和用户体验类似的广告商组成的广告平台按转化付费才比较可行，典型的例子就是淘宝客广告。</li>
+<li>实际执行中，存在广告主故意扣单以降低转化率，从而低成本赚取大量品牌曝光的可能。<br>因此，我们认为这种方式主要适合于一些垂直广告网络（vertical ad network）。</li>
+</ul>
+</li>
+<li>CPT（Cost Per Time），按照时间段收费<br>严格来说，这是一种销售方式而非一种计费模式，因为价格是双方事先约定，无需计量。这种方式主要适用于一些强曝光属性，有一定定制性的广告位，例如抖音的开屏页广告。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://i.bmp.ovh/imgs/2022/06/15/81ffb75c3c995357.png" alt=""></li>
+</ul>
+<p><em>Reference</em><br>计算广告 by 李航</p>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2021/11/05/regexp_intro/">正则表达式基础<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2022/06/15/computational_advertising_2/">计算广告 - 产品概览<span class="note">较新</span></a></section></div>
+
+
+
+
+
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>

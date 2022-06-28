@@ -18,29 +18,31 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#f8f8f8">
-  <title>Mann-Whitney U Test 与 ROC曲线 - 屹然的空间</title>
+  <title>计算广告 - 产品概览 - 屹然的空间</title>
 
   
 
   
-    <meta name="description" content="在了解U统计量与AUC之间的关系前，先来复习一下Mann-Whitney U Test。">
+    <meta name="description" content="在线广告产品主要分为四个部分：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Mann-Whitney U Test 与 ROC曲线">
-<meta property="og:url" content="http://lifanyiran.com/2021/04/19/U_test_and_roc/index.html">
+<meta property="og:title" content="计算广告 - 产品概览">
+<meta property="og:url" content="http://lifanyiran.com/2022/06/15/computational_advertising_2/index.html">
 <meta property="og:site_name" content="屹然的空间">
-<meta property="og:description" content="在了解U统计量与AUC之间的关系前，先来复习一下Mann-Whitney U Test。">
+<meta property="og:description" content="在线广告产品主要分为四个部分：">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s3.bmp.ovh/imgs/2022/04/24/4e23732d77382c3f.webp">
-<meta property="og:image" content="https://s3.bmp.ovh/imgs/2022/04/24/43e38c580a6d6fd6.webp">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/25043032-b721244c2f30854c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="article:published_time" content="2021-04-19T07:56:00.000Z">
-<meta property="article:modified_time" content="2022-06-28T08:49:04.244Z">
+<meta property="og:image" content="https://i.bmp.ovh/imgs/2022/06/15/ffaaf92b4c0633f0.png">
+<meta property="og:image" content="https://i.bmp.ovh/imgs/2022/06/15/94b833edcb8653c0.png">
+<meta property="og:image" content="https://snipboard.io/xAPSbm.jpg">
+<meta property="og:image" content="https://snipboard.io/JVxdMG.jpg">
+<meta property="og:image" content="https://snipboard.io/xfDhSJ.jpg">
+<meta property="article:published_time" content="2022-06-15T09:55:00.000Z">
+<meta property="article:modified_time" content="2022-06-28T08:47:16.332Z">
 <meta property="article:author" content="lifanyiran">
 <meta property="article:tag" content="Notes">
 <meta property="article:tag" content="Data Science">
-<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="Computational Advertising">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://s3.bmp.ovh/imgs/2022/04/24/4e23732d77382c3f.webp">
+<meta name="twitter:image" content="https://i.bmp.ovh/imgs/2022/06/15/ffaaf92b4c0633f0.png">
   
   
 
@@ -78,7 +80,7 @@
 
 <div class="widgets">
 
-<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Mann-Whitney-U-Test"><span class="toc-text">1. Mann-Whitney U Test</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Roc%E9%9D%A2%E7%A7%AF%E4%B8%8EMann-Whitney-U%E7%BB%9F%E8%AE%A1%E9%87%8F"><span class="toc-text">2. Roc面积与Mann-Whitney U统计量</span></a></li></ol></div></div></div>
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%95%86%E4%B8%9A%E4%BA%A7%E5%93%81%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="toc-text">3.1 商业产品的设计原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E9%9C%80%E6%B1%82%E6%96%B9%E7%9A%84%E5%B1%82%E7%BA%A7%E7%BB%84%E7%BB%87%E4%B8%8E%E6%8E%A5%E5%8F%A3"><span class="toc-text">3.2 需求方的层级组织与接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E4%BE%9B%E7%BB%99%E6%96%B9%E7%AE%A1%E7%90%86%E6%8E%A5%E5%8F%A3"><span class="toc-text">3.3 供给方管理接口</span></a></li></ol></div></div></div>
 
 
 </div>
@@ -90,58 +92,28 @@
 
       
 
-<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Machine-Learning/">Machine Learning</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-04-19T07:56:00.000Z">2021-04-19</time></div></div>
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Advertising/">Advertising</a></div><div id="post-meta">发布于&nbsp;<time datetime="2022-06-15T09:55:00.000Z">2022-06-15</time></div></div>
 
 <article class='content md post'>
-<h1 class="article-title"><span>Mann-Whitney U Test 与 ROC曲线</span></h1>
-<p>在了解U统计量与AUC之间的关系前，先来复习一下Mann-Whitney U Test。</p>
-<span id="more"></span>
-<p>首先放上AUC在统计上的意义：</p>
-<blockquote>
-<p><strong>随机选取一个正例和一个负例，分类器给正例的打分大于分类器给负例的打分的概率</strong></p>
-</blockquote>
-<h2 id="1-Mann-Whitney-U-Test"><a href="#1-Mann-Whitney-U-Test" class="headerlink" title="1. Mann-Whitney U Test"></a>1. Mann-Whitney U Test</h2><p>Mann-Whitney U Test常常用来判断两个群体间的分布是否相同。在统计学上，该检验的null hypothesis与alternative hypothesis为：</p>
-<script type="math/tex; mode=display">\begin{aligned}
-H_0: 两个群体的分布相同 \\ 
-H_1: 两个群体的分布不同
-\end{aligned}</script><p>1.1 例子：龟兔赛跑</p>
-<p>假设伊索不满意龟兔赛跑的结果，他想要一个具有泛性的比赛结果。于是他找来了8只乌龟，8只兔子，让他们同时赛跑，最后的比赛名次为：<br>兔、兔、兔、兔、兔、兔、兔、龟、龟、龟、龟、龟、龟、龟、龟、兔。</p>
-<p>每只乌龟战胜的兔子量为：1、1、1、1、1、1、1、1，则$U_1 = 8$。<br>每只兔子战胜的乌龟量为：8、8、8、8、8、8、8、0，则$U_2 = 56$。<br>则：</p>
-<script type="math/tex; mode=display">U_1 + U_2 = 64</script><p>更加泛性上来讲，U统计量的计算方式如下：</p>
-<script type="math/tex; mode=display">\begin{aligned}
-U_1 &= R_1 - \frac{n_1(n_1+1)}{2} \\ 
-U_2 &= R_2 - \frac{n_2(n_2+1)}{2} 
-\end{aligned}</script><p>其中$R$代表名次之和，$n$代表样本量。</p>
-<script type="math/tex; mode=display">\begin{aligned}
-U_1 + U_2 &= R_1 - \frac{n_1(n_1+1)}{2} + R_2 - \frac{n_2(n_2+1)}{2} 
-\end{aligned}</script><p>因为$R_1, R_2$均为排名之和，所以$R_1+R_2 = N(N+1)/2$，并且$N = n_1 + n_2$，所以</p>
-<script type="math/tex; mode=display">U_1 + U_2 = n_1n_2</script><p>回到龟兔赛跑的例子中，$U_1 + U_2 = 8 \times 8 = 64$。<br>解下来我们需要根据求得的U去决定结论是否显著，$U = min([U_1, U_2]) = 8$，从<a target="_blank" rel="noopener" href="https://math.usask.ca/~laverty/S245/Tables/wmw.pdf">Mann-Whitney U test临界值表</a>上可以看到，$n_1 = 8, n_2 = 8$在$\alpha = 0.05 $的情况下$U = 13$。因为$8 &lt; 13$，所以我们便可以拒绝零假设，说明两个组的分布是不同的（均值/中位数不同），所以我们便可以认为兔子确实跑的比乌龟快。</p>
-<h2 id="2-Roc面积与Mann-Whitney-U统计量"><a href="#2-Roc面积与Mann-Whitney-U统计量" class="headerlink" title="2. Roc面积与Mann-Whitney U统计量"></a>2. Roc面积与Mann-Whitney U统计量</h2><p>假设我们的分类器结果如以下表</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://s3.bmp.ovh/imgs/2022/04/24/4e23732d77382c3f.webp" alt=""></p>
-<p>$n =$总样本量<br>$e =$预测为正的样本<br>$e’=$预测为负的样本</p>
-<p>在不考虑排名相同的情况下（如上述表），我们预测的阈值每越过一个样本：</p>
+<h1 class="article-title"><span>计算广告 - 产品概览</span></h1>
+<p>在线广告产品主要分为四个部分：<br><span id="more"></span><br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://i.bmp.ovh/imgs/2022/06/15/ffaaf92b4c0633f0.png" alt=""></p>
 <ul>
-<li>初始为100%，则没有预测为正的样本，则TPR与FPR均为0； </li>
-<li>越过一个样本，阈值为95.2 - 98.4的任何数，则我们有一个TP（预测为正的样本，且该样本实际为正），则TPR上升，FPR不变，以此类推</li>
+<li>合约广告产品<br>由线下广告衍生而来，又可分为按时段的CPT广告或者按约定展示量的CPM广告。这类广告主要服务于对后续效果不宜直接衡量的广告主，在门户网站和视频网站比较常见。</li>
+<li>竞价广告产品<br>最重要的形式是搜索广告，对搜索关键词竞价。这种广告在拓展到站外展示广告流量时，演进成了对页面关键词或者用户标签竞价的产品形式，也就是 ADN。竞价广告的商业逻辑与合约广告完全不同，也是解决效果类广告需求的关键产品形式。</li>
+<li>程序化交易广告产品<br>竞价广告的进一步发展催生了实时竞价的交易形式。实时竞价使得需求方可以更灵活地划分和选择自己的目标受众，也使得更广泛的数据使用和 交易迅速发展起来。以实时竞价为核心的一系列交易方式逐渐演变为机器之间以程序化的方式完成广告交易决策，因此，这类产品称为程序化交易广告产品。</li>
+<li>原生广告产品<br>广告的产品体系除了自身的演进，另一个重要课题是如何处理与非商业化内容的关系，让广告与内容尽可能以“原生”的方式共存。搜索广告和社交网络信息流广告对此作了非常有价值的探索，不过这样的原生广告在规模化和交易化方面也遇到了很多的问题。然而，随着近年来移动设备对于原生广告的强烈渴求，像标准 ADN那样的原生广告平台正在快速发展中。<h2 id="3-1-商业产品的设计原则"><a href="#3-1-商业产品的设计原则" class="headerlink" title="3.1 商业产品的设计原则"></a>3.1 商业产品的设计原则</h2>商业产品指面向B端的产品，其中关键的重点和运营方式和C端产品有极大的不同。有时候良好的用户体验，并不一定能带来一款商业产品良好的口碑或市场上的成功，因为商业产品一般都有一个明确的商业目标，而商业产品的使用者选用一款产品的动力也是为了优化这个商业目标。Google AdWords 之所以为大量的中小广告主广泛采用，主要原因并不是因为 AdWords 的使用便捷性远超同类产品，而是因为其推广效果有目共睹。<br>注意的关键点有以下：</li>
 </ul>
-<p>如果越过一个FP（预测为正的样本，但实际为负的样本），则TPR不变，FPR上升。我们将越过FP的数量，记为$f$。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://s3.bmp.ovh/imgs/2022/04/24/43e38c580a6d6fd6.webp" alt=""></p>
-<p>所以，每次越过一个样本，ROC曲线增加的面积为：</p>
-<script type="math/tex; mode=display">area \ gained = \frac{e'-f}{e'e}</script><p>整体ROC曲线下的面积，即$AUC$为：</p>
-<script type="math/tex; mode=display">\begin{aligned}
-AUC&= \sum_i^e \frac{e'-f_i}{e'e} \\
-AUC&= 1- \frac{1}{e'e}\sum_i^e f_i \\
-\end{aligned}</script><p>下一步我们需要计算$\sum_i^e f_i$。与上面龟兔赛跑的例子类似，我们可以使用两种方法计算</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upload-images.jianshu.io/upload_images/25043032-b721244c2f30854c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="分类器Output"></p>
-<p>通过排名我们可以看到：<br>每个0超过的1的数量为：4，1，1，1，0，0，0，则$U_0 = 7$。<br>每个1超过的0的数量为：8，8，8，7，7，7，4，则$U_1 = 49$。<br>则$U = 7$</p>
-<p>泛性的公式如下：</p>
-<script type="math/tex; mode=display">\begin{aligned}
-F &= \sum_{i=1}^{e}f_i \\
-&= \sum_{i=1}^{e}(ri - i) \\
-&= \sum_{i=1}^{e}ri - \frac{e(e+1)}{2}\\
-&= 7 \\
-\end{aligned}</script><p>则$AUC = 1 - \frac{1}{7\times 8} \times 7 = 0.775$</p>
-<p><em>reference:</em><br><a target="_blank" rel="noopener" href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.458.8392&amp;rep=rep1&amp;type=pdf">Areas beneath the relative operating characteristics (ROC) and relative operating levels (ROL) curves: Statistical significance and interpretation</a></p>
+<ol>
+<li>相对于产品功能，要特别关注产品中的策略部分。以广告为例，竞价中的机制设计、冷启动时的数据探索、受众定向的标签体系 都是产品策略需要考虑的内容。策略上看似简单的调整往往能带来广告系统收入上巨大的变化。</li>
+<li>要特别关注数据，让运营和产品优化形成闭环。由于商业产品的目标是确定和 可优化的，所有产品特征和策略的成功与否要严格根据数据的反馈来判断。</li>
+<li>用户产品追求便捷性的设计原则 依然非常重要。不过在商业产品中，实现功能以外过于新奇、炫酷的产品外观和交互模式 是应当避免的。<h2 id="3-2-需求方的层级组织与接口"><a href="#3-2-需求方的层级组织与接口" class="headerlink" title="3.2 需求方的层级组织与接口"></a>3.2 需求方的层级组织与接口</h2>在市场上大多数的产品中，广告的层次分为广告主、广告（推广）计划（campaign）、广告（推广）组（ad goup）、广告创意（creative）等几个层级。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://i.bmp.ovh/imgs/2022/06/15/94b833edcb8653c0.png" alt=""></li>
+</ol>
+<ul>
+<li><strong>广告计划</strong>概念上对应于广告主的一次投放合同，其中包括了预算、时间范围等。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/xAPSbm.jpg" alt=""></li>
+<li><strong>广告组</strong>对应于一个具体的广告投放策略，主要设定受众的定向条件和出价。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/JVxdMG.jpg" alt=""></li>
+<li><strong>广告创意</strong>则是最终展示出来的素材，可能在同一组下有不同尺寸的创意存在。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/xfDhSJ.jpg" alt=""><h2 id="3-3-供给方管理接口"><a href="#3-3-供给方管理接口" class="headerlink" title="3.3 供给方管理接口"></a>3.3 供给方管理接口</h2>在目前的主流的广告交易逻辑中，供给方即媒体对业务的控制比起需求方来要弱很多。供给端的资源组织主要分媒体和广告位两个层次。其中媒体可以是网站，也可以是移动应用开发者。媒体的操作比广告主方要简单，一般来说，添加、删除广告位以及查看各广告位的运营数据是主要的功能需求。</li>
+</ul>
+<p><em>Reference</em><br>计算广告 by 李航</p>
 
 
 <div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
@@ -149,7 +121,7 @@ F &= \sum_{i=1}^{e}f_i \\
 
 </article>
 
-<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><div class="line"></div><a id="prev" href="/2021/05/13/abtesting_intro/">A/B Testing 基础<span class="note">较新</span></a></section></div>
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2022/06/14/computational_advertising_1/">计算广告 - 综述<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2022/06/15/computational_advertising_3/">计算广告 - 合约广告<span class="note">较新</span></a></section></div>
 
 
 

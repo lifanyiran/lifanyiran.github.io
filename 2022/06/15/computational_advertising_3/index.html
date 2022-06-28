@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>计算广告 - 合约广告 - 屹然的空间</title>
+
+  
+
+  
+    <meta name="description" content="互联网广告业务的初始阶段，拥有流量的媒体与需要广告资源的代理商是市场的主要参与者。其中按照CPT结算的广告合约对技术依赖较小，重点是按照CPM计费的展示量合约广告。从供给方产品和技术的复杂程度来看，CPM 合约甚至比以后的竞价系统更加复 杂，其复杂性主要来源于多个合约对投放系统提出的量的约束。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算广告 - 合约广告">
+<meta property="og:url" content="http://lifanyiran.com/2022/06/15/computational_advertising_3/index.html">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="互联网广告业务的初始阶段，拥有流量的媒体与需要广告资源的代理商是市场的主要参与者。其中按照CPT结算的广告合约对技术依赖较小，重点是按照CPM计费的展示量合约广告。从供给方产品和技术的复杂程度来看，CPM 合约甚至比以后的竞价系统更加复 杂，其复杂性主要来源于多个合约对投放系统提出的量的约束。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://snipboard.io/97mlKj.jpg">
+<meta property="og:image" content="https://snipboard.io/emXOAQ.jpg">
+<meta property="og:image" content="https://snipboard.io/QE8yGk.jpg">
+<meta property="article:published_time" content="2022-06-15T10:55:00.000Z">
+<meta property="article:modified_time" content="2022-06-28T08:47:46.205Z">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Notes">
+<meta property="article:tag" content="Data Science">
+<meta property="article:tag" content="Computational Advertising">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://snipboard.io/97mlKj.jpg">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/%5Bobject%20Object%5D">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F202004%2F24%2F20200424180257_epbvw.thumb.1000_0.jpeg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1649171377&t=c66e1c496f64309b13571c99481a0d0b" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-1-%E5%8F%97%E4%BC%97%E5%AE%9A%E5%90%91%E6%96%B9%E6%B3%95%E6%A6%82%E8%A7%88"><span class="toc-text">4.2.1 受众定向方法概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-1-%E5%8F%97%E4%BC%97%E5%AE%9A%E5%90%91%E6%96%B9%E6%B3%95%E6%A6%82%E8%A7%88-1"><span class="toc-text">4.2.1 受众定向方法概览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-1-%E6%B5%81%E9%87%8F%E9%A2%84%E6%B5%8B"><span class="toc-text">4.3.1 流量预测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-2-%E6%B5%81%E9%87%8F%E5%A1%91%E5%BD%A2"><span class="toc-text">4.3.2 流量塑形</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-3-%E5%9C%A8%E7%BA%BF%E5%88%86%E9%85%8D"><span class="toc-text">4.3.3 在线分配</span></a></li></ol></div></div></div>
+
+
+</div>
+
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Advertising/">Advertising</a></div><div id="post-meta">发布于&nbsp;<time datetime="2022-06-15T10:55:00.000Z">2022-06-15</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>计算广告 - 合约广告</span></h1>
+<p>互联网广告业务的初始阶段，拥有流量的媒体与需要广告资源的代理商是市场的主要参与者。其中按照CPT结算的广告合约对技术依赖较小，重点是按照CPM计费的展示量合约广告。从供给方产品和技术的复杂程度来看，CPM 合约甚至比以后的竞价系统更加复 杂，其复杂性主要来源于多个合约对投放系统提出的量的约束。</p>
+<span id="more"></span>
+<p>在展示量合约广告中，需求方的产品技术并没有太大发展。这是因为所有广告投放的执行要求都以合约的形式交由供给方来完成了，需求方并没有技术上优化的空间。而正是 由于需求方对深入优化效果的需求进一步发展，才产生了按照竞价方式来售卖的广告系统。</p>
+<h1 id="4-1-广告位合约"><a href="#4-1-广告位合约" class="headerlink" title="4.1 广告位合约"></a>4.1 广告位合约</h1><p>它是指媒体和广告主约定在某一时间段内、在某些广告位上固定投送该广告主的广告，相应的结算方式为 CPT。这是一种典型的线下媒体广告投放模式，在互联网广告早期也很自然地被采用。这种方式的缺点非常明显， 即无法做到按受众类型投放广告，因而也无法进行深入的效果优化。<br>不过在特地情况存在好处：</p>
+<ul>
+<li>在一些强曝光属性的广告位独占投放，可以带来品牌冲击</li>
+<li>“橱窗效应”，塑造不断攀升的品牌价值和转化效果</li>
+<li>可以向广告主提供一些额外的附加服务，比如竞品互斥<br>随着定向技术的发展，广告位独占也产生了变化：</li>
+<li>某个广告位针对不同人群，投放一个广告主不同的创意</li>
+<li>利用频次控制的方式向同一用户递进式地展示一系列创意</li>
+<li>广告位的轮播售卖<br>在 CPT 售卖的情形下，供给方和需求方的计算需求和技术成分都不太高。广告主的营销需求往往是 4A 或其他代理公司进行媒介采买（media buy）。而对于广告质和量两方面的要求，也都是根据代理公司人员对媒体广告位的历史经验以及对广告主业务的了解通过人工优化的方式来满足。对于供给方，即媒体而言，往往会使用一种在合同确定以后自动地执行合同的广告管理工具，或者称为广告排期系统。<h1 id="4-2-受众定向"><a href="#4-2-受众定向" class="headerlink" title="4.2 受众定向"></a>4.2 受众定向</h1>受众定向本身的重要性和应用范围远远超过合约广告领域，而在各种竞价广告产品中也尤其重要，因此，我们先对受众定向这一核心的广告产品策略进行整体介绍。<h2 id="4-2-1-受众定向方法概览"><a href="#4-2-1-受众定向方法概览" class="headerlink" title="4.2.1 受众定向方法概览"></a>4.2.1 受众定向方法概览</h2>将大部分定向方式按照粗略的定性评估表示成图，水平方向表示的是定向技术在广告信息接收过程中大致起作用的阶段，而垂直方向为定性的效果评价。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/97mlKj.jpg" alt=""></li>
+<li>地域定向（geo-targeting）<br>这是一种很直觉也很早就被广泛使用的定向方式，计算简单且不可或缺。</li>
+<li>人口属性定向（demographical targeting）<br>人口属性定向虽然在效果上未必特别突出，但是由于在传统广告的话语体系中大量使用这类标签来表达受众，因此它特别为<strong>品牌广告主</strong>所熟悉。人口属性有一点与兴趣标签不同，那就是它是可以监测的，即可以用采样加调研的方法来判断一次人口属性定向广告活动受众中有多少比例是正确的。因此，在按 CPM 结算的广告中，人口属性比其他定向标签为广告主接受的程度更高。</li>
+<li><p>频道定向（channel targeting）<br>频道定向是完全按照供应方的内容分类体系将库存按照频道划分，对各频道的流量投送不同的广告。这种定向方式比较适用于那些离转化需求比较近的垂直类媒体，如汽车、母婴、购物导航等。</p>
+<blockquote>
+<p>举一个极端的例子，如果我们把某网站的军事频道作为一 个定向标签，那么很难找到直接匹配的广告需求。</p>
+</blockquote>
+</li>
+<li><p>上下文定向（contextual targeting）<br>将频道定向这种方法加以推广，可以根据网页的具体内容来匹配相关的广告，这就是上下文定向。上下文定向的效果在不同类别的内容上有很大的区别，但是这种方式有一个非常大的好处，那就是覆盖率比较高。</p>
+</li>
+<li>行为定向（behaviorial targeting）<br>是根据用户的历史访问行为了解用户兴趣，从而投送相关广告。行为定向的框架、算法和评价指标也就奠定了在线广告数据驱动的本质特征，并催生了相关的数据加工和交易的衍生业务。如果把上下文定向看成是根据用户单次访问行为的定向，那么行为定向可以认为是一系列上下文定向的融合结果。<blockquote>
+<p>地域定向是根据用户当前访问的 IP 来确定地理区域，相应地，也可以根据用户过去一段时间内的访问中最频繁的地理位置来定向，这种方式实际上得到的更接近于用户的经常居住地，业界有人称其为“where-on-earth”定向。</p>
+</blockquote>
+</li>
+<li>精确位置定向（hyper-local targeting）<br>在移动设备上投放广告时，我们有可能获得非常精准的地理位置，也使得大量区域性非常强的小广 告主（如餐饮、美容等）有机会投放精准定位的广告。</li>
+<li>重定向（retargeting）<br>是对某个广告主过去一段时间的访客投放广告以提升效果。重定向被公认为精准程度最高、效果最突出的定向方式，不过其人群覆盖量往往较小。关于重定向的原理，详见<a href="www.baidu.com">“这里”</a>。</li>
+<li>新客推荐定向（look-alike targeting）<br>新客推荐定向的思路是根据广告主提供的种子访客信息，结合广告平台更丰富的数据，为广告主找到行为上相似的潜在客户。因为由于重定向的量太小，而且无法满足广 告主接触潜在用户的需求。关于新客推荐定向的原理，详见<a href="www.baidu.com">“这里”</a>。</li>
+<li>团购（group-purchase）<br>这并不是一种定向广告技术，却与其有一定的关联。根据我们的观点，团购也是一种变相的广告形式，这种广告有两个显著的特点：<ul>
+<li>首先是一般都针对区域性的广告主，因此地域定向或者直接按照地域分类组织是必要的功能</li>
+<li>另外，团购主要是利用价格工具，直接降低用户在决策阶段的门槛，使得价格敏感的用户转化效果有明显的提升<h2 id="4-2-1-受众定向方法概览-1"><a href="#4-2-1-受众定向方法概览-1" class="headerlink" title="4.2.1 受众定向方法概览"></a>4.2.1 受众定向方法概览</h2>一般来说，标签体系有两种组织方式：</li>
+</ul>
+</li>
+<li>按照某个分类法（taxonomy）制定一个层次标签体系， 其中上层的标签是下一层的父节点，在人群覆盖上是包含关系。</li>
+<li>兴趣标签的组织方式，是根据广告主的具体需求设置相应的标签，所有的标签并不能为同一个分类体系中所描述，也不存在明确的父子关系。这种半结构化或非结构化的标签体系往往包含一些比较精准的标签的集合，因而主要适用于多种目标，特别是效果目标并存的广告主的精准流量选择要求。<br>选择哪种体系更多地是商业上的决策，主要需要考虑下面两种情形：</li>
+<li>当标签作为广告投放的直接标的时，这些标签既要能够为广告主所理解，又要方便广告主的选择。因此，在这种情形下，结构化的层级标签体系往往是较合理的产品方案，特别是在 CPM 广告中，标签的划分不能过细细（原因将在 4.3.3 节中讨论）。例如Yahoo! GD 受众定向标签体系。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/emXOAQ.jpg" alt="Yahoo! GD 受众定向标签体系"></li>
+<li>当标签仅仅是投放系统需要的中间变量，作为 CTR 预测或者其他模块的变量输入时，那么结构化的标签体系其实是没有必要的，应该完全按照效果驱动的方式来规划或挖掘标签，而各个标签之间也不太需要层次关系的约束。例如Bluekai标签体系，详见 6.6.5。<h1 id="4-3-展示量合约"><a href="#4-3-展示量合约" class="headerlink" title="4.3 展示量合约"></a>4.3 展示量合约</h1>实际上，互联网主流的品牌广告投放方式是按照 CPM 结算的展示量合约。展示量合约指的是约定某种受众条件下的展示量，然后按照事先约定好的单位展示量价格来结算。这种合约还有一个名称，就是担保式投送即 GD，其中的“担保”指的就是量的约定。实际执行中，在未能完成合约中的投放量时，可能要求媒体承担一定的赔偿。<br>展示量合约虽然以人群为显式标的进行售卖，但是请注意一个非常重要的事实：<br><strong>展示量合约并没有摆脱广告位这一标的物。 </strong><br>这是由于在 CPM 这种结算方式下，无法将多个差别很大的广告位打包成同一售卖标的，因为这些广告位的曝光有效性可能差别巨大，合理的 CPM 也相应地大幅变动。<h2 id="4-3-1-流量预测"><a href="#4-3-1-流量预测" class="headerlink" title="4.3.1 流量预测"></a>4.3.1 流量预测</h2>展示量合约售卖的是某特定人群上的广告曝光次数，而人群不同于确定的广告位，因此必须在合约中约定投放的量。于是，在产品策略上就产生了流量预测（traffic forecasting） 这一问题。流量预测在广告产品中包括以下三个主要用途：</li>
+<li>售前指导</li>
+<li>在线流量分配</li>
+<li>出价指导<br>广告里一般的流量预测问题，可以描述成对流量 $t(u,b)$ 这个函数的估 计，其中第一个参数 $u$ 是给定的人群标签或人群标签的组合，第二个参数 $b$ 是出价。在 展示量合约中，由于没有竞价，可以看成是上述问题在 $b \to \infin$ 情形下的特例。与流量预测有关的技术将在第11章中介绍。<h2 id="4-3-2-流量塑形"><a href="#4-3-2-流量塑形" class="headerlink" title="4.3.2 流量塑形"></a>4.3.2 流量塑形</h2>在有些情形下，我们可以主动地影响流量，以利于合约的达成，这一产品策略问题称为流量塑形 （traffic shaping）。流量塑形的典型场景是综合性门户网站上售卖的展示量合约广告，例如在车展期间，汽车频道上的展示广告需求旺盛，那么首页上的链接应该更多地给汽车频道导流以利于收入的增加。值得注意的是，流量塑形问题已经涉及用户产品与商业产品的内在联系，这与后面讨论的原生广告有千丝万缕的联系，我们将在第 7 章中详细讨论。<h2 id="4-3-3-在线分配"><a href="#4-3-3-在线分配" class="headerlink" title="4.3.3 在线分配"></a>4.3.3 在线分配</h2>展示量合约这种保量合约都面临一个问题：各个合约要求的人群很可能大量交叠，如 何设计分配策略，使得各个合约都尽可能被满足。简化成为一个二部图问题：一方是广告库存的供给节点，另外一方是广告合约的需求节点。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/QE8yGk.jpg" alt=""><br>下方的 6 个节点为供给节点，而上面的三个节点为需求节点。需求节点之间可能会抢夺同一个供给节点的流量，因此在线分配需要根据历史数据和某种策略离线得到一个分配方案，线上则照此方案执行。</li>
+</ul>
+<p><em>Reference</em><br>计算广告 by 李航</p>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2022/06/15/computational_advertising_2/">计算广告 - 产品概览<span class="note">较早</span></a><div class="line"></div></section></div>
+
+
+
+
+
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
