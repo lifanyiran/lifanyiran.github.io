@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>机器学习V - 支持向量机(Support Vector Machines) - 屹然的空间</title>
+
+  
+
+  
+    <meta name="description" content="7. 支持向量机(Support Vector Machines)先从SVM模型的分类问题入手，上述已经学习的逻辑回归的代价函数如下  \begin{aligned}  J(\theta) &amp;&#x3D;  \frac{1}{m}[\sum^m_{i&#x3D;1} y^{(i)}*-log(h_\theta(x^{(i)})) + (1-y^{(i)})*-log(1-h_\theta(x^{(i)}))] + \">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习V - 支持向量机(Support Vector Machines)">
+<meta property="og:url" content="http://lifanyiran.com/2021/03/15/ml5_svm/index.html">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="7. 支持向量机(Support Vector Machines)先从SVM模型的分类问题入手，上述已经学习的逻辑回归的代价函数如下  \begin{aligned}  J(\theta) &amp;&#x3D;  \frac{1}{m}[\sum^m_{i&#x3D;1} y^{(i)}*-log(h_\theta(x^{(i)})) + (1-y^{(i)})*-log(1-h_\theta(x^{(i)}))] + \">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://editor.analyticsvidhya.com/uploads/87402svm3.png">
+<meta property="og:image" content="d:/Users/fyrli/AppData/Roaming/Typora/typora-user-images/image-20220210174428379.png">
+<meta property="article:published_time" content="2021-03-15T13:36:00.000Z">
+<meta property="article:modified_time" content="2022-06-30T06:37:06.466Z">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Notes">
+<meta property="article:tag" content="Data Science">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://editor.analyticsvidhya.com/uploads/87402svm3.png">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA-Support-Vector-Machines"><span class="toc-text">7. 支持向量机(Support Vector Machines)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E6%A0%B8%E5%87%BD%E6%95%B0"><span class="toc-text">7.1 核函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#7-1-1-SVM%E5%8F%82%E6%95%B0"><span class="toc-text">7.1.1 SVM参数</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E5%BA%94%E7%94%A8"><span class="toc-text">7.2 应用</span></a></li></ol></li></ol></div></div></div>
+
+
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Machine-Learning/">Machine Learning</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-03-15T13:36:00.000Z">2021-03-15</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>机器学习V - 支持向量机(Support Vector Machines)</span></h1>
+<h2 id="7-支持向量机-Support-Vector-Machines"><a href="#7-支持向量机-Support-Vector-Machines" class="headerlink" title="7. 支持向量机(Support Vector Machines)"></a>7. 支持向量机(Support Vector Machines)</h2><p>先从SVM模型的分类问题入手，上述已经学习的逻辑回归的代价函数如下</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+
+J(\theta) &= 
+\frac{1}{m}[\sum^m_{i=1} y^{(i)}*-log(h_\theta(x^{(i)})) + (1-y^{(i)})*-log(1-h_\theta(x^{(i)}))] + \frac{\lambda}{2m}\sum^n_{j=1}\theta_j^2 \\
+
+\end{aligned}</script><p>为了便利，我们使用$cost()$来代替其中的一部分</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+cost_1(\theta^Tx^{(i)}) &= -log(h_\theta(x^{(i)})) \\
+cost_0(\theta^Tx^{(i)}) &= -log(1-h_\theta(x^{(i)}))
+\end{aligned}</script><p>与逻辑回归不同的是，SVM的$cost()$函数需要满足以下条件</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+y &= 1, \theta^tx > 1\\
+y &= 0, \theta^tt \leq -1
+\end{aligned}</script><blockquote>
+<p>逻辑回归的分类界限为0，而SVM为1和-1，更加严格，这样也就会用一个区域两组样本分开，不仅仅是一条线，而最大化这个区域，也就是最好的分类器。</p>
+</blockquote>
+<p>并且 $C = \frac{1}{\lambda}$，以及忽略常数项，SVM的代价函数为</p>
+<script type="math/tex; mode=display">
+J(\theta) = C\sum^m_{i=1}[
+y^{(i)}cost_1(\theta^Tx^{(i)})+(1-y^{(i)})cost_0(\theta^Tx^{(i)})
+] +\frac{1}{2}\sum^n_{j=1}\theta_j^2</script><p>假设函数为</p>
+<script type="math/tex; mode=display">
+h_\theta(x) = \left\{
+\begin{aligned}
+1 \quad if \ \ \theta^T \geq 0 \\
+0 \quad otherwise
+\end{aligned}
+\right.</script><h3 id="7-1-核函数"><a href="#7-1-核函数" class="headerlink" title="7.1 核函数"></a>7.1 核函数</h3><p>核函数是将训练样本进行增维，转化为线性可分</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://editor.analyticsvidhya.com/uploads/87402svm3.png" alt="Mathematics SVM - input and featured space"></p>
+<p>根据$(x^{(1)}, y^{(1)}), (x^{(2)}, y^{(2)}),…, (x^{(m)}, y^{(m)})$</p>
+<p>选择$l^{(1)} = x^{(1)}, l^{(2)} = x^{(2)},…, l^{(m)} = x^{(m)}$</p>
+<p>所以$f_m^{(i)} = similarity(x^{(i)}, l^{(m)})$</p>
+<p>其中高斯核函数为</p>
+<script type="math/tex; mode=display">
+similarity(x, y) 
+    = exp(-\frac{||x-y||^2}{2\sigma^2}) 
+    = exp(
+        -\frac{
+            {
+                \sum_{
+                    j=1
+                }^n(x-y)
+            }^2
+        }
+        {
+            2\sigma^2
+        }
+    )</script><p>则有向量</p>
+<script type="math/tex; mode=display">
+f^{(i)} = \begin{bmatrix}
+f_0^{(i)} \\
+f_m^{(i)} \\
+\vdots \\
+f_m^{(i)}
+\end{bmatrix}</script><p>使用了核函数的SVM模型的假设为：</p>
+<p>根据$x$，计算出特征$f \in \mathbb{R}^{m+1}$，当$\theta^Tf\geq0$时预测$y=1$</p>
+<p>代价函数为：</p>
+<script type="math/tex; mode=display">
+min_\theta C\sum^m_{i=1}[
+y^{(i)}cost_1(\theta^Tf^{(i)})+(1-y^{(i)})cost_0(\theta^Tf^{(i)})
+] +\frac{1}{2}\sum^m_{j=1}\theta_j^2</script><h4 id="7-1-1-SVM参数"><a href="#7-1-1-SVM参数" class="headerlink" title="7.1.1 SVM参数"></a>7.1.1 SVM参数</h4><ul>
+<li><p>$C\ \ or \ \ 1/\lambda$</p>
+<p>$C$大会导致低误差，高方差，反之亦然</p>
+</li>
+<li><p>$\sigma$</p>
+<p>$\sigma$大会导致特征比较平滑，高误差，低方差</p>
+</li>
+</ul>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220210174428379.png" alt=""></p>
+<h3 id="7-2-应用"><a href="#7-2-应用" class="headerlink" title="7.2 应用"></a>7.2 应用</h3><p>$n$ = 特征数量，$m$ = 样本量</p>
+<p>$n$大（相对于样本量来说），使用逻辑回归，或者不使用核函数的SVM</p>
+<blockquote>
+<p>因为样本量多时，使用核函数很慢，需要遍历所有特征</p>
+</blockquote>
+<p>如果$n$小，可以使用核函数的SVM</p>
+<p>如果$n$小，$m$大，建立其他特征，之后使用逻辑回归，或者不使用核函数的SVM</p>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2021/03/15/ml4_evaluate/">机器学习IV - 评估模型(Evaluating Model)<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2021/03/17/ml6_tree/">机器学习VI - 树模型(Tree-Based Model)<span class="note">较新</span></a></section></div>
+
+
+
+
+
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>

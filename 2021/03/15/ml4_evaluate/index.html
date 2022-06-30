@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>机器学习IV - 评估模型(Evaluating Model) - 屹然的空间</title>
+
+  
+
+  
+    <meta name="description" content="模型评估方法评价指标模型评估位于整个数据分析中的非常重要的部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习IV - 评估模型(Evaluating Model)">
+<meta property="og:url" content="http://lifanyiran.com/2021/03/15/ml4_evaluate/index.html">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="模型评估方法评价指标模型评估位于整个数据分析中的非常重要的部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/25043032-b8caef6da8948c35.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/25043032-7032f0c3912689b8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/25043032-51c36a829a9d2dd8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="d:/Users/fyrli/AppData/Roaming/Typora/typora-user-images/image-20220210142953276.png">
+<meta property="og:image" content="d:/Users/fyrli/AppData/Roaming/Typora/typora-user-images/image-20220210143753719.png">
+<meta property="og:image" content="d:/Users/fyrli/AppData/Roaming/Typora/typora-user-images/image-20220210143740386.png">
+<meta property="article:published_time" content="2021-03-15T09:19:00.000Z">
+<meta property="article:modified_time" content="2022-06-30T05:40:33.637Z">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Notes">
+<meta property="article:tag" content="Data Science">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/25043032-b8caef6da8948c35.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E6%80%A7%E8%83%BD%E5%BA%A6%E9%87%8F"><span class="toc-text">6.1 性能度量</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#6-1-1-%E9%94%99%E8%AF%AF%E7%8E%87%E4%B8%8E%E7%B2%BE%E5%BA%A6"><span class="toc-text">6.1.1 错误率与精度</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6-1-2-%E6%9F%A5%E5%87%86%E7%8E%87%E3%80%81%E6%9F%A5%E5%85%A8%E7%8E%87%E3%80%81%E4%B8%8EF1"><span class="toc-text">6.1.2 查准率、查全率、与F1</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6-1-3-ROC%E4%B8%8EAUC"><span class="toc-text">6.1.3 ROC与AUC</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E8%AF%AF%E5%B7%AE-Bias-%E4%B8%8E%E6%96%B9%E5%B7%AE-Variance"><span class="toc-text">6.2 误差(Bias)与方差(Variance)</span></a></li></ol></div></div></div>
+
+
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Machine-Learning/">Machine Learning</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-03-15T09:19:00.000Z">2021-03-15</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>机器学习IV - 评估模型(Evaluating Model)</span></h1>
+<p>模型评估方法评价指标模型评估位于整个数据分析中的非常重要的部分。</p>
+<span id="more"></span>
+<h1 id="6-评估模型-Evaluating-Model"><a href="#6-评估模型-Evaluating-Model" class="headerlink" title="6. 评估模型(Evaluating Model)"></a>6. 评估模型(Evaluating Model)</h1><p>常用评估方法有以下：</p>
+<ul>
+<li><p>留出法 Hold-out</p>
+<p>“留出法”将两个数据集拆分为两个互斥的集，一般训练集为70%，测试集为30%。这样使用测试集得出的测试误差(testing error)更具有泛性。</p>
+</li>
+<li><p>交叉验证法 Cross Validation</p>
+<p>将数据集拆分为n份，依次选取其中的一份作为测试集，然后平均得出结果。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upload-images.jianshu.io/upload_images/25043032-b8caef6da8948c35.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="10 folds 交叉验证法"></p>
+</li>
+<li><p>自助法 bootstrapping</p>
+<p>自助法为从有$n$个样本量数据集中有放回随机选取一个样本集，作为训练集。在重复了$n$的抽样之后，样本从来没有被选到过的几率为：</p>
+<script type="math/tex; mode=display">
+\lim_{x\to\infty}(1-1/m)^m \to \frac{1}{e}=0.368...</script><p>自助法在数据集较小时，较为有用。此外，自助法可以产生多个训练集，对集成学习有很大的好处，但是自助法产生的数据集改变了初始数据集的分布，这会引入估计偏差，因此在数据量足够时，交叉验证法更为常用。</p>
+</li>
+</ul>
+<h3 id="6-1-性能度量"><a href="#6-1-性能度量" class="headerlink" title="6.1 性能度量"></a>6.1 性能度量</h3><p>回归任务中，最常用的性能度量为MSE(mean squared error)</p>
+<script type="math/tex; mode=display">
+MSE = E(f; D) = \frac{1}{m} \sum_{i=1}^{m}(f(x_i)-y_i)^2</script><p>以下主要讨论分类模型的常用性能度量</p>
+<h5 id="6-1-1-错误率与精度"><a href="#6-1-1-错误率与精度" class="headerlink" title="6.1.1 错误率与精度"></a>6.1.1 错误率与精度</h5><p>错误率：</p>
+<script type="math/tex; mode=display">
+E(f; D) = \frac{1}{m} \sum_{i=1}^{m} P(f(x_i)\neq y_i)</script><p>精度：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+acc(f; D) &= 1 - E(f; D) \\&= \frac{1}{m} \sum_{i=1}^{m} P(f(x_i)  = y_i)
+\end{aligned}</script><h5 id="6-1-2-查准率、查全率、与F1"><a href="#6-1-2-查准率、查全率、与F1" class="headerlink" title="6.1.2 查准率、查全率、与F1"></a>6.1.2 查准率、查全率、与F1</h5><p>错误率和精度虽常用，但并不能满足所有任务需求。例如二分类模型，我们需要知道判断为真的部分有多少确实为真，或者确认为真的部分多少被预测为真。这两种需求就无法满足。</p>
+<p>对于二分类问题，可将样例根据</p>
+<p>其真实类别与学习器预测类别的组合划分为真正例(true positive) 、假正例 (false positive) 、真反倒(true negative)、假反例 (false negative) 四种情形，令 TP、FP、TN、FN分别表示样例数。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upload-images.jianshu.io/upload_images/25043032-7032f0c3912689b8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="分类结果混淆矩阵"></p>
+<p>查准率（预测为真中，有多少实际为真）：<script type="math/tex">P(Precision) = \frac{TP}{TP + FP}</script></p>
+<p>查全率（实际为真中，有多少预测为真）：<script type="math/tex">R(Recall) = \frac{TP}{TP + FN}</script></p>
+<p>对于在不同的模型中做对比时，我们常用P-R曲线。如下图，ABC代表了三个模型，如果其中一个模型完全将另一个模型的曲线包裹在内，则代表模型性能更优（例如B优于C）。对比面积是比较好的一个选择，但是计算难度较大，所以一般使用平衡点作为度量值。平衡点（Break-Event Point）是$P=R$时的值。</p>
+<p>由于BEP还是过于太简化了，更常用的是$F1$度量：</p>
+<script type="math/tex; mode=display">
+F1 = \frac{2 \times P \times R}{P + R} = \frac{2TP}{n + TP - TN}</script><p>其中$n$ = 样本量。F1的核心思想在于，在尽可能的提高P和R的同时，也希望两者之间的差异尽可能小。</p>
+<p>但是在结合业务时，有时我们想在一定程度上偏向P或者R，例如商品推荐系统，我们希望推荐更精准（更大的P）且少打扰用户（更小的R），这个时候我们就需要使用$F1$更泛性的度$F_{\beta}$ </p>
+<script type="math/tex; mode=display">
+F_\beta = \frac{(1 + \beta^2) \times P \times R}{(\beta^2 \times P) + R}</script><p>其中$\beta$度量了查全率对查准率的相对重要性：$\beta &gt; 1$时更偏向R，$\beta &lt; 1$更偏向P。</p>
+<p>如果使用了类似交叉验证法，我们会得到多个confusion matrix，一般处理这种情况有两种选择：</p>
+<ol>
+<li><p>宏观 $macro\,F1$</p>
+<p>对于每个confusion matrix先计算出$P$、$R$，然后求得平均并带入公式求$macro\,F1$</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+macro\,P &= \frac{1}{n}\sum_{i = 1}^{n} P_i \\
+macro\,R &= \frac{1}{n}\sum_{i = 1}^{n} R_i \\
+macro\,F1 &= \frac{2 \times macro\,P \times macro\,R}{\times macro\,P + macro\,R}
+\end{aligned}</script></li>
+<li><p>微观 $micro\,F1$</p>
+<p>先求confusion matrix各元素的平均值，然后计算$P$、$R$。</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+micro\,P &= \frac{\overline {TP}}{\overline {TP} + \overline {FP}} \\
+micro\,R &= \frac{\overline {TP}}{\overline {TP} + \overline {FN}} \\
+micro\,F1 &= \frac{2 \times micro\,P \times micro\,R}{\times micro\,P + micro\,R}
+\end{aligned}</script><h5 id="6-1-3-ROC与AUC"><a href="#6-1-3-ROC与AUC" class="headerlink" title="6.1.3 ROC与AUC"></a>6.1.3 ROC与AUC</h5></li>
+</ol>
+<p>ROC 全称是”受试者工作特征” (Receiver Operating Characteristic)。与P-R曲线不同的是，ROC使用了“真正例率”和“假正例子率”</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+TPR(Precision) &= \frac{TP}{TP + FN} \\
+FPR(Precision) &= \frac{FP}{FP + TN}
+\end{aligned}</script><p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upload-images.jianshu.io/upload_images/25043032-51c36a829a9d2dd8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="P-R曲线示意图"></p>
+<p>对比模型间的好坏，与P-R类似，是对比ROC曲线下的面积，称之为AUC(Area Under ROC Curve)。</p>
+<p>假定ROC曲线由$\left\{(x_1,y_1),(x_2, y_2)…(x_m, y_m)\right\}$一系列的点组成，且$x_1 = 0, x_m = 1$，则AUC可以估算为长方形面积的和：</p>
+<script type="math/tex; mode=display">
+AUC = \frac{1}{2}\sum_{i = 1}^{m-1}(x_{i+1}-x_i)(y_{i+1}-y_i)</script><blockquote>
+<p>实际一般使用AUC与Wilcoxon-Mann-Whitney Test U统计量的关系，来计算AUC，<br>笔者的另一篇笔记<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/82dfe6808a37">Mann-Whitney U Test与ROC、AUC</a></p>
+</blockquote>
+<p>从概念上理解，简单来说其实是随机抽出一对样本（一个正样本，一个负样本），然后用训练得到的分类器来对这两个样本进行预测，预测得到正样本的概率大于负样本概率的概率。</p>
+<script type="math/tex; mode=display">
+AUC = P(P(Positve) > P(Negative))</script><h3 id="6-2-误差-Bias-与方差-Variance"><a href="#6-2-误差-Bias-与方差-Variance" class="headerlink" title="6.2 误差(Bias)与方差(Variance)"></a>6.2 误差(Bias)与方差(Variance)</h3><p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220210142953276.png" alt=""></p>
+<p><strong>高误差/欠拟合(Underfitting)</strong>：$J_{train}(\Theta), J_{CV}(\Theta)$都较高</p>
+<p><strong>高方差/过拟合(Overfitting)</strong>：$J_{train}(\Theta)$低，$J_{CV}(\Theta)$高</p>
+<p>高误差时：</p>
+<ul>
+<li>如果样本量少，$J_{train}(\Theta)$低，$J_{CV}(\Theta)$高</li>
+<li>如果样本量多，$J_{train}(\Theta)$和$J_{CV}(\Theta)$都比较高</li>
+</ul>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220210143753719.png" alt=""></p>
+<p>高方差时：</p>
+<ul>
+<li>如果样本少，$J_{train}(\Theta)$低，$J_{CV}(\Theta)$高</li>
+<li>如果样本多，在添加样本量同时，$J_{train}(\Theta)$，$J_{CV}(\Theta)$均变好，但其间的差距仍然十分显著</li>
+</ul>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220210143740386.png" alt=""></p>
+<p>解决办法：</p>
+<p>解决高误差：</p>
+<ul>
+<li>增加额外特征</li>
+<li>增加高纬特征</li>
+<li>减小正则系数</li>
+</ul>
+<p>解决高方差：</p>
+<ul>
+<li>增加样本量</li>
+<li>减少特征</li>
+<li>增加正则系数</li>
+</ul>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2021/03/14/ml3_nn/">机器学习III - 神经网络(Neural Networks)<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2021/03/15/ml5_svm/">机器学习V - 支持向量机(Support Vector Machines)<span class="note">较新</span></a></section></div>
+
+
+
+
+
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>

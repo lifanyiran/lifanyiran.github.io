@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>机器学习VI - 树模型(Tree-Based Model) - 屹然的空间</title>
+
+  
+
+  
+    <meta name="description" content="8.树模型8.1 基本概念决策树模型为非参数监督模型，该模型为根据一系列的if-else逻辑组合而成。树可以看作是一个分段函数，并且树的层数越深，就会更贴合数据(fitted)。显然决策树的生成时一个递归过程，且在以下三种情形下会导致递归返回：  当前结点包含的样本全属于同一类别：例如敲声清脆的瓜都是好瓜，则敲声音清脆下无需继续划分。 当前属性集为空，或是所有样本在所有属性上取值相同，无法划分：例">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习VI - 树模型(Tree-Based Model)">
+<meta property="og:url" content="http://lifanyiran.com/2021/03/17/ml6_tree/index.html">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="8.树模型8.1 基本概念决策树模型为非参数监督模型，该模型为根据一系列的if-else逻辑组合而成。树可以看作是一个分段函数，并且树的层数越深，就会更贴合数据(fitted)。显然决策树的生成时一个递归过程，且在以下三种情形下会导致递归返回：  当前结点包含的样本全属于同一类别：例如敲声清脆的瓜都是好瓜，则敲声音清脆下无需继续划分。 当前属性集为空，或是所有样本在所有属性上取值相同，无法划分：例">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://snipboard.io/zjXt4d.jpg">
+<meta property="og:image" content="https://snipboard.io/64aTXO.jpg">
+<meta property="og:image" content="https://snipboard.io/V8EiIX.jpg">
+<meta property="og:image" content="https://snipboard.io/AILets.jpg">
+<meta property="og:image" content="https://snipboard.io/hbmAnz.jpg">
+<meta property="og:image" content="https://snipboard.io/Sc8Ouf.jpg">
+<meta property="og:image" content="https://snipboard.io/FhRU8G.jpg">
+<meta property="article:published_time" content="2021-03-17T09:10:00.000Z">
+<meta property="article:modified_time" content="2022-06-30T06:37:02.498Z">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Notes">
+<meta property="article:tag" content="Data Science">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://snipboard.io/zjXt4d.jpg">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E6%A0%91%E6%A8%A1%E5%9E%8B"><span class="toc-text">8.树模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#8-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">8.1 基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#8-1-1-%E5%88%86%E7%B1%BB%E6%A0%91"><span class="toc-text">8.1.1 分类树</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-1-2-%E5%9B%9E%E5%BD%92%E6%A0%91"><span class="toc-text">8.1.2 回归树</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-2-%E5%88%92%E5%88%86%E9%80%89%E6%8B%A9"><span class="toc-text">8.2 划分选择</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#8-2-1-%E4%BF%A1%E6%81%AF%E5%A2%9E%E7%9B%8A-information-gain"><span class="toc-text">8.2.1 信息增益 (information gain)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-2-1-1-%E4%BE%8B%E5%AD%90"><span class="toc-text">8.2.1.1 例子</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-2-2-%E5%A2%9E%E7%9B%8A%E7%8E%87-gain-ratio"><span class="toc-text">8.2.2 增益率(gain ratio)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-2-3-%E5%9F%BA%E5%B0%BC%E7%B3%BB%E6%95%B0-Gini-index"><span class="toc-text">8.2.3 基尼系数(Gini index)</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-3-%E5%89%AA%E6%9E%9D"><span class="toc-text">8.3 剪枝</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#8-3-1-%E9%A2%84%E5%89%AA%E6%9E%9D"><span class="toc-text">8.3.1 预剪枝</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-3-2-%E5%90%8E%E5%89%AA%E6%9E%9D"><span class="toc-text">8.3.2 后剪枝</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-4-%E8%BF%9E%E7%BB%AD%E5%80%BC%E4%B8%8E%E7%BC%BA%E5%A4%B1%E5%80%BC"><span class="toc-text">8.4 连续值与缺失值</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#8-4-1-%E8%BF%9E%E7%BB%AD%E5%80%BC"><span class="toc-text">8.4.1 连续值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-4-1-1-%E4%BE%8B%E5%AD%90%EF%BC%9A"><span class="toc-text">8.4.1.1 例子：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-4-2-%E7%BC%BA%E5%A4%B1%E5%80%BC"><span class="toc-text">8.4.2 缺失值</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-5-%E4%BE%8B%E5%AD%90"><span class="toc-text">8.5 例子</span></a></li></ol></li></ol></div></div></div>
+
+
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Machine-Learning/">Machine Learning</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-03-17T09:10:00.000Z">2021-03-17</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>机器学习VI - 树模型(Tree-Based Model)</span></h1>
+<h2 id="8-树模型"><a href="#8-树模型" class="headerlink" title="8.树模型"></a>8.树模型</h2><h3 id="8-1-基本概念"><a href="#8-1-基本概念" class="headerlink" title="8.1 基本概念"></a>8.1 基本概念</h3><p>决策树模型为非参数监督模型，该模型为根据一系列的if-else逻辑组合而成。树可以看作是一个<strong>分段函数</strong>，并且树的层数越深，就会更贴合数据(fitted)。<br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/zjXt4d.jpg" alt="西瓜问题的一颗决策树"><br>显然决策树的生成时一个递归过程，且在以下三种情形下会导致递归返回：</p>
+<ol>
+<li>当前结点包含的样本全属于同一类别：<strong>例如敲声清脆的瓜都是好瓜，则敲声音清脆下无需继续划分。</strong></li>
+<li>当前属性集为空，或是所有样本在所有属性上取值相同，无法划分：<strong>例如色泽黑色的瓜全都是敲声浊响根蒂蜷缩。</strong></li>
+<li>当前节点包含的样本集合为空，不能划分</li>
+</ol>
+<p>分类和回归任务，决策树模型一般均可以执行。</p>
+<h4 id="8-1-1-分类树"><a href="#8-1-1-分类树" class="headerlink" title="8.1.1 分类树"></a>8.1.1 分类树</h4><p>DecisionTreeClassifier可以用作训练决策树分类模型。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">from sklearn.datasets import load_iris</span><br><span class="line">from sklearn import tree</span><br><span class="line">X, y = load_iris(return_X_y=True)</span><br><span class="line">clf = tree.DecisionTreeClassifier()</span><br><span class="line">clf = clf.fit(X, y)</span><br><span class="line">tree.plot_tree(clf)</span><br><span class="line"></span><br><span class="line">Out[310]: </span><br><span class="line">[Text(167.4, 199.32, &#x27;X[2] &lt;= 2.45\ngini = 0.667\nsamples = 150\nvalue = [50, 50, 50]&#x27;),</span><br><span class="line"> Text(141.64615384615385, 163.07999999999998, &#x27;gini = 0.0\nsamples = 50\nvalue = [50, 0, 0]&#x27;),</span><br><span class="line"> Text(193.15384615384616, 163.07999999999998, &#x27;X[3] &lt;= 1.75\ngini = 0.5\nsamples = 100\nvalue = [0, 50, 50]&#x27;),</span><br><span class="line"> Text(103.01538461538462, 126.83999999999999, &#x27;X[2] &lt;= 4.95\ngini = 0.168\nsamples = 54\nvalue = [0, 49, 5]&#x27;),</span><br><span class="line"> Text(51.50769230769231, 90.6, &#x27;X[3] &lt;= 1.65\ngini = 0.041\nsamples = 48\nvalue = [0, 47, 1]&#x27;),</span><br><span class="line"> Text(25.753846153846155, 54.359999999999985, &#x27;gini = 0.0\nsamples = 47\nvalue = [0, 47, 0]&#x27;),</span><br><span class="line"> Text(77.26153846153846, 54.359999999999985, &#x27;gini = 0.0\nsamples = 1\nvalue = [0, 0, 1]&#x27;),</span><br><span class="line"> Text(154.52307692307693, 90.6, &#x27;X[3] &lt;= 1.55\ngini = 0.444\nsamples = 6\nvalue = [0, 2, 4]&#x27;),</span><br><span class="line"> Text(128.76923076923077, 54.359999999999985, &#x27;gini = 0.0\nsamples = 3\nvalue = [0, 0, 3]&#x27;),</span><br><span class="line"> Text(180.27692307692308, 54.359999999999985, &#x27;X[2] &lt;= 5.45\ngini = 0.444\nsamples = 3\nvalue = [0, 2, 1]&#x27;),</span><br><span class="line"> Text(154.52307692307693, 18.119999999999976, &#x27;gini = 0.0\nsamples = 2\nvalue = [0, 2, 0]&#x27;),</span><br><span class="line"> Text(206.03076923076924, 18.119999999999976, &#x27;gini = 0.0\nsamples = 1\nvalue = [0, 0, 1]&#x27;),</span><br><span class="line"> Text(283.2923076923077, 126.83999999999999, &#x27;X[2] &lt;= 4.85\ngini = 0.043\nsamples = 46\nvalue = [0, 1, 45]&#x27;),</span><br><span class="line"> Text(257.53846153846155, 90.6, &#x27;X[1] &lt;= 3.1\ngini = 0.444\nsamples = 3\nvalue = [0, 1, 2]&#x27;),</span><br><span class="line"> Text(231.7846153846154, 54.359999999999985, &#x27;gini = 0.0\nsamples = 2\nvalue = [0, 0, 2]&#x27;),</span><br><span class="line"> Text(283.2923076923077, 54.359999999999985, &#x27;gini = 0.0\nsamples = 1\nvalue = [0, 1, 0]&#x27;),</span><br><span class="line"> Text(309.04615384615386, 90.6, &#x27;gini = 0.0\nsamples = 43\nvalue = [0, 0, 43]&#x27;)]</span><br></pre></td></tr></table></figure></p>
+<h4 id="8-1-2-回归树"><a href="#8-1-2-回归树" class="headerlink" title="8.1.2 回归树"></a>8.1.2 回归树</h4><p>DecisionTreeRegressor可以用于构建回归树。回归树为该叶节点的预测值为该组的值。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># Import the necessary modules and libraries</span><br><span class="line">import numpy as np</span><br><span class="line">from sklearn.tree import DecisionTreeRegressor</span><br><span class="line">import matplotlib.pyplot as plt</span><br><span class="line"></span><br><span class="line"># Create a random dataset</span><br><span class="line">rng = np.random.RandomState(1)</span><br><span class="line">X = np.sort(5 * rng.rand(80, 1), axis=0)</span><br><span class="line">y = np.sin(X).ravel()</span><br><span class="line">y[::5] += 3 * (0.5 - rng.rand(16))</span><br><span class="line"></span><br><span class="line"># Fit regression model</span><br><span class="line">regr_1 = DecisionTreeRegressor(max_depth=2)</span><br><span class="line">regr_2 = DecisionTreeRegressor(max_depth=5)</span><br><span class="line">regr_1.fit(X, y)</span><br><span class="line">regr_2.fit(X, y)</span><br><span class="line"></span><br><span class="line"># Predict</span><br><span class="line">X_test = np.arange(0.0, 5.0, 0.01)[:, np.newaxis]</span><br><span class="line">y_1 = regr_1.predict(X_test)</span><br><span class="line">y_2 = regr_2.predict(X_test)</span><br></pre></td></tr></table></figure></p>
+<h3 id="8-2-划分选择"><a href="#8-2-划分选择" class="headerlink" title="8.2 划分选择"></a>8.2 划分选择</h3><p>决策树模型的关键为划分选择，即应该使用哪个属性进行划分，以及该属性为连续值时该从哪个值划分。以下介绍常用于划分的几个指标。</p>
+<h4 id="8-2-1-信息增益-information-gain"><a href="#8-2-1-信息增益-information-gain" class="headerlink" title="8.2.1 信息增益 (information gain)"></a>8.2.1 信息增益 (information gain)</h4><p>信息熵(information entropy)是度量样本集合纯度常用的一个指标。$Ent(D)$越小，则纯度越高。</p>
+<script type="math/tex; mode=display">Ent(D) = -\sum_{k=1}^{|y|}p_klog_2p_K</script><blockquote>
+<p>对数为什么选择2作为底数，是信息学约定俗称的一个习惯，笔者这里推断可能原因是与2进制有关。</p>
+</blockquote>
+<p>信息增益(information gain)则为在一个节点，划分后对划分前所带来的增益。一般而言，$Gain(D, a)$越大则使用属性$a$进行划分带来的纯度提升越大。</p>
+<script type="math/tex; mode=display">Gain(D, a) = Ent(D) - \sum_{v=1}^{V} \frac{D^v}{D} Ent(D^v)</script><p>即我们选择信息增益大的属性a来进行划分，数学上的表示为$a_* = arg max_{a \in A} Gain(D, a) $</p>
+<blockquote>
+<p>使用信息增益作为划分指标，也就是经典的<strong>ID3</strong>(Iterative Dichotomise 3rd) 模型 [Quinlan, 1979, 1986]。</p>
+</blockquote>
+<p>初次接触很难理解，以下为一个构建决策树的实例。</p>
+<h4 id="8-2-1-1-例子"><a href="#8-2-1-1-例子" class="headerlink" title="8.2.1.1 例子"></a>8.2.1.1 例子</h4><p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/64aTXO.jpg" alt="周志华西瓜数据集"></p>
+<p>首先我们需要计算出根节点的信息熵，即使用“好瓜”这个字段来计算$Ent(D)$。</p>
+<script type="math/tex; mode=display">Ent(D) = -\sum_{k=1}^{|y|}p_klog_2p_K = -(\frac{8}{17}log_2\frac{8}{17} + \frac{9}{17}log_2\frac{9}{17} = 0.998)</script><p>然后我们要计算出当前数据集内，每个属性的信息增益。以色泽为例，.若使用该属性对 D 进行划分，则可得到3个子集，分别记为：D1 (色泽=青绿)，D2 (色泽=乌黑)，D3 (色泽=浅白)：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Ent(D^1) &=  -(\frac{3}{6}log_2\frac{3}{6} + \frac{3}{6}log_2\frac{3}{6}) = 1.000, \\
+Ent(D^2) &=  -(\frac{4}{6}log_2\frac{4}{6} + \frac{2}{6}log_2\frac{2}{6}) = 0.918, \\
+Ent(D^2) &=  -(\frac{1}{5}log_2\frac{1}{5} + \frac{4}{5}log_2\frac{4}{5}) = 0.722, \\
+Gain(D, 色泽) &= Ent(D) - \sum_{v=1}^{V} \frac{D^v}{D} Ent(D^v) \\
+&= 0.998 - (\frac{6}{17} \times 1.000 + \frac{6}{17} \times 0.918 + \frac{5}{17} \times 0.722) \\ 
+&= 0.109
+\end{aligned}</script><p>使用同样方法计算其他属性的信息增益：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Gain(D, 色泽) &= 0.143, \\
+Gain(D, 敲声) &= 0.141, \\
+Gain(D, 纹理) &= 0.381, \\
+Gain(D, 脐部) &= 0.289, \\
+Gain(D, 触感) &= 0.006, 
+\end{aligned}</script><p>由于纹理的信息增益最高，所以选择他为划分属性。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/V8EiIX.jpg" alt="基于纹理对根节点划分"></p>
+<p>然后每个节点再继续对比信息增益，然后向下划分。例如选择纹理=“清晰”为例，基于$D^1$计算各属性的信息增益：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Gain(D^1, 色泽) &= 0.043, \\
+Gain(D^1, 根蒂) &= 0.458, \\
+Gain(D^1, 敲声) &= 0.331, \\
+Gain(D^1, 脐部) &= 0.458, \\
+Gain(D^1, 触感) &= 0.458, 
+\end{aligned}</script><p>“根蒂”、 “脐部”、 “触感” 3 个属性均取得了最大的信息增益，可任选其中之一作为划分属性。最终我们获得了以下决策树：</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/AILets.jpg" alt="西瓜数据集基于信息增益生成的决策树"></p>
+<h4 id="8-2-2-增益率-gain-ratio"><a href="#8-2-2-增益率-gain-ratio" class="headerlink" title="8.2.2 增益率(gain ratio)"></a>8.2.2 增益率(gain ratio)</h4><p>另一个经典的<strong>C4.5</strong>算法[Quinlan, 1993]则使用了增益率作为划分指标。引入增益率的原因为，ID3中的信息增益遇到多分类特征时，会偏大，便偏向于对多分类特征。</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Gain\_ratio(D, a) &= \frac{Gain(D, a)}{IV(a)} \\
+IV(a) &= -\sum_{v=1}^{V}\frac{D^v}{D}log_2\frac{D^v}{D}
+\end{aligned}</script><p>属性a可取值的数目越多，$IV(a)$便会越高，则对$Gain(D, a)$的惩罚就会越大。</p>
+<h4 id="8-2-3-基尼系数-Gini-index"><a href="#8-2-3-基尼系数-Gini-index" class="headerlink" title="8.2.3 基尼系数(Gini index)"></a>8.2.3 基尼系数(Gini index)</h4><p>CART决策树[Breiman et al., 1984]使用基尼系数来选择划分属性。</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Gini(D) &= \sum_{k=1}^{|y|}\sum_{k' \neq k}p_kp_{k'} 
+\\ &= 1 - \sum_{k = 1}^{|y|}p_k^2 
+\\ Gini_index(D, a) &=\sum_{v=1}^{V}\frac{D^v}{D}Gini(D^v)
+\end{aligned}</script><p>于是，我们在候选属性集合A中，选择那个使得划分后基尼指数小的属性作为最优划分属性，即$a_* = argmin_{a \in A} Gini_index(D, a) $</p>
+<h3 id="8-3-剪枝"><a href="#8-3-剪枝" class="headerlink" title="8.3 剪枝"></a>8.3 剪枝</h3><p>剪枝(purning)是决策树对付“过拟合”的主要手段。在决策树学习中，为了尽可能正确分类训练样本，结点划分过程将不断重复，有时会造成决策树分支过多，这时就可能因训练样本学得“太好”了。剪枝，顾名思义就是将一个节点之后分叉剪掉，让该节点变为一个叶节点。</p>
+<h4 id="8-3-1-预剪枝"><a href="#8-3-1-预剪枝" class="headerlink" title="8.3.1 预剪枝"></a>8.3.1 预剪枝</h4><p>对每个结点划分前先进行估计，若当前结点的划分不能带来决策树的泛化性能的提升，则停止划分，并标记为叶结点。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/hbmAnz.jpg" alt="西瓜数据集预剪枝"></p>
+<h4 id="8-3-2-后剪枝"><a href="#8-3-2-后剪枝" class="headerlink" title="8.3.2 后剪枝"></a>8.3.2 后剪枝</h4><p>先从训练集生成一棵完整的决策树，然后自底向上对非叶子结点进行考察，若该结点对应的子树用叶结点能带来决策树泛化性能的提升，则将该子树替换为叶结点。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/Sc8Ouf.jpg" alt="西瓜数据集后剪枝"></p>
+<p>后剪枝决策树的欠拟合风险很小，泛化性能往往优于预剪枝决策树。但后剪枝过程是在生成完全决策树之后进行的，并且要白底向上地对树中的所有非叶结点进行逐一考察，因此其训练时间开销比未剪枝决策树和预剪枝决策树都要大得多。</p>
+<h3 id="8-4-连续值与缺失值"><a href="#8-4-连续值与缺失值" class="headerlink" title="8.4 连续值与缺失值"></a>8.4 连续值与缺失值</h3><h4 id="8-4-1-连续值"><a href="#8-4-1-连续值" class="headerlink" title="8.4.1 连续值"></a>8.4.1 连续值</h4><p>将连续值拆分，最简单的方法为二分法(bi-partition)。<br>给定拥有$n$个样本量的样本集$D$和连续属性$a$，将$a$的值从大到小排列，记为$\{a^1, a^2, a^3,…, a^n\}$。基于划分点$t$可将D分为子集$D_t^-$和$D_t^+$，$D_t^-$为小于$t$的样本，$D_t^+$为大于等于$t$的样本。</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Gain(D, a) &= max_{t \in T_a} Gain(D,a,t)
+\\&=max_{t \in T_a}Ent(D) - \sum_{\lambda \in \lbrace-, +\rbrace }\frac{|D_t^\lambda|}{|D|}Ent(D_t^\lambda|)
+\end{aligned}</script><p>于是我们选择一个可以最大化$Gain(D, a, t)$的划分点。</p>
+<h4 id="8-4-1-1-例子："><a href="#8-4-1-1-例子：" class="headerlink" title="8.4.1.1 例子："></a>8.4.1.1 例子：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">data = pd.DataFrame(&#123;&#x27;is_house_owner&#x27;: list(&#x27;TFFTTFFFFT&#x27;),</span><br><span class="line">                     &#x27;marriage&#x27;: list(&#x27;SMSMDDSMSD&#x27;),</span><br><span class="line">                     &#x27;income&#x27;: [125, 100, 100, 110, 60, 95, 85, 75, 90, 220],</span><br><span class="line">                     &#x27;is_unable_payloan&#x27;: list(&#x27;FFFFFTTFTF&#x27;)&#125;)</span><br><span class="line"></span><br><span class="line">data</span><br><span class="line">Out[197]: </span><br><span class="line">  is_house_owner marriage  income is_unable_payloan</span><br><span class="line">0              T        S     125                 F</span><br><span class="line">1              F        M     100                 F</span><br><span class="line">2              F        S     100                 F</span><br><span class="line">3              T        M     110                 F</span><br><span class="line">4              T        D      60                 F</span><br><span class="line">5              F        D      95                 T</span><br><span class="line">6              F        S      85                 T</span><br><span class="line">7              F        M      75                 F</span><br><span class="line">8              F        S      90                 T</span><br><span class="line">9              T        D     220                 F</span><br></pre></td></tr></table></figure>
+<p>我们需要将收入($income$作为分类的特征)。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">from numpy import log2</span><br><span class="line">import numpy as np</span><br><span class="line">import pandas as pd</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def Sum_Every_Part_Log2(a):</span><br><span class="line">    return -(a/a.sum()[0]*log2(a/a.sum()[0])).sum()[0]</span><br><span class="line"></span><br><span class="line">def Cal_Entropy(ridge, data, y_name, x_name):</span><br><span class="line">    df = data[[y_name, x_name]]</span><br><span class="line">    return Sum_Every_Part_Log2(df[df[x_name] &gt;= ridge].groupby(y_name).count()) + Sum_Every_Part_Log2(df[df[x_name] &lt; ridge].groupby(y_name).count())</span><br><span class="line"></span><br><span class="line">Entropy_Result = pd.DataFrame(&#123;&#x27;ridge&#x27;: data[&#x27;income&#x27;].sort_values().append(pd.Series([max(data[&#x27;income&#x27;])]))&#125;)</span><br><span class="line">Entropy_Result[&#x27;Entropy&#x27;] = Entropy_Result[&#x27;ridge&#x27;].apply(lambda x: Cal_Entropy(x, data, &#x27;is_unable_payloan&#x27;, &#x27;income&#x27;))</span><br><span class="line"></span><br><span class="line">Entropy_Result</span><br><span class="line">Out[203]: </span><br><span class="line">   ridge   Entropy</span><br><span class="line">4     60  0.881291</span><br><span class="line">7     75  0.918296</span><br><span class="line">6     85  0.954434</span><br><span class="line">8     90  1.781416</span><br><span class="line">5     95  1.650022</span><br><span class="line">1    100  0.970951</span><br><span class="line">2    100  0.970951</span><br><span class="line">3    110  0.985228</span><br><span class="line">0    125  0.954434</span><br><span class="line">9    220  0.918296</span><br><span class="line">0    220  0.918296</span><br></pre></td></tr></table></figure><br>可以看到在95的时候，信息熵最大，故选择95作为划分点划分为&gt;=95和&lt;95两部分。</p>
+<h4 id="8-4-2-缺失值"><a href="#8-4-2-缺失值" class="headerlink" title="8.4.2 缺失值"></a>8.4.2 缺失值</h4><p>缺失值的处理方法为，在计算$Gain(D, a)$时，乘特征a的数据缺失率。<br>例如：</p>
+<script type="math/tex; mode=display">Gain(D,色泽)=\rho \times Gain(D,色泽)</script><h3 id="8-5-例子"><a href="#8-5-例子" class="headerlink" title="8.5 例子"></a>8.5 例子</h3><p>使用CART对<code>titanic dataset</code>的用户生存率进行预测。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">import graphviz</span><br><span class="line">import numpy as np</span><br><span class="line">import pandas as pd</span><br><span class="line">from sklearn import tree</span><br><span class="line">from sklearn.feature_extraction import DictVectorizer</span><br><span class="line">from sklearn.model_selection import cross_val_score</span><br><span class="line">from sklearn.tree import DecisionTreeClassifier</span><br><span class="line"></span><br><span class="line">x = titan[[&#x27;pclass&#x27;, &#x27;age&#x27;, &#x27;sex&#x27;, &#x27;fare&#x27;]]</span><br><span class="line">y = titan[&#x27;survived&#x27;]</span><br><span class="line"></span><br><span class="line">x_train, x_test, y_train, y_test = train_test_split(x, y, random_state = 99)</span><br><span class="line"></span><br><span class="line">transfer = DictVectorizer(sparse=False)</span><br><span class="line">x_train = transfer.fit_transform(x_train.to_dict(orient=&quot;records&quot;))</span><br><span class="line">x_test = transfer.fit_transform(x_test.to_dict(orient=&quot;records&quot;))</span><br><span class="line"></span><br><span class="line">score = []</span><br><span class="line"></span><br><span class="line">for i in range(1, 21):</span><br><span class="line">    estimator = DecisionTreeClassifier(criterion=&quot;entropy&quot;, max_depth = i)</span><br><span class="line">    estimator.fit(x_train, y_train)</span><br><span class="line">    precision.append(estimator.score(x_test, y_test))</span><br><span class="line"></span><br><span class="line">score</span><br><span class="line"></span><br><span class="line">Out[183]: </span><br><span class="line">[0.7477477477477478,</span><br><span class="line"> 0.7477477477477478,</span><br><span class="line"> 0.7972972972972973,</span><br><span class="line"> 0.7972972972972973,</span><br><span class="line"> 0.8063063063063063,</span><br><span class="line"> 0.7882882882882883,</span><br><span class="line"> 0.7882882882882883,</span><br><span class="line"> 0.7927927927927928,</span><br><span class="line"> 0.7882882882882883,</span><br><span class="line"> 0.7882882882882883,</span><br><span class="line"> 0.7702702702702703,</span><br><span class="line"> 0.7522522522522522,</span><br><span class="line"> 0.7837837837837838,</span><br><span class="line"> 0.7612612612612613,</span><br><span class="line"> 0.7567567567567568,</span><br><span class="line"> 0.7387387387387387,</span><br><span class="line"> 0.7432432432432432,</span><br><span class="line"> 0.7432432432432432,</span><br><span class="line"> 0.7477477477477478,</span><br><span class="line"> 0.7477477477477478]</span><br></pre></td></tr></table></figure><br>可以看到树的深度在5时，测试集的精度最好，故我们选择五层的CART模型作为最终模型。</p>
+<blockquote>
+<p>使用测试集来确定一个新的参数，有可能会引起模型的泛化问题，避免这一问题可以多预留一个另外的测试集。<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">estimator = DecisionTreeClassifier(criterion=&quot;gini&quot;, max_depth = 5)</span><br><span class="line">estimator.fit(x_train, y_train)</span><br><span class="line">dot_tree = tree.export_graphviz(estimator, out_file=None)</span><br><span class="line">graph = graphviz.Source(dot_tree)</span><br><span class="line">graph.view(&#x27;titanic&#x27;)</span><br></pre></td></tr></table></figure><br><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://snipboard.io/FhRU8G.jpg" alt="titanic CART树"></p>
+</blockquote>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2021/03/15/ml5_svm/">机器学习V - 支持向量机(Support Vector Machines)<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2021/04/19/U_test_and_roc/">Mann-Whitney U Test 与 ROC曲线<span class="note">较新</span></a></section></div>
+
+
+
+
+
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>

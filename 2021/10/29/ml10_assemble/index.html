@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>机器学习VIII - 集成学习 (Ensemble Learning) - 屹然的空间</title>
+
+  
+
+  
+    <meta name="description" content="13 集成学习 (Ensemble Learning)集成学习是通过构建多个学习器来构建一个大的学习器，有时也会被称之为多分类系统 (Multi-Classifier System) ，基于委员会的学习 (committee-based learning) 等。 如果集成的学习器中，只包含同类的学习器，那这样的集成是同质的 (Homogeneous) ，其中个体学习器称之为“基学习器” （Base">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习VIII - 集成学习 (Ensemble Learning)">
+<meta property="og:url" content="http://lifanyiran.com/2021/10/29/ml10_assemble/index.html">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="13 集成学习 (Ensemble Learning)集成学习是通过构建多个学习器来构建一个大的学习器，有时也会被称之为多分类系统 (Multi-Classifier System) ，基于委员会的学习 (committee-based learning) 等。 如果集成的学习器中，只包含同类的学习器，那这样的集成是同质的 (Homogeneous) ，其中个体学习器称之为“基学习器” （Base">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="d:/Users/fyrli/AppData/Roaming/Typora/typora-user-images/image-20220216150434070.png">
+<meta property="og:image" content="d:/Users/fyrli/AppData/Roaming/Typora/typora-user-images/image-20220216153207719.png">
+<meta property="og:image" content="d:/Users/fyrli/AppData/Roaming/Typora/typora-user-images/image-20220217173236064.png">
+<meta property="article:published_time" content="2021-10-29T11:48:00.000Z">
+<meta property="article:modified_time" content="2022-06-30T06:59:43.738Z">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Notes">
+<meta property="article:tag" content="Data Science">
+<meta property="article:tag" content="Machine Learning">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="d:/Users/fyrli/AppData/Roaming/Typora/typora-user-images/image-20220216150434070.png">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#13-1-Boosting"><span class="toc-text">13.1 Boosting</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-2-Bagging"><span class="toc-text">13.2 Bagging</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-3-%E9%9A%8F%E6%9C%BA%E6%A3%AE%E6%9E%97-RF-Random-Forest"><span class="toc-text">13.3 随机森林 (RF, Random Forest)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-4-%E7%BB%93%E5%90%88%E7%AD%96%E7%95%A5"><span class="toc-text">13.4 结合策略</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#13-4-1-%E5%B9%B3%E5%9D%87%E6%B3%95"><span class="toc-text">13.4.1 平均法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#13-4-2-%E6%8A%95%E7%A5%A8%E6%B3%95"><span class="toc-text">13.4.2 投票法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#13-4-3-%E5%AD%A6%E4%B9%A0%E6%B3%95"><span class="toc-text">13.4.3 学习法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-5-%E5%A4%9A%E6%A0%B7%E6%80%A7-Diversity"><span class="toc-text">13.5 多样性 (Diversity)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-6-%E5%A4%9A%E6%A0%B7%E6%80%A7%E5%A2%9E%E5%BC%BA"><span class="toc-text">13.6 多样性增强</span></a></li></ol></div></div></div>
+
+
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Machine-Learning/">Machine Learning</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-10-29T11:48:00.000Z">2021-10-29</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>机器学习VIII - 集成学习 (Ensemble Learning)</span></h1>
+<h1 id="13-集成学习-Ensemble-Learning"><a href="#13-集成学习-Ensemble-Learning" class="headerlink" title="13 集成学习 (Ensemble Learning)"></a>13 集成学习 (Ensemble Learning)</h1><p>集成学习是通过构建多个学习器来构建一个大的学习器，有时也会被称之为多分类系统 (Multi-Classifier System) ，基于委员会的学习 (committee-based learning) 等。</p>
+<p>如果集成的学习器中，只包含同类的学习器，那这样的集成是同质的 (Homogeneous) ，其中个体学习器称之为“基学习器” （Base Learner），相应的算法称之为“基学习算法” (Base Learning Algorithm) ；如果集成的学习器中包含不同类型的学习器，则这样的集成是异质的 (Heterogenous) ，其中的个体学习器称之为“组件学习器” (Component Learner)。</p>
+<p>集成方式主要分为两种，Boosting与Bagging。</p>
+<h3 id="13-1-Boosting"><a href="#13-1-Boosting" class="headerlink" title="13.1 Boosting"></a>13.1 Boosting</h3><p>Boosting 是一族可将弱学习器提升为强学习器的算法。这族算法的工作机制类似：先从初始训练集训练出一个基学习器，再根据基学习器的表现对训练样本分布进行调整，使得先前基学习器做错的训练样本在后续受到更多关注， 然后基于调整后的样本分布来训练下一个基学习器；如此重复进行，直至基学习器数目达到事先指定的值最终将这个基学习器进行加权结合。</p>
+<p>其中最经典的Boosting算法为AdaBoost (Adaptive Boost) ，是多个基学习器的线性组合。</p>
+<p>假设函数如下：</p>
+<script type="math/tex; mode=display">
+H(x) = \sum_{t=1}^T\alpha_t h_t(x)</script><p>$T = $ 训练次数</p>
+<p>$h_t(x) = $ 每个弱分类器</p>
+<p>$\alpha_t = $ 每个弱分类器的权重</p>
+<p>完整算法如下：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+输入：&训练集D=\{(x_1, y_1),...,(x_m,y_m)\}
+\\ &基学习算法L
+\\ &训练轮数T
+\\过程： &初始化权重矩阵D_1(i)=1/m
+\\ &For\ \ t=1,...,T
+\\ & \quad \quad h_t = L(D,d_t) \quad 注：基于分布D_1(i),训练分类器h_t(x)
+\\ & \quad \quad \epsilon_t = P_{x\sim D_t}(h_t(x)\neq y)
+\\ & \quad \quad if \ \ \epsilon_t > 0.5 \ \ then \ \ break
+\\ & \quad \quad \alpha_t = \frac{1}{2}ln(\frac{1-\epsilon_t}{\epsilon_t})
+\\ & \quad \quad D_{t+1}(x) = \frac{D_{t}(x)}{Z_t} \times 
+\left\{
+    \begin{aligned}
+    exp(-\alpha_t), \quad if \ \ h_t(x)=y \\
+    exp(\alpha_t), \quad if \ \ h_t(x)\neq y
+    \end{aligned}
+\right.
+\\ & \quad \quad \quad \quad \quad \ \ \ = \frac{D_t(x)exp(-\alpha_t y h_t(x))}{Z_t}
+\\ & end \ \ for
+\\ 输出：& H(x) = sign(\sum_{t=1}^T\alpha_t h_t(x))
+\end{aligned}</script><p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220216150434070.png" alt=""></p>
+<h3 id="13-2-Bagging"><a href="#13-2-Bagging" class="headerlink" title="13.2 Bagging"></a>13.2 Bagging</h3><p>Bagging 是井行式集成学习方法最著名的代表。它直接基于自助来样法 (bootstrap sampling)， 给定包含m个样本的数据集，我们先随机取出一个样本放入采样集中，再把该样本放回初始数据集，使得下次采样时该样本仍有可能被选中，这样，经过随机采样操作，我们得到含m个样本的采样集，再基于每个采样集训练出一个基学习器，再将这些学习器结合。结合时，对分类任务使用简单头皮案发，对回归任务使用简单平均法。</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+输入：&训练集D=\{(x_1, y_1),...,(x_m,y_m)\}
+\\ &基学习算法L
+\\ &训练轮数T
+\\过程： &For\ \ t=1,...,T
+\\ & \quad \quad h_t = L(D,D_{bs}) \quad 注：随机自助抽样
+\\ & end \ \ for
+\\ 输出：& H(x) = \underset{y\in Y}{argmax[card(t:h_t(x) = y)]} 注：选择出现频次最高的预测
+\end{aligned}</script><p>由于使用了自助法，每个基学习器只使用了初始训练集中约 63.2% 的样本，剩下的样本可以用来作为测试集。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220216153207719.png" alt="image-20220216153207719"></p>
+<h3 id="13-3-随机森林-RF-Random-Forest"><a href="#13-3-随机森林-RF-Random-Forest" class="headerlink" title="13.3 随机森林 (RF, Random Forest)"></a>13.3 随机森林 (RF, Random Forest)</h3><p>RF是bagging的一个拓展变体，RF在以决策树为基学习器在Bagging的基础上，进一步在决策树的训练过程中引入了随机属性选择。</p>
+<p>传统决策树会使用所有特征$m$中最优一个特征，而RF则会现在随机选择k个特征，然后再从其中选择一个最优的属性，一般$k=log_2d$。</p>
+<h3 id="13-4-结合策略"><a href="#13-4-结合策略" class="headerlink" title="13.4 结合策略"></a>13.4 结合策略</h3><h5 id="13-4-1-平均法"><a href="#13-4-1-平均法" class="headerlink" title="13.4.1 平均法"></a>13.4.1 平均法</h5><p>对于数值型的输出，最常见的策略是平均法</p>
+<ul>
+<li><p>简单平均法 (Simple Averaging)</p>
+<script type="math/tex; mode=display">
+H(x) = \frac{1}{T} \sum_{i=1}^T h_i(x)</script></li>
+<li><p>加权平均法 (Weighted Averaging)</p>
+<script type="math/tex; mode=display">
+H(x) =\sum_{i=1}^T w_ih_i(x)</script><p>其中$w_i$为每个学习器的权重，通常要求$w_i \geq 0, \sum_{i=1}^Tw_i=1$</p>
+</li>
+</ul>
+<h5 id="13-4-2-投票法"><a href="#13-4-2-投票法" class="headerlink" title="13.4.2 投票法"></a>13.4.2 投票法</h5><ul>
+<li><p>绝对多数投票法 (Majority Voting)</p>
+<script type="math/tex; mode=display">
+H(x) = 
+\left\{ 
+\begin{aligned}
+&c_j, &&if\ \  \sum_{i=1}^Th_i^j(x)>0.5 \sum^N_{k=1}\sum^T_{i=1}h_i^k(x) \\
+&reject, &&otherwise
+\end{aligned}
+\right.</script><p>即若某标记得票过半数，则预测为该标记，否则拒绝。</p>
+</li>
+<li><p>相对多数投票法(Plurality Voting)</p>
+<script type="math/tex; mode=display">
+H(x) = c_{\underset{j}{argmax}\sum_{i=1}^Th_i^j(x)}</script><p>即选择得票最多的标记，如果有多个则随机一个。</p>
+</li>
+<li><p>加权投票法 (Weighted Voting)</p>
+<script type="math/tex; mode=display">
+H(x) = c_{\underset{j}{argmax}\sum_{i=1}^T w_i h_i^j(x)}</script><p>其中$w_i$为每个学习器的权重，通常要求$w_i \geq 0, \sum_{i=1}^Tw_i=1$</p>
+</li>
+</ul>
+<h5 id="13-4-3-学习法"><a href="#13-4-3-学习法" class="headerlink" title="13.4.3 学习法"></a>13.4.3 学习法</h5><p>当训练数据很多时，一种更为强大的结合策略是使用“学习法”，即通过另一个学习器来进行结合。Stacking是学习法的代表，我们把个器学习器称之为初级学习器，用于结合的学习器称之为次级学习器，或者是元学习器 (Meta-Learner)。</p>
+<p>Stacking先从初始数据集训练出初级学习器，然后“生成”一个新的数据集用于训练次级学习器。在这个新数据集中，初级学习器的输出被当作样例的输入特征，而初始样本的标记则被当作为样例标记。</p>
+<blockquote>
+<p>一般初级学习器和次级学习器是由不同算法组成的，则是异质的。</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{aligned}
+输入：&训练集D=\{(x_1, y_1),...,(x_m,y_m)\}
+\\ &初级学习算法L_1, L_2, ..., L_T
+\\ &次级学习算法L
+\\过程： &for\ \ t=1,...,T
+\\ & \quad \quad h_t = L_T(D) 
+\\ & end \ \ for
+\\ &D' = \emptyset 
+\\ &for\ \ i=1,...,m
+\\ & \quad \quad for\ \ t=1,...,T
+\\ & \quad \quad \quad \quad z_{it} = h_t(x_i);
+\\ & \quad \quad end\ \ for
+\\ & \quad \quad D' = D' \cup ((z_{i1}, z_{i2}, ..., z_{iT}), y_i)
+\\ & end \ \ for
+\\ & h' = L(D')
+\\ 输出：& H(x) = h'(h_1(x), h_2(x), ..., h_T(x)) \ \  注：选择出现频次最高的预测
+\end{aligned}</script><p>在训练阶段，次级训练集是利用初级学习器产生的，若直接用初级学习器 的训练集来产生次级训练集，则过拟合风险会比较大。因此，一般是通过使用交叉验证或留一法这样的方式，用训练初级学习器未使用的样本来产生次级学习器的训练样本。</p>
+<h3 id="13-5-多样性-Diversity"><a href="#13-5-多样性-Diversity" class="headerlink" title="13.5 多样性 (Diversity)"></a>13.5 多样性 (Diversity)</h3><p>个体学习器应该“好而不同”，故名思义，多样性度量 (diversity measure) 是用于度量集成中个体分类器的多样性，即估算个体学习器的多样化程度。典型做法是考虑个体分类器的两两相似/不相似性。</p>
+<p>给定数据集 $D = \{(x_1,y_1), (x_2,y_2), …, (x_m,y_m)\}$，对于二分类任务，$y_i \in \{-1，+1\}$，分类器$h_i,h_j$的预测结果列联表 (Contingency Table) 为</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">$h_i = +1$</th>
+<th style="text-align:center">$h_i = -1$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">$h_j = +1$</td>
+<td style="text-align:center">$a$</td>
+<td style="text-align:center">$c$</td>
+</tr>
+<tr>
+<td style="text-align:center">$h_j = -1$</td>
+<td style="text-align:center">$b$</td>
+<td style="text-align:center">$d$</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><p>不合适度 (Disagreement Measure)</p>
+<script type="math/tex; mode=display">
+dis_{ij} = \frac{b+c}{m} \in [0,1]</script><p>值越大代表多样性越大</p>
+</li>
+<li><p>相关系数 (Correlation Coeffcient)</p>
+<script type="math/tex; mode=display">
+\rho_{ij} = \frac{ad-bc}{\sqrt{(a+b)(a+c)(c+d)(b+d)}} \in [-1,+1]</script></li>
+<li><p>$Q-$统计量 ($Q-statistic$)</p>
+<script type="math/tex; mode=display">
+Q_{ij} = \frac{ad-bc}{ad+bc}</script></li>
+<li><p>$\kappa-$统计量 ($\kappa-statistic$)</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\kappa &= \frac{p_1-p_2}{1-p_2}
+\\ p_1 &= \frac{a+d}{m}
+\\ p_2 &= \frac{(a+b)(a+c)+(c+d)(b+d)}{m^2} 
+\end{aligned}</script><p>若分类器$h_i$与$h_j$完全一致，则$\kappa = 1$；如果仅是偶然一致，则$\kappa = 0$。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220217173236064.png" alt="image-20220217173236064"></p>
+</li>
+</ul>
+<h3 id="13-6-多样性增强"><a href="#13-6-多样性增强" class="headerlink" title="13.6 多样性增强"></a>13.6 多样性增强</h3><ul>
+<li><p>数据样本扰动</p>
+<p>利用不同的数据子集训练不同的个体学习器。例如在Bagging中使用自助采样，在AdaBoost中使用序列采样。这种做法对“不稳定基学习器”比较有效，比如决策树，神经网络等。对数据样本扰动不敏感的学习器称之为稳定基学习器 (Stable Base Learner)，例如线性学习器，SVM，k-means，朴素贝叶斯等。</p>
+</li>
+<li><p>输入属性扰动</p>
+<p>从不同子空间训练不同个体学习器。著名的随机子空间 (Random Subspace) 算法，就是从初始属性集中抽取出若干个属性子集，再基于每个属性子 集训练一个基学习器。对包含大量冗余属性的数据，在子空间中训练个体学习器不仅能产生多样性大的个体，还会因属性数的减少 而大幅节省时间开销，同时，由于冗余属性多，减少一些属性后训练出的个体学习器也不至于太差。若数据只包含少量属性，或者冗余属性很少，则不宜使用输入属性扰动法。</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+输入：&训练集D=\{(x_1, y_1),...,(x_m,y_m)\}
+\\ &基学习算法L
+\\ &基学习器数T
+\\ &子空间属性数d'
+\\过程： &For\ \ t=1,...,T
+\\ & \quad \quad F_t = RS(D, d') \quad 
+\\ & \quad \quad D_t = Map_{F_t}(D)
+\\ & \quad \quad h_t = L(D_t) \quad 注：随机自助抽样
+\\ & end \ \ for
+\\ 输出：& H(x) = \underset{y\in Y}{argmax}[card(t:h_t(Map_{F_t}(x)) = y)] 注：选择出现频次最高的预测
+\end{aligned}</script></li>
+<li><p>输出表示扰动</p>
+<p>此类做法的基本思路是对输出表示进行操纵以增强多样性，可对训练样本的类标记稍作变动。例如“翻转法” (Flipping Output) 随机改变一些训练样本的标记；“输出调制法” (Output Smearing) 讲分类输出转化为回归输出后构建个体学习器；如ECOC法利用纠错输出码将多分类任务拆解为一系列二分类任务来训练基学习器。</p>
+</li>
+<li><p>算法参数扰动</p>
+<p>通过随机设置不同的参数，产生差别较大的个体学习器。例如”负相关法” (Negative Correlation) 思式地通过正则化项来强制个体神经网络使用不同的参数。</p>
+</li>
+</ul>
+<blockquote>
+<p> 随机森林中同时使用了数据样本扰动和输入属性扰动。</p>
+</blockquote>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2021/10/23/ml9_anormal/">机器学习VIII - 异常检测(Anomaly Detection)与大数据的梯度下降<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2021/11/05/regexp_intro/">正则表达式基础<span class="note">较新</span></a></section></div>
+
+
+
+
+
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
