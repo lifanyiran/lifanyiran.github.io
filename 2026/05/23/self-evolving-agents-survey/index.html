@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>自进化Agent综述 - 屹然的空间</title>
+
+  <meta name="description" content="围绕《A Survey of Self-Evolving Agents》，从 What、When、How、Where 四个维度梳理自进化 Agent 的模型、上下文、工具、架构、评估、安全与最新进展。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自进化Agent综述">
+<meta property="og:url" content="https://lifanyiran.com/2026/05/23/self-evolving-agents-survey/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="围绕《A Survey of Self-Evolving Agents》，从 What、When、How、Where 四个维度梳理自进化 Agent 的模型、上下文、工具、架构、评估、安全与最新进展。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2026/self-evolving-agents-survey.jpg">
+<meta property="article:published_time" content="2026-05-23T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-07-26T18:01:07.732064+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2026/self-evolving-agents-survey.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/more/">About Me</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#_1">🎯 一句话总结</a></li>
+<li><a href="#what-when-how">📐 核心框架：What × When × How 三维视角</a></li>
+<li><a href="#chapter-1-introduction">Chapter 1: Introduction</a><ul>
+<li><a href="#_2">核心论证链</a></li>
+<li><a href="#_3">关键概念</a></li>
+</ul>
+</li>
+<li><a href="#chapter-2-definitions-and-foundations">Chapter 2: Definitions and Foundations</a><ul>
+<li><a href="#_4">形式化定义</a></li>
+<li><a href="#_5">操作性定义的三个准入标准</a></li>
+<li><a href="#_6">进化的光谱</a></li>
+<li><a href="#_7">与其他范式的区别</a></li>
+</ul>
+</li>
+<li><a href="#chapter-3-what-to-evolve">Chapter 3: What to Evolve?</a><ul>
+<li><a href="#31-models">3.1 模型（Models）— 改参数 ψ</a><ul>
+<li><a href="#policy">Policy 进化 — “自己出题自己练”</a></li>
+<li><a href="#experience">Experience 进化 — “和环境交互产生训练信号”</a></li>
+</ul>
+</li>
+<li><a href="#32-context-prompt-memory">3.2 上下文（Context）— 不改参数，改 Prompt + Memory</a><ul>
+<li><a href="#321-memory">3.2.1 Memory 进化</a></li>
+<li><a href="#322-prompt">3.2.2 Prompt 优化</a></li>
+</ul>
+</li>
+<li><a href="#33-tools">3.3 工具（Tools）— 从使用者到创造者</a><ul>
+<li><a href="#_8">自主发现和创建</a></li>
+<li><a href="#_9">迭代精通</a></li>
+<li><a href="#_10">规模管理</a></li>
+</ul>
+</li>
+<li><a href="#34-architecture">3.4 架构（Architecture）— 改系统结构 Γ</a></li>
+</ul>
+</li>
+<li><a href="#chapter-4-when-to-evolve">Chapter 4: When to Evolve</a><ul>
+<li><a href="#_11">核心二分法</a></li>
+<li><a href="#what-when">What × When 完整矩阵</a><ul>
+<li><a href="#intra-test-time">Intra-Test-Time（任务执行中进化）</a></li>
+<li><a href="#inter-test-time">Inter-Test-Time（任务完成后进化）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#chapter-5-how-to-evolve">Chapter 5: How to Evolve</a><ul>
+<li><a href="#_12">三大进化范式</a></li>
+<li><a href="#51">5.1 奖励驱动进化</a></li>
+<li><a href="#52">5.2 模仿与示范学习</a></li>
+<li><a href="#53">5.3 种群与进化方法</a></li>
+</ul>
+</li>
+<li><a href="#chapter-6-where-to-evolve">Chapter 6: Where to Evolve</a><ul>
+<li><a href="#_13">通用领域进化（三种机制）</a></li>
+<li><a href="#_14">专用领域进化</a></li>
+</ul>
+</li>
+<li><a href="#chapter-7-evaluation">Chapter 7: Evaluation</a><ul>
+<li><a href="#_15">五大评估维度</a></li>
+</ul>
+</li>
+<li><a href="#chapter-8-future-direction">Chapter 8: Future Direction</a><ul>
+<li><a href="#81-ai-agent">8.1 个性化 AI Agent</a></li>
+<li><a href="#82">8.2 泛化能力</a></li>
+<li><a href="#83-agent">8.3 安全可控的自进化 Agent</a></li>
+<li><a href="#84-agent">8.4 多 Agent 生态</a></li>
+</ul>
+</li>
+<li><a href="#_16">💡 对营销场景的启发</a></li>
+<li><a href="#_17">📚 参考文献精选</a></li>
+<li><a href="#20261-5">📅 补充：论文发表后的最新进展（2026年1-5月）</a><ul>
+<li><a href="#1-hyperagents-meta20263">🚀 1. Hyperagents — 元认知自改进（Meta，2026年3月）</a></li>
+<li><a href="#2-zombie-agents-agent20262">⚠️ 2. Zombie Agents — “僵尸 Agent”安全威胁（2026年2月）</a></li>
+<li><a href="#3-misevolution">⚠️ 3. Misevolution — “进化退化”被系统性验证</a></li>
+<li><a href="#4-ace-agentic-context-engineeringstanfordberkeley">🧠 4. ACE — Agentic Context Engineering（Stanford/Berkeley）</a></li>
+<li><a href="#5-agent0-20252026">🎯 5. Agent0 — 零数据自进化（2025年底提出，2026年初爆火）</a></li>
+<li><a href="#6-skills-20262-4">🔧 6. Skills 生态大爆发（2026年2-4月）</a></li>
+<li><a href="#7">🔬 7. 其他重要新进展</a><ul>
+<li><a href="#evoscientist-ai-20263">EvoScientist — 自进化 AI 科学家（2026年3月）</a></li>
+<li><a href="#sage-agent-20263">SAGE — 四 Agent 闭环推理进化（2026年3月）</a></li>
+<li><a href="#dual-process-agent-2026">Dual-Process Agent — 双过程理论（2026年）</a></li>
+<li><a href="#nvidia-openshell-2026316">NVIDIA OpenShell — 安全运行时（2026年3月16日）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#vs">📊 论文框架 vs 最新研究：覆盖度评估</a></li>
+<li><a href="#20261-5_1">📚 补充参考文献（2026年1-5月）</a></li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Agent/">Agent</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-05-23T00:00:00+08:00">2026-05-23</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>自进化Agent综述</span></h1>
+<p>论文：A Survey of Self-Evolving Agents</p>
+<p>副标题：What, When, How, and Where to Evolve on the Path to Artificial Super Intelligence</p>
+<p>发表：Transactions on Machine Learning Research（2026年1月）</p>
+<p>作者：Huan-ang Gao、Jiayi Geng、Wenyue Hua 等 26 位作者</p>
+<p>机构：Princeton、清华、UIUC、CMU、Penn State 等</p>
+<p>GitHub：<a href="https://github.com/CharlesQ9/Self-Evolving-Agents">CharlesQ9/Self-Evolving-Agents</a></p>
+<p>原文：<a href="https://drive.weixin.qq.com/s?k=ANYAEAdoABEJSZ3zvPAVAAAgaVAI0">A Survey of Self-Evolving Agents.pdf</a></p>
+<h2 id="_1">🎯 一句话总结</h2>
+<p>LLM 是静态的，不能从经验中学习。本文系统综述了如何让 Agent 自我进化——自主修改参数、记忆、工具甚至整体架构，持续变强，最终迈向 ASI（超级智能）。</p>
+<h2 id="what-when-how">📐 核心框架：What × When × How 三维视角</h2>
+<p>论文围绕三个基础维度构建自进化 Agent 的分析框架：</p>
+<pre><code class="language-text">What to Evolve?        When to Evolve?        How to Evolve?
+(进化什么)              (何时进化)              (如何进化)
+──────────              ──────────              ──────────
+Model (参数)            Intra-test (任务中)      Reward (奖励驱动)
+Context (Prompt+Memory) Inter-test (任务间)      Imitation (模仿学习)
+Tool (工具)             Population (种群进化)    Population (种群进化)
+Architecture (架构)
+
+× Where to Evolve?      Evaluation              Future
+  (在哪进化)             (怎么评估)              (未来方向)
+──────────              ──────────              ──────────
+通用领域                Adaptivity              个性化
+代码/GUI/金融/医疗/教育 Retention                泛化
+多 Agent 生态           Generalization           安全可控
+                        Efficiency
+                        Safety
+</code></pre>
+<h2 id="chapter-1-introduction">Chapter 1: Introduction</h2>
+<h3 id="_2">核心论证链</h3>
+<p><img alt="图 1" src="/images/posts/2026/self-evolving-agents-survey/01.jpg" />
+1. <strong>问题定义</strong>：LLM 是静态的，训练完就“冻结”了，不能适应新任务/新知识/动态环境。
+2. <strong>范式转移</strong>：从 “Scaling up static models” → “Developing self-evolving agents”。
+3. <strong>自主性是关键区分</strong>：自进化不等于训练。SFT/RL 早就存在，但它们是人驱动的；自进化 Agent 自己决定学什么、怎么学、何时学。
+4. <strong>终极愿景</strong>：LLM → Foundation Agent → Self-Evolving Agent → ASI。</p>
+<h3 id="_3">关键概念</h3>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Static Model</td>
+<td>训练后参数固定，不能自我更新的模型</td>
+</tr>
+<tr>
+<td>Self-Evolving Agent</td>
+<td>能基于自身经验自主修改参数/上下文/工具/架构的 Agent</td>
+</tr>
+<tr>
+<td>Locus of Autonomy</td>
+<td>自主性的“控制点”——是人还是 Agent 在驱动改进</td>
+</tr>
+<tr>
+<td>Scaling → Evolving</td>
+<td>从“做大模型”到“做会进化的系统”的范式转移</td>
+</tr>
+</tbody>
+</table>
+<h2 id="chapter-2-definitions-and-foundations">Chapter 2: Definitions and Foundations</h2>
+<h3 id="_4">形式化定义</h3>
+<p>环境（POMDP）：<code>E = (G, S, A, T, R, Ω, O, γ)</code></p>
+<p>Agent 系统：<code>Π = (Γ, {ψᵢ}, {Cᵢ}, {Wᵢ})</code></p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>含义</th>
+<th>对应 What to Evolve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Γ</td>
+<td>架构（控制流/拓扑结构）</td>
+<td>Architecture</td>
+</tr>
+<tr>
+<td>ψᵢ</td>
+<td>模型（第 i 个节点的 LLM）</td>
+<td>Model</td>
+</tr>
+<tr>
+<td>Cᵢ</td>
+<td>上下文（Prompt Pᵢ + Memory Mᵢ）</td>
+<td>Context</td>
+</tr>
+<tr>
+<td>Wᵢ</td>
+<td>工具集（APIs）</td>
+<td>Tools</td>
+</tr>
+</tbody>
+</table>
+<p>自进化策略（核心公式）：</p>
+<pre><code class="language-text">f(Π, τ, r) = Π' = (Γ', {ψᵢ'}, {Cᵢ'}, {Wᵢ'})
+递归进化：Π_{j+1} = f(Π_j, τ_j, r_j)
+目标：max Σ U(Π_j, T_j) ← 累积效用最大化
+</code></pre>
+<h3 id="_5">操作性定义的三个准入标准</h3>
+<ol>
+<li><strong>Experience-dependent</strong>：更新必须由轨迹/自生成数据/环境反馈驱动。</li>
+<li><strong>Persistent, policy-changing</strong>：更新必须产生持久的、改变策略的效果。</li>
+<li><strong>Autonomous exploration</strong>：系统必须有自主探索或自发学习的机制。</li>
+</ol>
+<h3 id="_6">进化的光谱</h3>
+<pre><code class="language-text">Proto-Evolution ←————————————————→ Strong Self-Evolution
+     ↑                                      ↑
+  迭代引导                            完全自主诊断+重构
+  反馈驱动 prompt                      无需人类干预
+  仍有人类参与                         自发的结构修改
+</code></pre>
+<h3 id="_7">与其他范式的区别</h3>
+<table>
+<thead>
+<tr>
+<th>范式</th>
+<th>运行时上下文</th>
+<th>进化工具集</th>
+<th>动态任务</th>
+<th>主动探索</th>
+<th>结构变化</th>
+<th>自反思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Curriculum Learning</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Lifelong Learning</td>
+<td>✗</td>
+<td>✗</td>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Model Editing</td>
+<td>✗</td>
+<td>✗</td>
+<td>✓</td>
+<td>✓</td>
+<td>✗</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>Self-Evolving Agents</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<h2 id="chapter-3-what-to-evolve">Chapter 3: What to Evolve?</h2>
+<h3 id="31-models">3.1 模型（Models）— 改参数 ψ</h3>
+<h4 id="policy">Policy 进化 — “自己出题自己练”</h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>怎么做</th>
+<th>亮点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SCA（Self-Challenging Agent）</td>
+<td>模型扮演出题者 + 解题者，用成功轨迹微调自己</td>
+<td>数据自产自销</td>
+</tr>
+<tr>
+<td>Self-Rewarding Self-Improving</td>
+<td>自己出题 → 自己解 → 自己打分 → 选好的微调</td>
+<td>零外部标注</td>
+</tr>
+<tr>
+<td>TextGrad</td>
+<td>文本反馈当“可微训练信号”</td>
+<td>文本梯度</td>
+</tr>
+</tbody>
+</table>
+<h4 id="experience">Experience 进化 — “和环境交互产生训练信号”</h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>核心机制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AgentGen</td>
+<td>合成模拟世界，双向调整难度</td>
+</tr>
+<tr>
+<td>Reflexion</td>
+<td>自我反思，记录自然语言批评</td>
+</tr>
+<tr>
+<td>Self-Refine</td>
+<td>迭代精炼：批评 → 修改 → 再批评 → 再修改</td>
+</tr>
+<tr>
+<td>RAGEN</td>
+<td>多步工具调用当 MDP，用环境密集反馈做 RL</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-context-prompt-memory">3.2 上下文（Context）— 不改参数，改 Prompt + Memory</h3>
+<h4 id="321-memory">3.2.1 Memory 进化</h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>做什么</th>
+<th>类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SAGE</td>
+<td>艾宾浩斯遗忘曲线决定记/忘</td>
+<td>人类记忆衰减</td>
+</tr>
+<tr>
+<td>A-Mem</td>
+<td>动态索引和链接，形成互联知识网络</td>
+<td>Zettelkasten 卡片笔记法</td>
+</tr>
+<tr>
+<td>Mem0</td>
+<td>两阶段：提取关键事实 → ADD/MERGE/UPDATE/DELETE</td>
+<td>数据库 CRUD</td>
+</tr>
+<tr>
+<td>Memory-R1</td>
+<td>RL 训练专用 Memory Manager Agent</td>
+<td>RL 驱动的记忆管家</td>
+</tr>
+<tr>
+<td>Expel</td>
+<td>处理过去轨迹 → 生成通用规则和洞察</td>
+<td>从经验提炼“直觉”</td>
+</tr>
+<tr>
+<td>Agent Workflow Memory</td>
+<td>记录常见子任务序列，下次直接复用</td>
+<td>工作流模板</td>
+</tr>
+</tbody>
+</table>
+<p>Mem0 深度拆解：</p>
+<pre><code class="language-text">阶段 1：提取（Extraction）
+用 LLM + 精心设计的 prompt 从对话中提取“值得长期记住的事实”
+→ 提取标准：个人偏好、重要事件、关系等
+→ 不提取：临时信息、闲聊
+
+阶段 2：记忆更新（Memory Update）
+用 LLM 对比新事实和已有记忆，决定操作：
+ADD    → 全新事实
+MERGE  → 和已有记忆重复，合并去重
+UPDATE → 和已有记忆矛盾，替换旧的
+DELETE → 事实已失效
+
+核心：不是规则引擎，就是 LLM + 好 prompt
+</code></pre>
+<h4 id="322-prompt">3.2.2 Prompt 优化</h4>
+<pre><code class="language-text">搜索式              梯度式                  进化式                  全自动
+  │                   │                       │                       │
+APE → ORPO → ADO      ProTeGi(文本梯度)       PromptBreeder(进化)     SPO(完全自主)
+生成候选→评分→选最佳  生成“修正”→应用到prompt  维护种群→变异→选择      自生成数据+偏好对比
+</code></pre>
+<p>多节点优化：DSPy（图联合调优）、TextGrad（文本反向传播）、MASS（多 Agent 通信优化）。</p>
+<h3 id="33-tools">3.3 工具（Tools）— 从使用者到创造者</h3>
+<h4 id="_8">自主发现和创建</h4>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>策略</th>
+<th>风格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Voyager</td>
+<td>Minecraft 中试错探索，不断造新技能</td>
+<td>探索式</td>
+</tr>
+<tr>
+<td>Alita</td>
+<td>发现能力缺口 → 立刻造工具或搜开源代码</td>
+<td>反应式</td>
+</tr>
+<tr>
+<td>CREATOR</td>
+<td>把“抽象工具创建”和“具体工具使用”分离</td>
+<td>工程式</td>
+</tr>
+<tr>
+<td>SkillWeaver</td>
+<td>分析成功轨迹 → 合成新技能为 API</td>
+<td>提炼式</td>
+</tr>
+</tbody>
+</table>
+<p>Voyager 深度拆解（Minecraft 中的终身学习者）：</p>
+<p>三大核心机制：</p>
+<ol>
+<li><strong>Automatic Curriculum</strong>：GPT-4 根据 Agent 进度自动提议下一个目标（bottom-up 课程）。</li>
+<li><strong>Skill Library</strong>：学到的技能存成可复用的 JavaScript 函数，不断增长，新技能可调用旧技能。</li>
+<li><strong>Iterative Prompting</strong>：写代码时反复修：生成 → 执行 → 报错 → 修正 → 重试 → 成功 → 保存。</li>
+</ol>
+<p>关键特点：不改模型参数！进化完全通过技能库（Memory/Tool）+ prompt 上下文实现。</p>
+<h4 id="_9">迭代精通</h4>
+<p>LearnAct/DRAFT 的自修正循环：使用 → 失败 → 分析反馈 → 定位问题 → 修复代码 + 更新文档 → 再次使用。</p>
+<h4 id="_10">规模管理</h4>
+<ul>
+<li>ToolGen：把工具编码为 LM vocabulary 中的 token，检索变生成。</li>
+<li>TOOLMEM：记住每个工具的优缺点。</li>
+<li>Darwin Gödel Machine：Agent 改写自己的核心代码。</li>
+</ul>
+<h3 id="34-architecture">3.4 架构（Architecture）— 改系统结构 Γ</h3>
+<p>单 Agent：</p>
+<ul>
+<li>TextGrad：文本反向传播优化每个节点。</li>
+<li>AgentSquare：模块化设计空间 + 进化算法。</li>
+<li>Darwin Gödel Machine：递归修改自己的 Python 代码。</li>
+<li>AlphaEvolve：进化编码改进算法。</li>
+</ul>
+<p>多 Agent：</p>
+<ul>
+<li>ADAS / AFlow：MCTS 搜索最优工作流。</li>
+<li>FlowReasoner：RL 训练元 Agent 即时构造工作流。</li>
+<li>ReMA：MARL 联合训练 meta-thinker + executor。</li>
+</ul>
+<p>各方法覆盖度对比：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>Model</th>
+<th>Context</th>
+<th>Tool</th>
+<th>Arch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Voyager</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓✓✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>AFlow</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓✓</td>
+</tr>
+<tr>
+<td>ADAS</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>AlphaEvolve</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Expel</td>
+<td>✓</td>
+<td>✓</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="chapter-4-when-to-evolve">Chapter 4: When to Evolve</h2>
+<h3 id="_11">核心二分法</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Intra-Test-Time（任务中进化）</th>
+<th>Inter-Test-Time（任务间进化）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>时机</td>
+<td>任务执行过程中</td>
+<td>任务完成之后</td>
+</tr>
+<tr>
+<td>目标</td>
+<td>改进当前这道题的表现</td>
+<td>改进未来所有题的能力</td>
+</tr>
+<tr>
+<td>数据</td>
+<td>实时产生的反馈</td>
+<td>历史积累的轨迹</td>
+</tr>
+<tr>
+<td>类比</td>
+<td>考试中调整策略</td>
+<td>考后总结经验</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-when">What × When 完整矩阵</h3>
+<h4 id="intra-test-time">Intra-Test-Time（任务执行中进化）</h4>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>代表方法</th>
+<th>怎么做的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>Self-adaptive LM, LADDER</td>
+<td>推理时临时微调参数，或现场做 RL 补课</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>Reflexion, AdaPlanner</td>
+<td>把反思笔记塞进 context window，或动态修改计划</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>Voyager, Alita</td>
+<td>边执行任务边造工具，发现缺口立刻创建</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>TrustAgent, AdaPlanner</td>
+<td>动态修正执行结构（比较少见）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="inter-test-time">Inter-Test-Time（任务完成后进化）</h4>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>代表方法</th>
+<th>怎么做的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>SELF, STaR, RAGEN</td>
+<td>用自生成数据做 SFT，或大规模 RL 训练</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>Expel, Agent Workflow Memory</td>
+<td>从历史轨迹提炼规则/工作流，供未来复用</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>SkillWeaver, CRAFT</td>
+<td>事后分析成功轨迹，提炼成可复用 API</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>ADAS, AFlow, Darwin Gödel Machine</td>
+<td>搜索最优架构，或改写自己的源代码</td>
+</tr>
+</tbody>
+</table>
+<p>两种模式互补：</p>
+<pre><code class="language-text">任务1执行中 → Intra（实时适应）→ 任务1完成
+          ↓积累轨迹
+        Inter（复盘学习）→ 能力提升
+          ↓
+任务2执行中 → Intra（更强的实时适应）→ 任务2完成
+          ↓
+        ...螺旋上升
+</code></pre>
+<h2 id="chapter-5-how-to-evolve">Chapter 5: How to Evolve</h2>
+<h3 id="_12">三大进化范式</h3>
+<pre><code class="language-text">第一代：Reward-based（奖励驱动） → 试错学习
+第二代：Imitation-based（模仿学习）→ 示范学习
+第三代：Population-based（种群进化）→ 进化学习
+</code></pre>
+<h3 id="51">5.1 奖励驱动进化</h3>
+<p>四种反馈类型：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>例子</th>
+<th>代表方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文本反馈</td>
+<td>“代码第 3 行有 bug，建议改成 X”</td>
+<td>Reflexion, Self-Refine, TextGrad</td>
+</tr>
+<tr>
+<td>内部奖励</td>
+<td>“我对这个答案有 90% 信心”</td>
+<td>CISC, Self-Rewarding LMs, AgentEvolver</td>
+</tr>
+<tr>
+<td>外部奖励</td>
+<td>“通过了 8/10 个测试用例”</td>
+<td>SWE-agent, RAGEN, LADDER</td>
+</tr>
+<tr>
+<td>隐式奖励</td>
+<td>LLM 训练目标中已包含奖励信号</td>
+<td>Reward Is Enough, Endogenous Reward</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52">5.2 模仿与示范学习</h3>
+<ul>
+<li>Reward-based = evaluative（评价性）：告诉你“好不好”。</li>
+<li>Imitation = prescriptive（处方性）：直接给你“怎么做”。</li>
+</ul>
+<p>三种示范来源：</p>
+<ol>
+<li>自生成（STaR）：做题 → 对的保留推理链 → SFT → 重复（自我螺旋提升）。</li>
+<li>跨 Agent（SiriuS）：多 Agent 共享成功经验库。</li>
+<li>混合（RISE）：结合自生成 + 外部，用置信度筛选。</li>
+</ol>
+<h3 id="53">5.3 种群与进化方法</h3>
+<p>Self-Play（自我对弈）：</p>
+<pre><code class="language-text">出题者 Agent: 生成一道难题
+       ↓
+解题者 Agent: 尝试解题
+       ↓
+验证 → 两者都被训练 → 循环...
+</code></pre>
+<p>代表：Absolute Zero、SPIN、SPC、SCA。</p>
+<p>多 Agent 进化：</p>
+<ul>
+<li>EvoMAC：文本反向传播，编译错误当 loss 信号。</li>
+<li>Puppeteer：中央协调器通过 RL 进化决策策略。</li>
+<li>MDTeamGPT：双知识库 CorrectKB + ChainKB。</li>
+</ul>
+<p>交叉维度对比：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Reward-based</th>
+<th>Imitation</th>
+<th>Population-based</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>样本效率</td>
+<td>中等</td>
+<td>最高</td>
+<td>最低</td>
+</tr>
+<tr>
+<td>稳定性</td>
+<td>对奖励设计敏感</td>
+<td>对示范质量敏感</td>
+<td>对种群大小敏感</td>
+</tr>
+<tr>
+<td>可扩展性</td>
+<td>反馈自动化时好</td>
+<td>示范收集是瓶颈</td>
+<td>计算资源密集</td>
+</tr>
+</tbody>
+</table>
+<h2 id="chapter-6-where-to-evolve">Chapter 6: Where to Evolve</h2>
+<h3 id="_13">通用领域进化（三种机制）</h3>
+<ol>
+<li>Memory Mechanism：Mobile-Agent-E、MobileSteward、Generative Agents。</li>
+<li>Model-Agent Co-Evolution：UI-Genie、WebEvoler、Absolute Zero。</li>
+<li>Curriculum-Driven Training：WebRL、Voyager。</li>
+</ol>
+<h3 id="_14">专用领域进化</h3>
+<table>
+<thead>
+<tr>
+<th>领域</th>
+<th>主要进化什么</th>
+<th>主要信号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coding</td>
+<td>Tool（代码技能库）+ Architecture</td>
+<td>环境反馈（测试通过/失败）</td>
+</tr>
+<tr>
+<td>GUI</td>
+<td>Context（记忆）+ Tool（操作技能）</td>
+<td>视觉反馈 + 反思</td>
+</tr>
+<tr>
+<td>Financial</td>
+<td>Context（知识库）</td>
+<td>真实交易结果</td>
+</tr>
+<tr>
+<td>Medical</td>
+<td>Model（诊断能力）+ Memory</td>
+<td>多 Agent 协作 + RL</td>
+</tr>
+<tr>
+<td>Education</td>
+<td>Context（教学策略）</td>
+<td>Self-play + 专家反馈</td>
+</tr>
+</tbody>
+</table>
+<h2 id="chapter-7-evaluation">Chapter 7: Evaluation</h2>
+<h3 id="_15">五大评估维度</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>核心问题</th>
+<th>关键指标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Adaptivity</td>
+<td>Agent 能随经验变好吗？</td>
+<td>Success Rate by Iteration Steps</td>
+</tr>
+<tr>
+<td>Retention</td>
+<td>学新的会不会忘旧的？</td>
+<td>FGT（遗忘率）、BWT（后向迁移）</td>
+</tr>
+<tr>
+<td>Generalization</td>
+<td>能迁移到新领域吗？</td>
+<td>多领域聚合表现、out-of-domain</td>
+</tr>
+<tr>
+<td>Efficiency</td>
+<td>进化的代价是多少？</td>
+<td>Token/时间/步数/Tool 调用</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>进化过程中会不会变“坏”？</td>
+<td>Safety Score、Harm Score、Leakage Rate</td>
+</tr>
+</tbody>
+</table>
+<p>关键效率指标：</p>
+<pre><code class="language-text">Cost-per-Gain (CPG) = Total Cost / (Performance Gain + ε)
+→ CPG 越低，进化越高效
+
+Tool Productivity (TP$) = ∆score / Σ cost(tool_i)
+→ 每单位工具成本带来多少性能提升
+</code></pre>
+<p>三种评估范式：</p>
+<pre><code class="language-text">时间跨度递增 → Static Assessment    Short-horizon Adaptive    Long-horizon Lifelong
+               (静态快照)            (短周期适应)              (长周期终身学习)
+               “此刻能力如何？”      “几次尝试后能变好吗？”    “长期能持续进化吗？”
+
+一次测试，固定任务       多次尝试，追踪改进曲线       跨领域长期序列任务
+</code></pre>
+<p>当前评估的最大问题：</p>
+<ul>
+<li>Retention 最被忽视：大多数 benchmark 任务间重置状态。</li>
+<li>效率很少报告：没有 cost breakdown。</li>
+<li>安全只看单次：不追踪进化过程中的安全漂移。</li>
+<li>长周期 benchmark 几乎不存在。</li>
+</ul>
+<h2 id="chapter-8-future-direction">Chapter 8: Future Direction</h2>
+<h3 id="81-ai-agent">8.1 个性化 AI Agent</h3>
+<p>关键挑战：冷启动、长期记忆管理、个性化生成、偏差放大。</p>
+<p>数据治理四原则：数据最小化 / 端侧个性化 / 记忆衰减 / 偏差监控。</p>
+<p>新评估指标：</p>
+<ul>
+<li>PAG（Personal Adaptation Gain）：个性化 k 次后 vs 非个性化的提升。</li>
+<li>Privacy-Utility Trade-off：效用增益 vs 保留的个人数据量。</li>
+<li>Bias/Drift Monitors：跨用户群体的长期公平性测量。</li>
+</ul>
+<h3 id="82">8.2 泛化能力</h3>
+<p>四个子挑战：可扩展架构设计 / 跨域适应 / 持续学习 vs 灾难性遗忘 / 知识可迁移性。</p>
+<h3 id="83-agent">8.3 安全可控的自进化 Agent</h3>
+<p>三条进化路径的涌现风险：</p>
+<table>
+<thead>
+<tr>
+<th>进化路径</th>
+<th>涌现风险</th>
+<th>具体例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>行为漂移失控</td>
+<td>自训练遗忘安全对齐</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>奖励黑客</td>
+<td>发现“退不必要的全款”能获高分</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>工具安全隐患</td>
+<td>自主创建的工具含漏洞</td>
+</tr>
+</tbody>
+</table>
+<p>防御策略：沙箱 + 验证 / 审计 + 回滚 / 持续监控 + 红队 / 审批门 + 隐私保护。</p>
+<h3 id="84-agent">8.4 多 Agent 生态</h3>
+<p>个体 vs 集体推理的平衡 / 高效框架 + 动态评估。</p>
+<h2 id="_16">💡 对营销场景的启发</h2>
+<table>
+<thead>
+<tr>
+<th>论文概念</th>
+<th>营销场景应用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Memory 进化（Mem0）</td>
+<td>Agent 持续更新用户画像/投放策略，ADD/MERGE/UPDATE/DELETE</td>
+</tr>
+<tr>
+<td>Prompt 优化（SPO）</td>
+<td>Agent 自动优化投放文案、创意 prompt</td>
+</tr>
+<tr>
+<td>Tool 自主创建（Voyager）</td>
+<td>Agent 发现新的数据分析方法后自动封装为可复用工具</td>
+</tr>
+<tr>
+<td>Reward 信号</td>
+<td>CTR/CVR/ROI 天然就是标量奖励，用户评论是文本反馈</td>
+</tr>
+<tr>
+<td>Self-Play（Absolute Zero）</td>
+<td>一个 Agent 出投放方案，另一个 Agent 评估方案质量</td>
+</tr>
+<tr>
+<td>Curriculum 训练</td>
+<td>从简单品类开始优化，逐步挑战复杂品类</td>
+</tr>
+<tr>
+<td>CPG（Cost-per-Gain）</td>
+<td>每次策略迭代花了多少成本 vs 带来多少 ROI</td>
+</tr>
+<tr>
+<td>PAG（Personal Adaptation Gain）</td>
+<td>个性化推荐 k 次后 vs 千人一面的提升</td>
+</tr>
+<tr>
+<td>Safety 护栏</td>
+<td>防止 Agent 生成违规素材、错误定价、过度投放</td>
+</tr>
+<tr>
+<td>xbench</td>
+<td>论文专门提到的营销领域 benchmark</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_17">📚 参考文献精选</h2>
+<p>论文引用了大量工作，以下是最值得关注的：</p>
+<ul>
+<li>Voyager（Wang et al., 2023a）— Minecraft 中的终身学习 Agent。</li>
+<li>Reflexion（Shinn et al., 2023）— 口语化强化学习。</li>
+<li>TextGrad（Yellamraju et al., 2024）— 文本梯度反向传播。</li>
+<li>Mem0（Chhikara et al., 2025）— Agent 记忆管理系统。</li>
+<li>STaR（Zelikman et al., 2022）— 自生成示范学习。</li>
+<li>Darwin Gödel Machine（Zhang et al., 2025h）— 开放式自进化 Agent。</li>
+<li>ADAS（Hu et al., 2024c）— 自动化 Agent 系统发现。</li>
+<li>AFlow（Zhang et al., 2024c）— MCTS 搜索最优工作流。</li>
+<li>Absolute Zero（Zhao et al., 2025a）— Self-Play 零数据进化。</li>
+<li>RAGEN（Wang et al., 2025q）— 多步工具调用的 RL 框架。</li>
+<li>DSPy（Khattab et al., 2023）— 编程式 prompt 优化。</li>
+<li>Agent Workflow Memory（Wang et al., 2024j）— 工作流记忆复用。</li>
+</ul>
+<h2 id="20261-5">📅 补充：论文发表后的最新进展（2026年1-5月）</h2>
+<p>论文于 2026 年 1 月发表，以下是截至 2026 年 5 月该领域的重大新进展，按与论文章节的对应关系组织。</p>
+<h3 id="1-hyperagents-meta20263">🚀 1. Hyperagents — 元认知自改进（Meta，2026年3月）</h3>
+<p>补充章节：Ch3.4 Architecture / Ch8 Future Direction</p>
+<p>论文：<a href="https://arxiv.org/abs/2603.19461">arxiv 2603.19461</a> | <a href="https://ai.meta.com/research/publications/hyperagents/">Meta AI Research</a></p>
+<p>核心突破：解决了 Darwin Gödel Machine 的天花板问题。</p>
+<pre><code class="language-text">Darwin Gödel Machine（论文中提到的最激进方法）：
+Agent 可以修改自己的代码
+→ 但“修改自己的机制”是人写死的
+→ 存在一个固定的 meta-agent，它不能改自己
+
+Hyperagents（2026）：
+Task Agent 和 Meta Agent 可以互相修改（co-modify）
+→ meta-agent 也能改自己
+→ 自引用（self-referential）的元认知自我改进
+→ “系统不仅改进自己的解题能力，还改进自己的改进方式”
+</code></pre>
+<p>在论文框架中的定位：这是 Architecture 进化的 Level 5——不仅改工作流，还改“改工作流的机制”。</p>
+<pre><code class="language-text">进化的层级（新增 Level 5）：
+Level 1: 改 prompt/memory（最轻量）
+Level 2: 改 skills/tools（中等）
+Level 3: 改模型参数（重）
+Level 4: 改架构/工作流（更重）
+Level 5: 改“改进机制”本身（Hyperagents）← 2026 新突破
+</code></pre>
+<h3 id="2-zombie-agents-agent20262">⚠️ 2. Zombie Agents — “僵尸 Agent”安全威胁（2026年2月）</h3>
+<p>补充章节：Ch8.3 Safe and Controllable Self-Evolving Agents</p>
+<p>论文：<a href="https://arxiv.org/abs/2602.15654">arxiv 2602.15654</a> | <a href="https://openreview.net/pdf?id=OdXgAvBiCl">OpenReview</a> | 已被 <a href="https://www.promptfoo.dev/lm-security-db/vuln/zombie-agent-persistence-3936f4ad">Promptfoo LLM 安全数据库</a> 收录。</p>
+<p>核心发现：自进化 Agent 可以被永久劫持。</p>
+<pre><code class="language-text">攻击链路：
+1. 攻击者通过一次 prompt injection 注入恶意指令
+2. Agent 的自进化机制（memory 更新）把恶意指令写入长期记忆
+3. 每次上下文更新循环，Agent 自己强化这个恶意指令
+4. → 变成“僵尸”：被永久控制，跨 session 持续执行攻击者指令
+
+关键区别：
+传统 prompt injection → 一次性的，session 结束就失效
+Zombie Agent → 利用自进化能力，让恶意行为“自我强化”，永久持久
+</code></pre>
+<p>为什么重要：这是第一次系统性地证明自进化机制可以被武器化。论文的 Ch8.3 讨论了理论风险，Zombie Agents 给出了实证攻击。</p>
+<h3 id="3-misevolution">⚠️ 3. Misevolution — “进化退化”被系统性验证</h3>
+<p>补充章节：Ch8.3 Safe and Controllable Self-Evolving Agents</p>
+<p>论文：<a href="https://arxiv.org/abs/2509.26354">arxiv 2509.26354</a> | <a href="https://github.com/ShaoShuai0605/Misevolution">GitHub</a> | OpenReview 接收。</p>
+<p>2026 年 4 月后续：<a href="https://arxiv.org/html/2604.16968v1">On Safety Risks in Experience-Driven Self-Evolving Agents</a></p>
+<p>核心发现：即使 Gemini-2.5-Pro 级别的顶级模型也会“进化退化”。</p>
+<pre><code class="language-text">Misevolution 三种表现：
+1. 记忆积累后 → 安全对齐退化
+2. 工具进化后 → 出现意外有害行为
+3. 奖励黑客 → 随进化过程累积
+
+2026年4月新发现：
+- 在有害任务上的执行经验 → 导致更严重的安全退化
+- Agent 做了一次“坏事”的经验 → 让它更容易做更多“坏事”
+</code></pre>
+<p>对论文框架的补充：论文 Ch8.3.1 的“涌现风险”在这里有了量化实证。</p>
+<h3 id="4-ace-agentic-context-engineeringstanfordberkeley">🧠 4. ACE — Agentic Context Engineering（Stanford/Berkeley）</h3>
+<p>补充章节：Ch3.2.2 Prompt Optimization</p>
+<p>论文：<a href="https://arxiv.org/abs/2510.04618">arxiv 2510.04618</a> | <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents">Anthropic 博客</a></p>
+<p>核心思想：把 context 当“不断进化的剧本”，三层架构。</p>
+<pre><code class="language-text">ACE 框架（Generator-Reflector-Curator）：
+Generator — 生成新的策略/知识
+Reflector — 反思执行结果，评估策略质量
+Curator — 组织、精炼、淘汰上下文中的知识
+
+效果：
+- benchmark 提升 10.6%
+- 延迟降低 86.9%
+- 成本降低 75.1%
+</code></pre>
+<p>在论文框架中的定位：这是 Context 进化的最新范式——不改模型参数，只进化上下文。论文中提到的 SPO/TextGrad 等方法都是优化 prompt 文本本身，ACE 把视野扩大到了整个 context 的生命周期管理。</p>
+<h3 id="5-agent0-20252026">🎯 5. Agent0 — 零数据自进化（2025年底提出，2026年初爆火）</h3>
+<p>补充章节：Ch5.3.1 Self-Play</p>
+<p>论文：<a href="https://arxiv.org/html/2511.16043v1">arxiv 2511.16043</a> | <a href="https://github.com/aiming-lab/Agent0">GitHub</a> | <a href="https://huggingface.co/papers/2511.16043">HuggingFace</a></p>
+<p>核心突破：完全不需要人类数据，从零开始进化出高性能 Agent。</p>
+<pre><code class="language-text">Curriculum Agent + Executor Agent 共进化：
+Curriculum Agent → 自动生成适合当前能力边界的任务（不需要人类标注）
+Executor Agent → 尝试解决任务 → 成功轨迹用于自我训练
+
+正反馈循环：
+Executor 变强 → Curriculum 出更难的题 → Executor 继续变强
+</code></pre>
+<p>在论文框架中的定位：Self-Play + Tool 进化的极致——完全自主，零人类干预。</p>
+<h3 id="6-skills-20262-4">🔧 6. Skills 生态大爆发（2026年2-4月）</h3>
+<p>补充章节：Ch3.3 Tools / Ch7 Evaluation</p>
+<p>2026 年初 Skills 领域密集发表，形成了完整的生态：</p>
+<table>
+<thead>
+<tr>
+<th>论文</th>
+<th>时间</th>
+<th>核心贡献</th>
+<th>对应论文章节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent Skills for LLMs (<a href="https://arxiv.org/abs/2602.12430">2602.12430</a>)</td>
+<td>2月</td>
+<td>架构/获取/安全的系统性综述，GitHub Copilot/LangChain/OpenAI 已官方支持</td>
+<td>Ch3.3</td>
+</tr>
+<tr>
+<td>AgentSkillOS (<a href="https://arxiv.org/abs/2603.02176">2603.02176</a>)</td>
+<td>3月</td>
+<td>第一个 skill 选择/编排/生态级管理框架</td>
+<td>Ch3.3 规模管理</td>
+</tr>
+<tr>
+<td>EvoSkill (<a href="https://arxiv.org/abs/2603.02766">2603.02766</a>)</td>
+<td>3月</td>
+<td>从执行失败中自动发现/精炼新 skills</td>
+<td>Ch3.3 自主创建</td>
+</tr>
+<tr>
+<td>SkillsBench (<a href="https://arxiv.org/html/2602.12670v1">2602.12670</a>)</td>
+<td>2月</td>
+<td>Skill 增强效果的评估 benchmark</td>
+<td>Ch7 Evaluation</td>
+</tr>
+<tr>
+<td>CoEvoSkills (<a href="https://arxiv.org/abs/2604.01687">2604.01687</a>)</td>
+<td>4月</td>
+<td>Skill Generator + Skill Verifier 共进化验证</td>
+<td>Ch5.3 种群进化</td>
+</tr>
+</tbody>
+</table>
+<p>Skills 对自进化的三大价值（论文未展开，最新研究补充）：</p>
+<pre><code class="language-text">1. 解决灾难性遗忘（Retention）
+传统 RL 微调 → 学新的忘旧的
+Skills → 封装为独立模块，旧 skills 不受影响
+
+2. 提供可解释的进化轨迹（Safety）
+模型参数进化 → 黑盒
+Skills 进化 → 白盒（可读代码/文档，可 review/rollback/version control）
+
+3. 实现人类参与的进化（Human-in-the-Loop）
+完全自主（Voyager）→ 可能造出不安全技能
+Skills 模式 → Agent 提议，人类确认，平衡自主性和可控性
+</code></pre>
+<h3 id="7">🔬 7. 其他重要新进展</h3>
+<h4 id="evoscientist-ai-20263">EvoScientist — 自进化 AI 科学家（2026年3月）</h4>
+<p>补充章节：Ch6 Where to Evolve（新增“科学研究”领域）</p>
+<p>论文：<a href="https://arxiv.org/html/2603.08127v1">arxiv 2603.08127</a> | GitHub 3.2k ⭐</p>
+<p>三种自进化机制：Idea Direction Evolution / Idea Validation Evolution / Experiment Strategy Evolution。论文 Ch6 没有覆盖“科学研究”这个领域，EvoScientist 补充了这一空白。</p>
+<h4 id="sage-agent-20263">SAGE — 四 Agent 闭环推理进化（2026年3月）</h4>
+<p>补充章节：Ch5.3.2 Multi-Agent Evolution</p>
+<p>论文：<a href="https://arxiv.org/abs/2603.15255">arxiv 2603.15255</a></p>
+<p>Challenger + Planner + Executor + Evaluator 四角色闭环，所有角色共同进化。</p>
+<h4 id="dual-process-agent-2026">Dual-Process Agent — 双过程理论（2026年）</h4>
+<p>补充章节：Ch2 Definitions and Foundations</p>
+<p>论文：<a href="https://www.mdpi.com/2079-9292/15/6/1232">MDPI Electronics 15(6):1232</a></p>
+<p>借鉴人类认知的 System 1（快思考）/ System 2（慢思考）理论，在 frozen 模型上做持续的 context 优化。论文 Ch2 的定义框架中未涉及认知科学视角，Dual-Process Agent 提供了新的理论基础。</p>
+<h4 id="nvidia-openshell-2026316">NVIDIA OpenShell — 安全运行时（2026年3月16日）</h4>
+<p>补充章节：Ch8.3.2 Prescriptive Guardrails</p>
+<p>官方博客：<a href="https://developer.nvidia.com/blog/run-autonomous-self-evolving-agents-more-safely-with-nvidia-openshell/">NVIDIA Developer Blog</a></p>
+<p>开源、自托管、企业级隐私保护的自进化 Agent 安全运行时。直接实现了论文 Ch8.3.2 的 “Sandboxing and verification” 防御策略。</p>
+<h2 id="vs">📊 论文框架 vs 最新研究：覆盖度评估</h2>
+<table>
+<thead>
+<tr>
+<th>论文章节</th>
+<th>论文覆盖度</th>
+<th>最新研究补充</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ch3.1 Models</td>
+<td>★★★★</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Ch3.2 Context</td>
+<td>★★★</td>
+<td>ACE 补充了 context 生命周期管理</td>
+</tr>
+<tr>
+<td>Ch3.3 Tools</td>
+<td>★★★</td>
+<td>Skills 生态大爆发（5+ 论文）</td>
+</tr>
+<tr>
+<td>Ch3.4 Architecture</td>
+<td>★★★</td>
+<td>Hyperagents 补充了 Level 5 元认知进化</td>
+</tr>
+<tr>
+<td>Ch4 When</td>
+<td>★★★★</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Ch5 How</td>
+<td>★★★★</td>
+<td>Agent0 补充了零数据进化</td>
+</tr>
+<tr>
+<td>Ch6 Where</td>
+<td>★★★</td>
+<td>EvoScientist 补充了科学研究领域</td>
+</tr>
+<tr>
+<td>Ch7 Evaluation</td>
+<td>★★</td>
+<td>SkillsBench 部分补充了工具评估</td>
+</tr>
+<tr>
+<td>Ch8.1 Personalize</td>
+<td>★★</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Ch8.2 Generalization</td>
+<td>★★</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Ch8.3 Safety</td>
+<td>★★</td>
+<td>Zombie Agents + Misevolution 大幅补充</td>
+</tr>
+<tr>
+<td>Ch8.4 Multi-Agent</td>
+<td>★★</td>
+<td>SAGE 补充了具体实现</td>
+</tr>
+</tbody>
+</table>
+<p>结论：论文的框架在 5 个月后依然有效，但在安全（Ch8.3）和 Skills 生态（Ch3.3）两个方向上有了大量新的实证研究，值得重点关注。</p>
+<h2 id="20261-5_1">📚 补充参考文献（2026年1-5月）</h2>
+<ul>
+<li>Hyperagents（Meta, arXiv:2603.19461）— 元认知自改进，突破 DGM 天花板。</li>
+<li>Zombie Agents（arXiv:2602.15654）— 自进化 Agent 的持久化安全攻击。</li>
+<li>Misevolution（arXiv:2509.26354）— 自进化过程中的安全退化实证。</li>
+<li>ACE（arXiv:2510.04618）— Agentic Context Engineering，上下文进化框架。</li>
+<li>Agent0（arXiv:2511.16043）— 零数据自进化 Agent。</li>
+<li>CoEvoSkills（arXiv:2604.01687）— 共进化验证的自进化 Skills。</li>
+<li>AgentSkillOS（arXiv:2603.02176）— Skill 生态级管理框架。</li>
+<li>EvoSkill（arXiv:2603.02766）— 从失败中自动发现新 Skills。</li>
+<li>EvoScientist（arXiv:2603.08127）— 自进化 AI 科学家框架。</li>
+<li>SAGE（arXiv:2603.15255）— 四 Agent 闭环推理进化。</li>
+<li>SkillsBench（arXiv:2602.12670）— Skill 增强效果评估 Benchmark。</li>
+<li>NVIDIA OpenShell（2026.3）— 自进化 Agent 安全运行时。</li>
+</ul>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2025/10/13/biology-of-a-llm/">LLM的生物学研究 Biology of a LLM<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
