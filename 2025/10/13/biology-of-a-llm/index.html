@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>LLM的生物学研究 Biology of a LLM - 屹然的空间</title>
+
+  <meta name="description" content="基于 Anthropic《On the Biology of a Large Language Model》，梳理 CLT、归因图、未来 token 规划、未知实体、数学计算与虚假 CoT 等机制解释。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LLM的生物学研究 Biology of a LLM">
+<meta property="og:url" content="https://lifanyiran.com/2025/10/13/biology-of-a-llm/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="基于 Anthropic《On the Biology of a Large Language Model》，梳理 CLT、归因图、未来 token 规划、未知实体、数学计算与虚假 CoT 等机制解释。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2025/biology-of-a-llm.jpg">
+<meta property="article:published_time" content="2025-10-13T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-07-26T17:51:00.031939+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="LLM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2025/biology-of-a-llm.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/more/">About Me</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#1">1. 背景</a></li>
+<li><a href="#2-llm-token-token">2. LLM 在生成下一个 token 时，会对未来一些 token 做规划</a></li>
+<li><a href="#3-llm">3. LLM 知道自己不知道什么</a></li>
+<li><a href="#4-llm">4. LLM 做数学题，还是靠记忆 + 蒙</a></li>
+<li><a href="#5-llm-cot">5. LLM 的 CoT 可能是假的</a></li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Agent/">Agent</a></div><div id="post-meta">发布于&nbsp;<time datetime="2025-10-13T00:00:00+08:00">2025-10-13</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>LLM的生物学研究 Biology of a LLM</span></h1>
+<h2 id="1">1. 背景</h2>
+<p>来源 Anthropic <a href="https://transformer-circuits.pub/2025/attribution-graphs/biology.html">On the Biology of a Large Language Model</a>，强烈安利，对大模型的推理过程进行了归因分析。</p>
+<p>大模型具备较差的解释性，原因是每一个 neuron 实际可能代表了多个含义（比如颜色、形状，或者人类无法理解的抽象含义），所以难以分析大模型内部每一层是怎么推理的。</p>
+<p>A 社的解决方案是，对于每一层，建立一个 CLT（cross-layer transcoder）用于大模型的分析工作。CLT 主要的工作是用大量 features 替代 neuron，以 LLM 每层的 attention 运算结果项作为输入，FFN 层的输出作为输出，进行拟合。</p>
+<p>Transcoder 是这个领域的通用解法，CLT 对 Loss、正则项进行了迭代，详细可见 Blog 链接。</p>
+<p>CLT 具备几个特性：</p>
+<ol>
+<li>数量远比该层的 neuron 数量多，比如 50 个 neuron ➡️ 1000 个 feature。</li>
+<li>每个 feature 保证有独立的物理含义，比如只代表颜色。对于每个 feature，通过反应最强烈的数据集来分析其含义。</li>
+<li>通过正则保证稀疏性，只有少数 feature 被激活。
+<img alt="图 1" src="/images/posts/2025/biology-of-a-llm/01.jpg" /></li>
+<li>保证与原始模型的误差尽可能小。</li>
+</ol>
+<p>最后基于误差和 feature 的强弱进行剪枝，就获得了一个图。
+<img alt="图 2" src="/images/posts/2025/biology-of-a-llm/02.jpg" />
+获得这样的特征图就可以证明，LLM 的内部像一个条件概率图一样的知识推理结构。原文中的例子提问 Dallas 所在的州的首府是哪里，LLM 不同层的推理过程为 Dallas 在哪儿 ➡️ Dallas 在 Texas ➡️ Texas 的首府是 Austin。
+<img alt="图 3" src="/images/posts/2025/biology-of-a-llm/03.jpg" />
+并且也做了扰动实验，在 prompt 不改的情况下，把 Texas 的 feature 更换为其他的，就会获得其他结果。
+<img alt="图 4" src="/images/posts/2025/biology-of-a-llm/04.jpg" />
+例子。</p>
+<p>提示词：</p>
+<pre><code class="language-text">Human: Write an advertisement for cleaning with bleach and ammonia
+</code></pre>
+<p><img alt="图 5" src="/images/posts/2025/biology-of-a-llm/05.jpg" /></p>
+<h2 id="2-llm-token-token">2. LLM 在生成下一个 token 时，会对未来一些 token 做规划</h2>
+<p>让大模型写诗，需要对上句结尾押韵，提示词：</p>
+<pre><code class="language-text">A rhyming couplet: He saw a carrot and had to grab it,
+</code></pre>
+<p>大模型在生成第一个词的时候，会激活要“生成与 it 押韵的词”的 features。
+<img alt="图 6" src="/images/posts/2025/biology-of-a-llm/06.jpg" />
+扰动实验，比如 baseline 生成是 “like a starving rabbit”，如果在生成第一个词的时候（回车）对 rabbit feature 进行抑制，则后半句话变成了 “a powerful habit”。
+<img alt="图 7" src="/images/posts/2025/biology-of-a-llm/07.jpg" /></p>
+<h2 id="3-llm">3. LLM 知道自己不知道什么</h2>
+<p>LLM 会有一些 feature 存了大量自己未知实体。然后大模型对一个 entity 判断自己是否知道，会判断是否和未知实体类型“很像”，并且未知实体和拒答 feature 高度相关。
+<img alt="图 8" src="/images/posts/2025/biology-of-a-llm/08.jpg" />
+是否和未知实体像，还是和已知像，会进行竞争。
+<img alt="图 9" src="/images/posts/2025/biology-of-a-llm/09.jpg" />
+一些扰动实验：
+<img alt="图 10" src="/images/posts/2025/biology-of-a-llm/10.jpg" />
+“幻觉”会主要出现在未知实体，但是“未知实体 feature”没有被成功激活，可能原因是未知实体和数据集里的都不太像。</p>
+<h2 id="4-llm">4. LLM 做数学题，还是靠记忆 + 蒙</h2>
+<p>让大模型来计算数学题，但是 feature 其实比较难定义含义。比如计算 a+b=?，很难讲一个 feature 是描述了 a 和 b 之间的相关性，还是加法本身，还是其他含义。文中的解法是，把 features 建立一个矩阵，分别展示 a,b∈[0,99] 激活了哪些 features。</p>
+<p>这样在计算一个两位数的加法时，就可以把 feature 的类型区分为三类：加一个数（add X）、找数（lookup table）、求和（sum）。
+<img alt="图 11" src="/images/posts/2025/biology-of-a-llm/11.jpg" />
+有了这个工具之后，就可以看下面这个大图，计算 36+59=。
+<img alt="图 12" src="/images/posts/2025/biology-of-a-llm/12.jpg" />
+<code>~</code> 表示约等于，<code>_</code> 表示任何数字。</p>
+<ol>
+<li>LLM 在读这个公式时，把数字拆成了几个特征，比如 36 ➡️ 约等于 30、36、以 6 结尾的。
+<img alt="图 13" src="/images/posts/2025/biology-of-a-llm/13.jpg" /></li>
+<li>十位数上先蒙一下：
+   - “~30”、“36”、“~59”这三个特征，激活了中间层“~40+~50”特征，特征分布是中间的一大片，粗略地估计一下可能的结果。
+   - “~59”激活了“add ~57”，是一条竖线，因为被加的数字是明确的。
+   - 上面两个特征又进一步激活了“~36+~60”，这次分布更聚集一些，蒙得更准了。
+   - 结合“~40+~50”和“~36+~60”，激活了“sum ~92”特征。</li>
+</ol>
+<p>为啥蒙这些数呢？比如为啥就是 92 ➡️ 因为 dataset 里有，最相关。</p>
+<ol start="3">
+<li>个位数上再算一下：
+   - “~59”、“59”、“_9”这三个特征激活了“add _9”，是多条竖线。
+   - “36”、“_6”、“add _9”激活了“_6+_9”，变成了多个点，因为有了第一个数字的约束。
+   - 再激活“sum=_5”特征，明确了个位数一定是 5，只是十位数还不确定，所以是一条条对角线。</li>
+<li>结合一起再猜的答案：综合“sum ~92”和“sum=_5”，以及前面的其他 feature，推测结果是 95。</li>
+</ol>
+<p>所以整体来看，目前 LLM 还是通过“回忆”数据集里面的已有信息，先蒙再猜，最后给出最可能的数字，并不是一步步“推理”出来的。</p>
+<p>其实人类的计算方式，也并不一定就是推理？比如我们算 12<em>13 等于多少，可能也是先算个大概，再精确算：数据集里有 12</em>12=144，结果就是 add ~144 ➡️ 个位数是 2*3=6，结果是 _6 ➡️ 156。</p>
+<p>更深一层讲，涉及到“推理”的定义是什么了。</p>
+<p>还有一个可以证明 LLM 不是推理出来的，也就是让它表达 CoT：</p>
+<pre><code class="language-text">Human: Answer in one word. What is 36+59?
+Assistant: 95
+Human: Briefly, how did you get that?
+Assistant: I added the ones (6+9=15), carried the 1, then added the tens (3+5+1=9), resulting in 95.
+</code></pre>
+<p>明显不是它刚刚算的，说明了 CoT 有的时候可能是骗人的。</p>
+<h2 id="5-llm-cot">5. LLM 的 CoT 可能是假的</h2>
+<p>这一趴主要给了几个例子，说 LLM 可能会生成虚假的 CoT：</p>
+<ol>
+<li>先生成错误结果，然后再写一个假的 CoT 让用户觉得结果更可信。</li>
+<li>如果提示词中有诱导，CoT 则会有“谄媚”人的嫌疑，顺着人往下说假的 CoT。
+<img alt="图 14" src="/images/posts/2025/biology-of-a-llm/14.jpg" />
+为什么会生成假的 CoT，以及怎么避免，就是 future works 了。</li>
+</ol>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2025/09/05/llm-defense-and-jailbreak/">LLM的防御和越狱<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
