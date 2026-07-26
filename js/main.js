@@ -306,3 +306,55 @@ if (stellar.plugins.heti) {
     stellar.plugins.heti.enable = false;
   });
 }
+
+// Runtime fallback for newly generated article pages. The publishing workflow
+// also writes the same block into HTML so comments work without JavaScript.
+function ensureArticleComments() {
+  const articlePath = /^\/\d{4}\/\d{2}\/\d{2}\/[^/]+\/?$/;
+  if (!articlePath.test(window.location.pathname) || document.getElementById('comments')) {
+    return;
+  }
+
+  const article = document.querySelector('article.content.md.post');
+  if (!article) {
+    return;
+  }
+
+  const comments = document.createElement('div');
+  comments.className = 'related-wrap md reveal';
+  comments.id = 'comments';
+  comments.innerHTML = [
+    "<div class='cmt-title cap theme'><p>留言</p></div>",
+    "<div class='cmt-body giscus-comments'><div class='giscus'></div></div>",
+  ].join('');
+
+  const script = document.createElement('script');
+  const attributes = {
+    src: 'https://giscus.app/client.js',
+    'data-repo': 'lifanyiran/lifanyiran.github.io',
+    'data-repo-id': 'MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU=',
+    'data-category': 'Announcements',
+    'data-category-id': 'DIC_kwDOF0Lnkc4DB_WB',
+    'data-mapping': 'pathname',
+    'data-strict': '1',
+    'data-reactions-enabled': '1',
+    'data-emit-metadata': '0',
+    'data-input-position': 'top',
+    'data-theme': 'dark',
+    'data-lang': 'zh-CN',
+    'data-loading': 'lazy',
+    crossorigin: 'anonymous',
+  };
+  Object.entries(attributes).forEach(([name, value]) => script.setAttribute(name, value));
+  script.async = true;
+  comments.querySelector('.giscus-comments').appendChild(script);
+
+  const readNext = document.getElementById('read-next');
+  article.parentNode.insertBefore(comments, readNext || article.nextSibling);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', ensureArticleComments, { once: true });
+} else {
+  ensureArticleComments();
+}
