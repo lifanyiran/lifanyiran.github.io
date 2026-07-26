@@ -10,6 +10,7 @@
   <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
 
   <meta name="renderer" content="webkit">
   <meta name="force-rendering" content="webkit">
@@ -18,25 +19,20 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#f8f8f8">
-  <title>机器学习VIII - 异常检测(Anomaly Detection)与大数据的梯度下降 - 屹然的空间</title>
+  <title>留言板 - 屹然的空间</title>
 
   
 
   
-    <meta name="description" content="11. 异常检测(Anomaly Detection)我们需要基于原有的数据，来预测一个新的数据，是否是一个异常值（可以理解为离群值），从而应用在反欺诈，生产质检等等。 11.1 密度估计(Density Estimation)给定一个数据集$X$，估计所有特征的概率密度函数(PDF, Probability Density Function)，以正态分布为例，计算$\mu,\sigma$。然后计">
-<meta property="og:type" content="article">
-<meta property="og:title" content="机器学习VIII - 异常检测(Anomaly Detection)与大数据的梯度下降">
-<meta property="og:url" content="http://lifanyiran.com/2021/10/23/ml9_anormal/index.html">
+    <meta name="description" content="欢迎来到屹然的空间留言板。通过 GitHub 登录后，可以在这里留下想法、建议或问候。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="留言板">
+<meta property="og:url" content="https://lifanyiran.com/guestbook/">
 <meta property="og:site_name" content="屹然的空间">
-<meta property="og:description" content="11. 异常检测(Anomaly Detection)我们需要基于原有的数据，来预测一个新的数据，是否是一个异常值（可以理解为离群值），从而应用在反欺诈，生产质检等等。 11.1 密度估计(Density Estimation)给定一个数据集$X$，估计所有特征的概率密度函数(PDF, Probability Density Function)，以正态分布为例，计算$\mu,\sigma$。然后计">
+<meta property="og:description" content="欢迎来到屹然的空间留言板。通过 GitHub 登录后，可以在这里留下想法、建议或问候。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-10-23T09:48:00.000Z">
-<meta property="article:modified_time" content="2022-06-30T06:40:59.185Z">
 <meta property="article:author" content="lifanyiran">
-<meta property="article:tag" content="Notes">
-<meta property="article:tag" content="Data Science">
-<meta property="article:tag" content="Machine Learning">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
   
   
 
@@ -60,22 +56,23 @@
   
 
 
-
-
   <div class='l_body' id='start'>
-    <aside class='l_left' layout='post'>
+    <aside class='l_left' layout='page'>
     
 
 
 <header class="header">
 
 <div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
-<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/more/">更多</a></nav></header>
+<nav class="menu dis-select"><a class="nav-item" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item active" href="/guestbook/">留言板</a><a class="nav-item" href="/more/">更多</a></nav></header>
 
 <div class="widgets">
+<div class="widget-wrap" id="markdown"><div class="widget-header cap dis-select"><span class="name">Greetings</span></div><div class="widget-body fs14"><p>一起用离散的视角，观测连续的世界。</p>
+</div></div>
 
-<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E5%BC%82%E5%B8%B8%E6%A3%80%E6%B5%8B-Anomaly-Detection"><span class="toc-text">11. 异常检测(Anomaly Detection)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-1-%E5%AF%86%E5%BA%A6%E4%BC%B0%E8%AE%A1-Density-Estimation"><span class="toc-text">11.1 密度估计(Density Estimation)</span></a></li></ol></li></ol></div></div></div>
 
+
+<div class="widget-wrap" id="recent"><div class="widget-header cap dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><div class="more-item"><a class="title" href="/2021/03/14/ml3_nn/">机器学习III - 神经网络(Neural Networks)</a></div><div class="more-item"><a class="title" href="/2021/04/23/ml7_unsup/">机器学习VI - 无监督学习</a></div><div class="more-item"><a class="title" href="/2021/10/29/ml10_assemble/">机器学习VIII - 集成学习 (Ensemble Learning)</a></div><div class="more-item"><a class="title" href="/2021/10/23/ml9_anormal/">机器学习VIII - 异常检测(Anomaly Detection)与大数据的梯度下降</a></div><div class="more-item"><a class="title" href="/2021/10/20/ml8_recommend/">机器学习VII - 推荐系统(Recommender System)</a></div></div></div>
 
 </div>
 <footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
@@ -83,102 +80,43 @@
     </aside>
     <div class='l_main'>
       
+  
+
+<header class="header mobile-only">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+</header>
+
+
 
       
 
-<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Machine-Learning/">Machine Learning</a></div><div id="post-meta">发布于&nbsp;<time datetime="2021-10-23T09:48:00.000Z">2021-10-23</time></div></div>
+  
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/guestbook/">留言板</a></div></div>
 
-<article class='content md post'>
-<h1 class="article-title"><span>机器学习VIII - 异常检测(Anomaly Detection)与大数据的梯度下降</span></h1>
-<h2 id="11-异常检测-Anomaly-Detection"><a href="#11-异常检测-Anomaly-Detection" class="headerlink" title="11. 异常检测(Anomaly Detection)"></a>11. 异常检测(Anomaly Detection)</h2><p>我们需要基于原有的数据，来预测一个新的数据，是否是一个异常值（可以理解为离群值），从而应用在反欺诈，生产质检等等。</p>
-<h3 id="11-1-密度估计-Density-Estimation"><a href="#11-1-密度估计-Density-Estimation" class="headerlink" title="11.1 密度估计(Density Estimation)"></a>11.1 密度估计(Density Estimation)</h3><p>给定一个数据集$X$，估计所有特征的概率密度函数(PDF, Probability Density Function)，以正态分布为例，计算$\mu,\sigma$。然后计算出$p(x)$，其中</p>
-<script type="math/tex; mode=display">
-\begin{aligned}
-& p(x) = \prod_{j=1}^n p(x_j;u_j,\sigma^2_j) = \prod_{j=1}^n \frac{1}{\sqrt{2\pi}\sigma_j}exp(-\frac{(x_j-\mu_j)^2}{2\sigma_j^2})
-\\
-& 如果\ p(x) < \epsilon \ 则异常
-\end{aligned}
-$$ {asd1}
-例如一个二维数据集，其中$\mu_1=5, \sigma_1= 2, \mu_2 = 3, \sigma_2 = 1$
-
-![](D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220215142844961.png)
-
-如果$\epsilon = 0.02$</script><p>p(x_{test}^{(1)}) = 0.0426 &gt; \epsilon \ 非异常\\<br>p(x_{test}^{(1)}) = 0.0021 &lt; \epsilon \ 异常</p>
-<script type="math/tex; mode=display">
-
-### 11.2 应用
-
-一般将数据分为三组，而训练组中不放异常项，然后使用密度估计来进行判断异常。
-
-测量模型的性能可以使用混交矩阵，精度，召回率，F1等等。模型同样可以用来确定$\epsilon$。
-
-对比监督模型和异常检测：
-
-异常检测：
-
-- 极少的正样本，大量样本均为负样本
-- 正样本有各种各样的异常类型，模型很难学习；未来的正样本的异常原因是未曾发生的
-- 用于欺诈检测、制造业质检、数据中心监控等
-
-监督模型：
-
-- 正负样本均比较多
-- 正样本足够多，可以用来归纳总结正样本的类型
-- 用于垃圾邮件分类，天气预测，癌症预测等
-
-## 12. 大数据的梯度下降
-
-### 12.1 随机梯度下降(Stochastic Gradient Descent)
-
-以线性回归为例，
-
-- 普通的梯度下降，或者也叫做批量梯度下降(Batch Gradient Descent)
-
-  假设函数：</script><p>h(\theta) = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + … + \theta_n x_n</p>
-<script type="math/tex; mode=display">
-
-​        代价函数：</script><p>J_{train}(\theta) = \frac{1}{2m}\sum_{i=1}^m(h_{\theta}(x^{(i)})-y^{(i)})^2</p>
-<script type="math/tex; mode=display">
-​        梯度下降的算法如下：</script><p>\begin{aligned}&amp;重复直到收敛\ \{\\ &amp;\theta_j := \theta_j - \alpha \frac{1}{m}(h_\theta(x^{(i)}) - y^{(i)})*x_j^{(i)}\\ &amp;\}\end{aligned}</p>
-<script type="math/tex; mode=display">
-
-- 随机梯度下降
-
-  假设函数：</script><p>  \begin{aligned}<br>  cost(\theta, (x^{(i)}, y^{(i)})) &amp;= \frac{1}{2}(h_\theta(x^{(i)})-y^{(i)})^2 \\<br>  J_{train}(\theta) &amp;= \frac{1}{m}\sum^m_{i=1}cost(\theta, (x^{(i)}, y^{(i)}))<br>  \end{aligned}</p>
-<script type="math/tex; mode=display">
-  **随机排序数据集**，执行算法</script><p>  \begin{aligned}<br>  &amp;重复直到收敛\ \{\\<br>  &amp; \quad for\ \ i:=1,…,m\{ \\<br>  &amp; \quad \quad \theta_j := \theta_j-\alpha (h_\theta(x^{(i)}) - y^{(i)})*x_j^{(i)}\\<br>  &amp; \quad \} \\<br>  &amp;\}<br>  \end{aligned}</p>
-<script type="math/tex; mode=display">
-
-> 一般重复1-10次，如果数据量大1次即可
-  >
-  > 下图中红色为BGD，粉色为SGD
-
-![](D:\Users\fyrli\AppData\Roaming\Typora\typora-user-images\image-20220216100422485.png)
-
-### 12.2 小批量梯度下降 (Mini-Batch Gradient Descent)
-
-对比以上三个梯度下降算法，
-
-批量梯度下降BGD：每次遍历时，使用全部的$m$个样本
-
-随机梯度下降SGD：每次遍历时，使用1个样本
-
-小批量梯度下降MBGD：每次遍历时，使用一部分$b$个样本
-
-其中$b =$小批量量(Mini-Batch Size)，一般会选择10，大致介于2～100之间。
-
-完整算法：</script><p>\begin{aligned}<br>&amp;重复直到收敛\ \{\\<br>&amp; \quad for\ \ i:=1,11,21,…,m\{ \\<br>&amp; \quad \quad \theta_j := \theta_j-\alpha \frac{1}{10}\sum_{k=i}^{i+9}(h_\theta(x^{(k)}) - y^{(k)})*x_j^{(k)}\\<br>&amp; \quad \} \\<br>&amp;\}<br>\end{aligned}<br>$$</p>
-
-
-<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
-</div></section></div>
-
-</article>
-
-<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2021/10/20/ml8_recommend/">机器学习VII - 推荐系统(Recommender System)<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2021/10/29/ml10_assemble/">机器学习VIII - 集成学习 (Ensemble Learning)<span class="note">较新</span></a></section></div>
-
-
-
+  <article class='content md page'>
+  <h1 class="article-title"><span>留言板</span></h1>
+  <p>欢迎来到留言板。你可以通过 GitHub 登录，在这里留下想法、建议或问候。</p>
+  <p class="cap">留言将公开保存在 GitHub Discussions 中，请不要发布个人隐私或敏感信息。</p>
+  <div class="giscus"></div>
+  <script src="https://giscus.app/client.js"
+          data-repo="lifanyiran/lifanyiran.github.io"
+          data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+          data-category="Announcements"
+          data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+          data-mapping="specific"
+          data-term="留言板"
+          data-strict="1"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="top"
+          data-theme="dark"
+          data-lang="zh-CN"
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async>
+  </script>
+  </article>
 
 
 
