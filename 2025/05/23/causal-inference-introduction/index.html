@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>因果推断简述 - 屹然的空间</title>
+
+  <meta name="description" content="从因果推断思想、辛普森悖论、DAG、Estimand/Estimator/Estimate，到匹配、DID、合成控制、Uplift、DML 与 IV 等方法的简要梳理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="因果推断简述">
+<meta property="og:url" content="https://lifanyiran.com/2025/05/23/causal-inference-introduction/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="从因果推断思想、辛普森悖论、DAG、Estimand/Estimator/Estimate，到匹配、DID、合成控制、Uplift、DML 与 IV 等方法的简要梳理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2025/causal-inference-introduction.jpg">
+<meta property="article:published_time" content="2025-05-23T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-07-26T17:33:34.247544+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Causal Inference">
+<meta property="article:tag" content="Data Science">
+<meta property="article:tag" content="Notes">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2025/causal-inference-introduction.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#1">1. 因果推断思想</a><ul>
+<li><a href="#_1">什么是因果关系？</a></li>
+<li><a href="#_2">因果关系有什么用？</a></li>
+<li><a href="#_3">怎么衡量因果关系？</a><ul>
+<li><a href="#simpsons-paradox">辛普森悖论（Simpson's Paradox）</a></li>
+<li><a href="#dagdirected-acyclic-graphs">DAG（Directed Acyclic Graphs，有向无环图）——把假设可视化</a></li>
+<li><a href="#confounding-biascommon-causes">混杂偏差（Confounding Bias）——Common Causes</a></li>
+<li><a href="#selection-biasconditioning-on-common-effects">选择偏差（Selection Bias）——Conditioning on Common Effects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2">2. 因果推断概念</a><ul>
+<li><a href="#estimandestimateestimator">被估量（Estimand）、估计值（Estimate）与估计器/估计量（Estimator）</a></li>
+<li><a href="#causal-discovery">Causal Discovery</a></li>
+<li><a href="#_4">四象限</a></li>
+<li><a href="#_5">估计量</a><ul>
+<li><a href="#ateaverage-treatment-effect">ATE（Average Treatment Effect）</a></li>
+<li><a href="#ittintention-to-treatment-estimation">ITT（Intention-to-treatment Estimation）</a></li>
+<li><a href="#attaverage-treatment-on-the-treated">ATT（Average Treatment on the Treated）</a></li>
+<li><a href="#latelocal-average-treatment-effect">LATE（Local Average Treatment Effect）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3">3. 方法</a><ul>
+<li><a href="#31-matching">3.1. 匹配 Matching</a></li>
+<li><a href="#32-time-series">3.2. 时间序列 Time Series</a><ul>
+<li><a href="#321-did">3.2.1. DID</a></li>
+<li><a href="#322">3.2.2. 合成控制</a></li>
+</ul>
+</li>
+<li><a href="#33-uplift">3.3. 增效模型 Uplift</a></li>
+<li><a href="#34-dml">3.4. 双重机器学习 DML</a></li>
+<li><a href="#35-iv">3.5. 工具变量 IV</a></li>
+<li><a href="#36">3.6. 总结</a></li>
+</ul>
+</li>
+<li><a href="#4">4. 大模型与因果推断</a></li>
+<li><a href="#5-ref">5. Ref</a></li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Causal-Inference/">Causal Inference</a></div><div id="post-meta">发布于&nbsp;<time datetime="2025-05-23T00:00:00+08:00">2025-05-23</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>因果推断简述</span></h1>
+<h2 id="1">1. 因果推断思想</h2>
+<h3 id="_1">什么是因果关系？</h3>
+<p>比较哲学的定义：因果关系（Causality）是一个事件和第二个事件之间的作用关系，其中后一事件被认为是前一事件的结果。而因果推断（Causal Inference），则是在一个较大的系统中确定指定现象（或事件）的实际、独立效果的过程。</p>
+<p>说人话：因果关系试图回答的是 what-if 问题，即假如其他一切不变，只改变一个变量 x，如果 y 发生了变化，则认为 x-y 有因果关系。而这一推断过程，称之为因果推断。</p>
+<h3 id="_2">因果关系有什么用？</h3>
+<p>通常我们描述两个事件之间的关系，会常用“相关性”和“因果性”来描述，不妨我们先对比一下这两个区别。</p>
+<p>下图是美国每年科研支出与自杀数的关系，可以看到相关性达到了 99% 以上，但是我们可以说是每年科研支出上升导致了自杀数的上升吗？
+<img alt="图 1" src="/images/posts/2025/causal-inference-introduction/01.jpg" />
+而因果关系就是用来解决这一关系的。相关不一定代表因果，同样的，因果也不一定代表相关。回到最初的问题，那我们为什么需要知道因果呢？或者说知道了因果有什么用呢？</p>
+<p>简单的回答：因为因果关系可以用来指导业务决策。举个例子，比如我们的一个分析需求是提升产品的用户留存率，通常的做法是以已经流失的用户作为数据，挖掘变量训练一个模型对用户的流失率进行预测，再针对容易流失的用户进行干预。但是实际上，更有效的方式是寻找“留存率提升空间最大的群体”，而不是“最容易流失的群体”。但流失用户识别模型，是很难发掘前者的。</p>
+<p>如果我们是全知全能的，比如在上面的例子中，我们可以创造一个平行宇宙，一个对所有用户提供干预，一个不干预，从而获得对每个人干预的效果，再对比干预的成本就可以决定要不要实际使用干预措施。但是现实里，我们不是全知全能的，也就是存在数据缺失（missing data），所以我们才需要研究各种方法来挖掘因果关系，也促成了数据科学发展中的一个重要方向。</p>
+<h3 id="_3">怎么衡量因果关系？</h3>
+<p>这里讲解我们在实验中或观测数据中常遇到的一个问题，以及如何应用因果推断来解决。</p>
+<h4 id="simpsons-paradox">辛普森悖论（Simpson's Paradox）</h4>
+<p>例子：一组数据展示了不同性别的病人在接受药物治疗/未接受药物治疗之后康复的比例。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>接受药物治疗</th>
+<th>未接受药物治疗</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>男性</td>
+<td>81/87（93%）</td>
+<td>234/270（87%）</td>
+</tr>
+<tr>
+<td>女性</td>
+<td>192/263（73%）</td>
+<td>55/80（69%）</td>
+</tr>
+<tr>
+<td>总计</td>
+<td>273/350（78%）</td>
+<td>289/350（83%）</td>
+</tr>
+</tbody>
+</table>
+<p>问题：我们应该看拆分性别的数据，还是总计的数据呢？</p>
+<p>答案：应该看拆分性别的数据，结论是药物对治疗有帮助。</p>
+<p>如果根据这组数据，我们发现无论男女，接受药物治疗后的康复比例均高于未接受药物。总计之中，接受治疗的康复比例是低于未接受治疗的，原因是男女比例的不同。所以我们可以得出结论，该药物对于治疗病情是有效的。如果我们现在换一个数据拆分的维度，还是同样的数据，只是把性别换成了血压分类：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>接受药物治疗</th>
+<th>未接受药物治疗</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>低血压</td>
+<td>81/87（93%）</td>
+<td>234/270（87%）</td>
+</tr>
+<tr>
+<td>高血压</td>
+<td>192/263（73%）</td>
+<td>55/80（69%）</td>
+</tr>
+<tr>
+<td>总计</td>
+<td>273/350（78%）</td>
+<td>289/350（83%）</td>
+</tr>
+</tbody>
+</table>
+<p>问题：我们应该看拆分血压的数据，还是总计的数据呢？</p>
+<p>答案：应该看总计的数据，结论是药物对治疗无帮助/加重病情。</p>
+<p>为什么同样的数据，有的时候需要看整体，而有的时候需要看拆分的呢？原因是我们需要从数据中识别因果关系，从而应用得来准确的结论。</p>
+<h4 id="dagdirected-acyclic-graphs">DAG（Directed Acyclic Graphs，有向无环图）——把假设可视化</h4>
+<p>DAG 是一种把因果关系假设呈现的工具，图中每一个箭头则代表一种因果关系。例如性别是一个混杂因素（Confounder），即药物不会影响性别，但性别影响药物效果，这时我们便需要观测拆分性别后的数据。
+<img alt="图 2" src="/images/posts/2025/causal-inference-introduction/02.jpg" />
+在第二组数据中，血压是药物发生作用的中介变量（mediator），即吃药可能会导致血压变化，从而影响药物效果。这个时候就应该看整体数据。
+<img alt="图 3" src="/images/posts/2025/causal-inference-introduction/03.jpg" />
+在现实情况中，通常因果关系不会这么明显，而影响我们得到正确因果关系的有两种常见偏差。</p>
+<h4 id="confounding-biascommon-causes">混杂偏差（Confounding Bias）——Common Causes</h4>
+<p>类似上边不同性别对于药物效果的影响，混杂偏差主要出现在有混杂变量存在，但该变量不容易或不能被观察到的场景中。
+<img alt="图 4" src="/images/posts/2025/causal-inference-introduction/04.jpg" /></p>
+<h4 id="selection-biasconditioning-on-common-effects">选择偏差（Selection Bias）——Conditioning on Common Effects</h4>
+<p>类似上面血压的例子，血压并不是一个后门阻断，如果根据血压来选择实验/对照则会造成选择偏差。但通常背后的隐含变量是无法观测清楚的。
+<img alt="图 5" src="/images/posts/2025/causal-inference-introduction/05.jpg" /></p>
+<h2 id="2">2. 因果推断概念</h2>
+<p>因果推断主要是为了解决两个主要问题：</p>
+<ol>
+<li><strong>Causal Discovery（因果关系挖掘）</strong>：温度升高是否导致电费增加？或者在商品价格、转化率、上市时间等多个变量中探究一个因果图，探究哪些变量有因果关系？</li>
+<li><strong>Causal Effect（因果效应推理）</strong>：假设已经知道温度升高时电费增加的原因，我们想知道温度从 20 升到 30 度，会对电费带来多少增加？</li>
+</ol>
+<p>这两个问题也对应因果推断中的两个主要框架（Framework）：</p>
+<ol>
+<li><strong>Structural Causal Models（SCM）</strong>。我们首先需要先得到一个因果图，然后对于因果，使用 Structural Equations 来描述它。</li>
+<li><strong>Potential Outcome Framework</strong>。使用多种手段与方法控制变量，从中得到仅某个因变化而带来的预期结果。</li>
+</ol>
+<h3 id="estimandestimateestimator">被估量（Estimand）、估计值（Estimate）与估计器/估计量（Estimator）</h3>
+<p><img alt="图 6" src="/images/posts/2025/causal-inference-introduction/06.jpg" />
+被估量是一个使用统计分析方法来估计的统计量（An estimand is a quantity that is to be estimated in a statistical analysis）。</p>
+<p>估计值是根据有限数据估计出近似于被估量的统计量（The approximation of the estimand using a finite data sample）。</p>
+<p>估计器是根据有限数据估计被估量的方法（The method or formula for arriving at the estimate for an estimand）。</p>
+<p>说人话，我们先从什么是估计（estimation）开始。</p>
+<p>举个例子，我们想知道全球所有人的平均年龄，则全球人口是我们的样本（population），而平均年龄是我们估计的参数（parameter）。因为平均年龄可以告诉我们年龄的分布情况，所以它是一个参数。如果你真的有全世界人口的年龄，那就不叫估计了。可是现实中，我们无法得到所有人年龄的数据，于是从各国都抽取部分，被抽取的人就组成了我们的样本（sample）。然后我们计算出一个平均年龄，因为这个平均数并不是总人口的真实均值，所以这个均值是被估计的。</p>
+<p>现在，我们要升级一下思维：X（学历）和 Y（工资）之间存在一个参数，这个参数决定了 X 和 Y 之间的关系，定义为 β。我们想要知道，全世界范围内，学历到底怎样影响工资，即：β = ?。所以 β（总体的真实参数）是被估量（Estimand），是一个永远无法得知的值。但是我们抽了样本，我们需要一个方法（method or rule），根据我们给的数据计算出一个估计值（Estimate）。而这个方法呢，就叫做估计器（Estimator）。</p>
+<h3 id="causal-discovery">Causal Discovery</h3>
+<p>挖掘因果关系的主要方法是贝叶斯网络，及我们上边所提到的 DAG。</p>
+<p>举几个例子：
+<img alt="图 7" src="/images/posts/2025/causal-inference-introduction/07.jpg" />
+<img alt="图 8" src="/images/posts/2025/causal-inference-introduction/08.jpg" />
+<img alt="图 9" src="/images/posts/2025/causal-inference-introduction/09.jpg" />
+<img alt="图 10" src="/images/posts/2025/causal-inference-introduction/10.jpg" />
+<img alt="图 11" src="/images/posts/2025/causal-inference-introduction/11.jpg" />
+<img alt="图 12" src="/images/posts/2025/causal-inference-introduction/12.jpg" />
+<img alt="图 13" src="/images/posts/2025/causal-inference-introduction/13.jpg" />
+<img alt="图 14" src="/images/posts/2025/causal-inference-introduction/14.jpg" /></p>
+<h3 id="_4">四象限</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>如果上策略：接受 D(1)=1</th>
+<th>如果上策略：不接受 D(1)=0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>如果没上策略：接受 D(0)=1</td>
+<td>Always-Takers：上不上策略都接受</td>
+<td>Defiers：上策略不接受，不上就接受（反人格）</td>
+</tr>
+<tr>
+<td>如果没上策略：不接受 D(0)=0</td>
+<td>Compliers：上策略接受，不上就不接受</td>
+<td>Never-Takers：上不上策略都不接受</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">估计量</h3>
+<h4 id="ateaverage-treatment-effect">ATE（Average Treatment Effect）</h4>
+<p>群体中的平均效应（The average treatment effect across the population）。
+<img alt="图 15" src="/images/posts/2025/causal-inference-introduction/15.jpg" /></p>
+<h4 id="ittintention-to-treatment-estimation">ITT（Intention-to-treatment Estimation）</h4>
+<p>有意向干预的效果。即实验设计者可能希望 assigned to treatment 的实验对象（with Z=1）都真的接受了 treatment（with D=1），然而现实中会出现 assigned to treatment 的实验对象（with Z=1）可能并未真的接受 treatment（with D=0），即我们无法强制 assigned to treatment 组的个体真的接受 treatment。所以这里出现了一个漏斗。
+<img alt="图 16" src="/images/posts/2025/causal-inference-introduction/16.jpg" /></p>
+<h4 id="attaverage-treatment-on-the-treated">ATT（Average Treatment on the Treated）</h4>
+<p>群体中实际受到了措施的样本的平均效应（The average treatment effect among those who actually received the treatment in your study）。
+<img alt="图 17" src="/images/posts/2025/causal-inference-introduction/17.jpg" /></p>
+<h4 id="latelocal-average-treatment-effect">LATE（Local Average Treatment Effect）</h4>
+<p>treatment effects on compliers。</p>
+<p>简单来讲，它刻画了局部处理效应，该结果是否能代表大盘取决于受到策略影响的人群分布情况。对该概念的深入理解依赖于读者对工具变量估计框架的理解。具体介绍见上文工具变量相关文档。</p>
+<p>也存在一些其他估计量，比如 CATE（Conditional Average Treatment Effect，条件群体平均措施效应），ATU（Average treatment effect in the untreated，群体中实际未受到措施的样本的平均效应，The average treatment effect among those who actually did not received the treatment in your study）等。
+<img alt="图 18" src="/images/posts/2025/causal-inference-introduction/18.jpg" /></p>
+<h2 id="3">3. 方法</h2>
+<p>通常有五大类：匹配、时间序列、增效模型、双重机器学习、工具变量。</p>
+<h3 id="31-matching">3.1. 匹配 Matching</h3>
+<p>定义：在观测数据中，个体是否接受处理（如参与政策、接受治疗）通常不是随机的，而是由其特征（如年龄、收入、健康状况等）决定的，这会导致选择偏差（Treatment Selection Bias）。对每一个实验组的样本，通过特征匹配或将多维特征映射到倾向性得分（propensity score）上再匹配的方式找到反事实对照组。</p>
+<p>下面以倾向性得分即 PSM 为例，场景为教育程度与工资水平的关系：
+<img alt="图 19" src="/images/posts/2025/causal-inference-introduction/19.jpg" />
+步骤：</p>
+<ol>
+<li>计算倾向性得分：估计 X ➡️ T，计算每个个体接受处理的概率（不同家庭条件上大学的概率），即倾向性得分。</li>
+<li>共同支撑集检测：观测处理组和控制组的倾向得分分布重叠，重叠大则效果好（能匹配到类似的人）。</li>
+<li>匹配：根据倾向得分值，为每个处理组个体匹配一个或多个控制组个体。常用匹配方法包括：最近邻、卡尺匹配、分层匹配、核匹配、马氏距离匹配等等。</li>
+<li>平衡性检测：检测两组是否平衡，比如协变量的均值/方差等。</li>
+<li>因果估计：ATE、ATT。</li>
+</ol>
+<p><strong>PROS</strong></p>
+<ol>
+<li>降维处理：将高维协变量压缩为一维倾向得分，简化匹配过程。</li>
+<li>灵活性：适用于二分类处理变量（如是否参与政策），可结合多种匹配方法。</li>
+<li>接近随机实验：通过匹配消除可观测变量的选择偏差，使结果更接近因果推断。</li>
+</ol>
+<p><strong>CONS</strong></p>
+<ol>
+<li>依赖可观测变量：无法解决未被测量的混杂因素（如个体偏好、未记录的健康状况），若存在严重不可观测偏差，结果可能有误。</li>
+<li>共同支持限制：若处理组和控制组的倾向得分分布重叠较少（如极端样本），匹配效果较差，需剔除不满足条件的样本。</li>
+<li>模型依赖性：倾向得分的估计依赖模型设定（如线性回归、逻辑回归），若模型不满足 Groundtruth 上的关系就会产生误差。</li>
+</ol>
+<h3 id="32-time-series">3.2. 时间序列 Time Series</h3>
+<h4 id="321-did">3.2.1. DID</h4>
+<p><img alt="图 20" src="/images/posts/2025/causal-inference-introduction/20.jpg" />
+DID 即双重差分（difference in difference），用差值比差值，是很简单的群体效应估计方法。只需要将样本数据随机分成两组，对其中一组进行干预，评估时使用实验期间对比实验前的差值，然后评估实验组与对照组的差值的差值即可。</p>
+<p><strong>CONS</strong></p>
+<p>需要满足平行趋势假设，也就是实验前，两组的表现是平行一致的。</p>
+<p><strong>其他</strong></p>
+<p>业务上通常会使用 PSM + DID 一起用，原因是两者可以巧妙地相互补足短板，PSM 做样本上的降噪（横向），DID 做时间上的降噪（纵向）。但需要注意的是，因为经过两侧模型的预估，我们犯第一类/第二类错误的概率也在累积。</p>
+<h4 id="322">3.2.2. 合成控制</h4>
+<p>核心思想：与 Matching 不同于“找一个对照组”，合成控制是“生成一个对照组”。通过构建一个由多个控制组单元（如其他地区、国家）加权合成的“虚拟控制组”，使其在干预前的特征与处理组尽可能相似，从而通过比较处理组与合成控制组在干预后的差异，估计政策的净效应。</p>
+<p>例子：评估加州控烟政策的效果（Abadie et al., 2010）</p>
+<p>处理组：美国加州 1988 年实施控烟政策（提高烟草税、禁止公共场所吸烟）。</p>
+<p>控制组：其他未实施该政策的州。</p>
+<p>协变量：干预前的人均香烟销量、收入、人口结构、医疗支出等，通过加权最小二乘法求解权重，使得各州的加权合成的控制组与实验组在实验干预前的表现尽可能接近。</p>
+<p><strong>CONS</strong></p>
+<ol>
+<li>合成控制组的效果高度依赖协变量的选择。</li>
+<li>相对于 PSM 来讲解释性差。</li>
+</ol>
+<h3 id="33-uplift">3.3. 增效模型 Uplift</h3>
+<p>核心思想：建立一个模型（S-Learner，T-Learner，X-Learner 等等）来分别预估两个概率（上策略后接受的概率、不上策略后接受的概率），从而可以将有限的资源花给 Compliers，最大化策略效果。常用在发优惠券、激励广告等有成本的激励策略上。</p>
+<h3 id="34-dml">3.4. 双重机器学习 DML</h3>
+<p>核心思想：我们只关心 Treatment T 对 outcome Y 的影响，因此我们可以首先使用 X 回归 T，得到一个 T 的残差，然后使用 X 回归 Y，得到一个 Y 的残差，最后使用 T 的残差回归 Y 的残差，估计的参数即我们想要的 ATE。即：
+<img alt="图 21" src="/images/posts/2025/causal-inference-introduction/21.jpg" />
+以教育程度与工资水平的关系为例：
+<img alt="图 22" src="/images/posts/2025/causal-inference-introduction/22.jpg" />
+我们先估计 X ➡️ College 的关系获得残差：
+<img alt="图 23" src="/images/posts/2025/causal-inference-introduction/23.jpg" />
+再估计 X ➡️ Wage 的关系获得残差：
+<img alt="图 24" src="/images/posts/2025/causal-inference-introduction/24.jpg" />
+最后通过残差估计残差：
+<img alt="图 25" src="/images/posts/2025/causal-inference-introduction/25.jpg" />
+<strong>CONS</strong></p>
+<p>DML 需要建立在 Unconfoundedness 假设上：因为需要用混淆变量估计 Treatment 和 Outcome，所以所有混淆变量都需要被找到。</p>
+<h3 id="35-iv">3.5. 工具变量 IV</h3>
+<p>核心思想：我们在预估的时候会存在内生变量的影响。为了解决这个问题，我们可以找一个与 x 相关、与 y 不直接相关、但与 e 不相关的变量作为工具，代替 x 放入到方程中。</p>
+<p>以教育程度与工资水平的关系为例：
+<img alt="图 26" src="/images/posts/2025/causal-inference-introduction/26.jpg" />
+在研究受教育程度对工资水平的影响时，通常会遗漏重要的解释变量“个人能力”，以致于估计出来的系数包含了个人能力对工资的影响。由于“住在大学附近”并不能直接影响工资水平，且和误差项中的“个人能力”不相关，但是可能会影响个人是否上大学，因此可以用“住在大学附近”作为工具变量替换“教育水平”。</p>
+<p>实际操作的方式是一个二阶段估计：一阶段估计“住在大学附近”➡️“教育水平”，获得一个工具变量“hat(教育水平)”；二阶段使用“hat(教育水平)”➡️“工资水平”。</p>
+<p>在寻找工具变量的时候需要满足：</p>
+<ol>
+<li>外生性
+<img alt="图 27" src="/images/posts/2025/causal-inference-introduction/27.jpg" /></li>
+<li>
+<p>相关性
+<img alt="图 28" src="/images/posts/2025/causal-inference-introduction/28.jpg" />
+一些有趣的工具变量：</p>
+</li>
+<li>
+<p>墨西哥移民规模是否影响个体就业选择
+   - 工具变量：用移民来源社区降雨量替代移民来源社区。
+   - 相关性：样本所属的墨西哥社区主要从事依赖降雨的农业生产，降雨量会影响社区农业收入进而影响农业预期收入，并最终影响移民决策。</p>
+</li>
+<li>子女数目增加对父母劳动市场参与
+   - 工具变量：头两个孩子的性别构成。
+   - 相关性：父母一般希望子女的性别构成多样化，所以如果头两胎都是男孩或女孩，那么他们就希望再生一个性别不一样的；但如果前两胎一个男孩一个女孩，那性别多样化的任务已经完成了，就不会再生了。</li>
+<li>越战经历对之后收入的影响
+   - 工具变量：作者发现国防部征兵的时候是给适龄的男性抽一个号码（Draft Lottery），然后定一个上限，号码小于这个上限的人在征兵范围之内，于是他定义征兵号是否小于这个上限为 draft eligibility，作为工具变量。这是一个巧妙利用自然实验的例子。
+   - 从因果推断角度理解，AB 实验干预其实是一个天然的工具变量，关于 AB 实验详见<a href="https://doc.weixin.qq.com/doc/w3_AawA6wbTANEUwKXfjJNTGmTle0zlX?scode=ANYAEAdoABE8e0SZlUAawA6wbTANE">一文带你速通 AB 实验</a>。
+   - 相关性：在这个范围内的人，才能被征兵。</li>
+<li>更多：<a href="https://www.lianxh.cn/news/946348365bb2d.html">IV 在哪里？奇思妙想的工具变量</a></li>
+</ol>
+<p><strong>CONS</strong></p>
+<ol>
+<li>IV 方法在计量中很流行，但在工业界应用较少：实际难论证工具变量和 Y 之间没有其他中介变量。</li>
+<li>IV 存在 P-hacking 风险（Brodeur et al. 2020），降雨量作为 IV 的泛滥：<a href="https://osf.io/preprints/socarxiv/9qj4f">https://osf.io/preprints/socarxiv/9qj4f</a></li>
+</ol>
+<h3 id="36">3.6. 总结</h3>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>方法</th>
+<th>被估量</th>
+<th>实验变量类型</th>
+<th>高维数据控制 High dimensional control</th>
+<th>无混淆性 Unconfoundedness</th>
+<th>其他假设</th>
+<th>双重鲁棒性 doubly robustness</th>
+<th>置信区间 Confidence interval</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>匹配 matching</td>
+<td>cem</td>
+<td>ATT</td>
+<td>离散</td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>匹配 matching</td>
+<td>psm</td>
+<td>ATT</td>
+<td>离散</td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td>1</td>
+</tr>
+<tr>
+<td>匹配 matching</td>
+<td>iptw</td>
+<td>ATE</td>
+<td>离散</td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td>1</td>
+</tr>
+<tr>
+<td>时间序列 Time series</td>
+<td>did</td>
+<td>ATT</td>
+<td></td>
+<td></td>
+<td></td>
+<td>平行趋势 Parallel trend</td>
+<td></td>
+<td>1</td>
+</tr>
+<tr>
+<td>时间序列 Time series</td>
+<td>Synthetic control</td>
+<td>ATT</td>
+<td></td>
+<td></td>
+<td></td>
+<td>稳定线性组合 Stable linear combination</td>
+<td></td>
+<td>1</td>
+</tr>
+<tr>
+<td>时间序列 Time series</td>
+<td>psm + did</td>
+<td>ATT</td>
+<td></td>
+<td>1</td>
+<td></td>
+<td>平行趋势 Parallel trend</td>
+<td></td>
+<td>1</td>
+</tr>
+<tr>
+<td>uplift model</td>
+<td>s-learner</td>
+<td>ITE/ATT/ATE</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>uplift model</td>
+<td>T-learner</td>
+<td>ITE/ATT/ATE</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>uplift model</td>
+<td>x-learner</td>
+<td>ITE/ATT/ATE</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>uplift model</td>
+<td>linearDR-learner</td>
+<td>ITE/ATT/ATE</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>uplift model</td>
+<td>forestDR-learner</td>
+<td>ITE/ATT/ATE</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>uplift model</td>
+<td>orthoforestDR-learner</td>
+<td>ITE/ATT/ATE</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>DML</td>
+<td>LinearDML</td>
+<td>ITE/ATT/ATE/MTE</td>
+<td>离散/连续</td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td>1</td>
+</tr>
+<tr>
+<td>DML</td>
+<td>CausalForestDML</td>
+<td>ITE/ATT/ATE/MTE</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td>1</td>
+</tr>
+<tr>
+<td>DML</td>
+<td>OrthoforestDML</td>
+<td>ITE/ATT/ATE/MTE</td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td></td>
+<td></td>
+<td>1</td>
+</tr>
+<tr>
+<td>IV</td>
+<td>2SLS</td>
+<td>LATE</td>
+<td></td>
+<td></td>
+<td></td>
+<td>IV 假设</td>
+<td></td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4">4. 大模型与因果推断</h2>
+<p>在大模型与因果推断的结合上，目前还较浅，主要聚焦于三个方向：</p>
+<ol>
+<li>通过因果图的方式，用大模型对因果图进行增强识别。利用因果发现算法与大模型相结合，以获取更精准的因果图。</li>
+<li>Agent，利用大模型的智能基础及其工具使用能力，配合外部工具，综合构建一个智能代理，帮助用户完成一些因果推断任务。</li>
+<li>ABM（agent base modeling）基于代理的建模，通过多个智能体之间的相互交互形成现实生活中的场景，即形成一个仿真生态，进而辅助策略的研究和探索。</li>
+</ol>
+<h2 id="5-ref">5. Ref</h2>
+<ul>
+<li><a href="https://theeffectbook.net/">The Effect: An Introduction to Research Design and Causality | The Effect</a></li>
+<li><a href="https://doc.weixin.qq.com/doc/w3_AawA6wbTANEUwKXfjJNTGmTle0zlX?scode=ANYAEAdoABE8e0SZlUAawA6wbTANE">一文带你速通 AB 实验</a></li>
+<li><a href="https://www.lianxh.cn/news/946348365bb2d.html">IV 在哪里？奇思妙想的工具变量</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/672251154">https://zhuanlan.zhihu.com/p/672251154</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/429839492">https://zhuanlan.zhihu.com/p/429839492</a></li>
+</ul>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2025/05/23/rag-survey-notes/">RAG相关综述<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
