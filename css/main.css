@@ -3569,11 +3569,15 @@ article.md.error-page a#back {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   align-items: start;
+  position: relative;
 }
 .l_main.feed-grid .post-list.post .post-card {
   display: block;
   width: 100%;
   margin: 0;
+}
+.l_main.feed-grid .post-list.post.masonry-active {
+  display: block;
 }
 .l_main.feed-grid .post-list.post .post-cover {
   aspect-ratio: var(--cover-ratio, 1.6);
@@ -3592,6 +3596,10 @@ article.md.error-page a#back {
 @media screen and (max-width: 768px) {
   .l_main.feed-grid .post-list.post {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .l_main.feed-grid .post-list.post.masonry-active {
+    display: grid;
+    height: auto !important;
   }
 }
 .post-list .post-card.post.photo .cover {
