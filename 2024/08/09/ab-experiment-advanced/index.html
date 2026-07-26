@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>AB实验进阶 - 屹然的空间</title>
+
+  <meta name="description" content="从基础 AB 实验讲到广告平台双边市场中的挤压、外溢、四格表实验、预算分桶、联合采样以及长期效应。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AB实验进阶">
+<meta property="og:url" content="https://lifanyiran.com/2024/08/09/ab-experiment-advanced/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="从基础 AB 实验讲到广告平台双边市场中的挤压、外溢、四格表实验、预算分桶、联合采样以及长期效应。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2024/ab-experiment-advanced.jpg">
+<meta property="article:published_time" content="2024-08-09T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-07-26T16:38:28.301121+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="AB实验">
+<meta property="article:tag" content="因果推断">
+<meta property="article:tag" content="双边市场">
+<meta property="article:tag" content="实验设计">
+<meta property="article:tag" content="广告平台">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2024/ab-experiment-advanced.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#ab">一文带你速通 AB 实验</a></li>
+<li><a href="#1">1. 为什么要做实验</a></li>
+<li><a href="#2">2. 什么是实验</a><ul>
+<li><a href="#211">2.1.1 指标特性</a></li>
+<li><a href="#212">2.1.2 指标类型</a></li>
+<li><a href="#22">2.2 分流单位</a></li>
+<li><a href="#23">2.3 实验群体</a></li>
+<li><a href="#24">2.4 实验样本量/周期</a></li>
+</ul>
+</li>
+<li><a href="#3">3. 双边市场问题</a><ul>
+<li><a href="#31">3.1 背景</a><ul>
+<li><a href="#311">3.1.1 广告平台：典型的双边市场</a></li>
+<li><a href="#312">3.1.2 例子：计划冷启动策略</a></li>
+</ul>
+</li>
+<li><a href="#32">3.2 挤压与外溢效应：双边市场的诅咒</a><ul>
+<li><a href="#321">3.2.1 流量实验</a></li>
+<li><a href="#322">3.2.2 计划侧实验</a></li>
+</ul>
+</li>
+<li><a href="#33">3.3 解决方案</a><ul>
+<li><a href="#331">3.3.1 双边市场四格表实验</a></li>
+<li><a href="#332">3.3.2 预算分桶流量实验</a></li>
+<li><a href="#333">3.3.3 双边市场列联表联合采样实验</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4">4. 其他效应</a><ul>
+<li><a href="#41">4.1 新奇效应/学习效应</a><ul>
+<li><a href="#411">4.1.1 长期流量预留实验</a></li>
+<li><a href="#412-ccd">4.1.2 长期轮转实验（CCD 实验）</a></li>
+</ul>
+</li>
+<li><a href="#42">4.2 长期效应</a></li>
+</ul>
+</li>
+<li><a href="#5">5. 总结</a></li>
+<li><a href="#6">6. 附录</a></li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><span class="cap breadcrumb-link">数据分析</span></div><div id="post-meta">发布于&nbsp;<time datetime="2024-08-09T00:00:00+08:00">2024-08-09</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>AB实验进阶</span></h1>
+<p class="post-hero"><img src="/images/covers/2024/ab-experiment-advanced.jpg" alt="AB实验进阶"></p>
+<h2 id="ab">一文带你速通 AB 实验</h2>
+<h2 id="1">1. 为什么要做实验</h2>
+<p>倘若我们拥有创造平行宇宙的神奇能力，那么所有那些 “WHAT IF” 类型的问题，例如“要是 B 站添加了贴片广告，会有多少用户流失？”这样的疑问，都能轻而易举地得到确切答案。在那无数个平行宇宙中，我们可以构建出 B 站添加贴片广告的宇宙场景，直接观察用户流失的具体情况。</p>
+<p>但现实却是，我们只能在这唯一的宇宙中生存。面对如此困境，我们只能另辟蹊径，寻求某种方式，来尽可能获取无限接近真实情况的结论。而 AB 实验，正是众多方法里最简单且高效的一种：创建出一个“虚拟的平行宇宙场景”。</p>
+<h2 id="2">2. 什么是实验</h2>
+<p>AB 实验是一种随机测试，将两个不同的群体通过控制变量法进行假设比较，运用统计学上的<a href="https://zh.wikipedia.org/wiki/%E5%81%87%E8%A8%AD%E6%AA%A2%E5%AE%9A">假设检定</a>和<a href="https://zh.wikipedia.org/w/index.php?title=%E9%9B%99%E6%AF%8D%E9%AB%94%E5%81%87%E8%A8%AD%E6%AA%A2%E5%AE%9A&amp;action=edit&amp;redlink=1">双母体假设检定</a>。</p>
+<p>广义上来讲，AB 实验是因果推断中的一个方法。我们探究的问题其实是一个“估计目标”，通过 AB 实验分流添加变量处理后的分布情况为“估计量”，根据该分布推断出的结果为“估计值”。估计值与估计目标之间，我们可以根据合理的实验设计，让其无限接近。</p>
+<p>从因果推断角度理解，实验干预是一个天然的工具变量（IV，Instrumental Variable）。</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>估计目标（Estimand）</td>
+<td>实际 B 站添加了贴片广告会损失用户</td>
+</tr>
+<tr>
+<td>估计量（Estimator）</td>
+<td>A/B 实验，一半用户可以看到贴片广告后，用户留存的分布情况</td>
+</tr>
+<tr>
+<td>估计值（Estimate）</td>
+<td>根据 A/B 实验，推断 B 站添加了贴片广告会损失用户</td>
+</tr>
+<tr>
+<td><img alt="图 1" src="/images/posts/2024/ab-experiment-advanced/01.jpg" /></td>
+<td></td>
+</tr>
+<tr>
+<td>### 2.1 观测指标</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>观测指标为实验中我们关注的结果指标，可以是一个也可以是多个，例如上述例子中的“用户使用时长”就是我们关注的核心指标。</p>
+<h4 id="211">2.1.1 指标特性</h4>
+<p>通常 AB 实验的观测指标，要满足以下几个特性：</p>
+<ul>
+<li><strong>敏感性</strong>：指标对于我们关注的效应变化是否迅速。</li>
+<li><strong>鲁棒性</strong>：指标对于我们不想关注的效应变化是否稳定。</li>
+</ul>
+<p>最理想的指标，应该反映我们想关注的数据变化（高敏感性），不反映我们不想关注的部分（高鲁棒性）。</p>
+<p>例：均值高敏感性低鲁棒性，中位数低敏感性高鲁棒性。</p>
+<ul>
+<li><strong>变异性</strong>：指标自身变化的程度是否可接受（方差是否过大）。</li>
+</ul>
+<p>对于以上三个特性，我们可以通过 A/A 实验或者回顾性历史分析来进行判断。</p>
+<h4 id="212">2.1.2 指标类型</h4>
+<p>通常指标分为三类：</p>
+<ul>
+<li><strong>总量</strong>：消耗、曝光量、播放量。</li>
+<li><strong>均值</strong>：平均使用时长、ARPU。</li>
+<li><strong>率</strong>：CTR、CVR、留存率。</li>
+</ul>
+<p>对于不同的观测指标，由于其各自的分布不同，实验的假设检验方式是不同的。</p>
+<p>例如总量和均值需要用 Z 检验，CTR 这种率值需要用 delta-method 处理，留存率这种去重率值需要用 chi-square 检验。</p>
+<p>详细各指标的假设检验方式可见：<a href="https://doc.weixin.qq.com/doc/w3_AawA6wbTANE11qYNOHFTxehShfHy0?scode=ANYAEAdoABEi8gPENmAawA6wbTANE">商业化实验平台显著检验方案_24M9</a></p>
+<p>AB 实验假设检验小工具：<a href="https://doc.weixin.qq.com/sheet/e3_AawA6wbTANENXPBVeziRVSB91aLUW?scode=ANYAEAdoABEYYW9abQAawA6wbTANE&amp;tab=BB08J2">AB 实验小工具（显著性计算 + 样本量计算）</a></p>
+<h3 id="22">2.2 分流单位</h3>
+<p>为了测试，通过某种方式将流量（Traffic）分为 A/B 两组，称之为分流（Diversion），而分流所使用的单位，则称之为分流单位（Unit of Diversion）。</p>
+<p>在广告业务场景下，常用的分流单位包括：流量/用户 ID、广告主 ID、计划 ID。</p>
+<p>在选择分流单位时，通常需要考虑以下三点：</p>
+<ul>
+<li><strong>一致性</strong>：也称为 SUTVA（Stable Unit Treatment Value Assumption）或者稳定单位处理值假设，对于实验群体可感知的实验，需要保证其每次都在同一个组内。</li>
+<li><strong>无偏性</strong>：也称为条件独立性假设（Conditional Independence Assumption, CIA），根据分流单位分组后两组是同质无偏的，这一假设也可以通过 A/A 实验进行验证。</li>
+<li><strong>变异性</strong>：分流单位需要和实验单位（指标的分母，也就是多少单位进入了测试）一致，否则计算出的变异性要远远小于实际的变异性，因为我们在计算变异性时，其实在假设数据的分布是独立的。</li>
+</ul>
+<p>例如流量实验，但是根据广告主粒度来聚合分析，则变异性会远远小于实际情况。</p>
+<h3 id="23">2.3 实验群体</h3>
+<p>通常有两种实验形式：</p>
+<ul>
+<li><strong>用户间测试（inter-user experiments）</strong>：用户组 A 和用户组 B 对比。</li>
+<li><strong>用户内测试（intra-user experiments）</strong>：用户组在时间 A 与时间 B 对比。</li>
+</ul>
+<p>使用用户内测试需要注意两个问题：</p>
+<ol>
+<li>前后时间周期是否可比。</li>
+<li>是否存在随时间变化的效应，也称为学习效应/知识效应/变化厌恶。如何避免/度量学习效应，可以在后文中看到详细方法。</li>
+</ol>
+<h3 id="24">2.4 实验样本量/周期</h3>
+<p>实验周期以及样本量基于以下元素决定：</p>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>名称</th>
+<th>解释</th>
+<th>与样本量的关系</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一类错误水平</td>
+<td>误判</td>
+<td>实际没用但是认为有用的概率，通常取 0.05</td>
+<td>越小 ➡️ 越多样本</td>
+</tr>
+<tr>
+<td>二类错误水平</td>
+<td>错杀</td>
+<td>实际有用但是认为没用的概率，通常取 0.2</td>
+<td>越小 ➡️ 越多样本</td>
+</tr>
+<tr>
+<td>MDE</td>
+<td>Minimum Detectable Effect，最小可检测效应</td>
+<td>希望实验能够检测多灵敏的变化，需要根据业务来拍</td>
+<td>越小 ➡️ 越多样本</td>
+</tr>
+<tr>
+<td>Var</td>
+<td>Variance，测量指标方差</td>
+<td>测量指标的变异性</td>
+<td>越大 ➡️ 越多样本</td>
+</tr>
+</tbody>
+</table>
+<p>为了保证周期性对于效应的影响，通常实验至少会开一周来避免周中效应/周末效应；对于部分样本量较少/方差较大的场景，无法获得统计上的显著结论，也有 Capping、DID、CUPED 等工具来进行实验数据的后处理。</p>
+<p>AB 实验样本量计算小工具：<a href="https://doc.weixin.qq.com/sheet/e3_AawA6wbTANENXPBVeziRVSB91aLUW?scode=ANYAEAdoABEYYW9abQAawA6wbTANE&amp;tab=BB08J2">AB 实验小工具（显著性计算 + 样本量计算）</a></p>
+<p>以上就是所有 AB 实验的基础，恭喜你已经全部掌握，可以成为一个 AB 实验方面的专家了！
+<img alt="图 2" src="/images/posts/2024/ab-experiment-advanced/02.jpg" /></p>
+<h2 id="3">3. 双边市场问题</h2>
+<h3 id="31">3.1 背景</h3>
+<h4 id="311">3.1.1 广告平台：典型的双边市场</h4>
+<p>互联网场景下，绝大多数的平台都是某种意义下的双边市场。在一个双边市场内，供给方彼此存在竞争，需求方内部存在竞争，同时需求方的变化会引起供给方的变化，影响相互交织，形成复杂的竞争环境。</p>
+<p>一般双边市场下的实验设计，可以通过地域随机化、类目随机化或时间随机化的方式，将竞争隔离在地域、类目内部或某段时间内。但是在广告平台中，常规按照地域和时间做实验的方法都不太可行。所以通常只能通过实验设计来厘清相互竞争所带来的效应。</p>
+<p><a href="https://doc.weixin.qq.com/flowchart-addon">https://doc.weixin.qq.com/flowchart-addon</a></p>
+<h4 id="312">3.1.2 例子：计划冷启动策略</h4>
+<p>计划冷启动是媒体的商业化平台常见的调控策略，其手段是对新建计划在一定时间 &amp; 一定转化前，通过排序过程中对其添加一个扶持项，从而在排序中更容易竞胜。主要目的是通过将一部分流量用于新计划的探索，使模型可以更好地预估该计划点击或者转化，从而可以更准确地排序，使得全局流量的变现最大化。</p>
+<p>经典的<a href="https://en.wikipedia.org/wiki/Multi-armed_bandit">多臂赌博机</a>问题，就是该如何分配资源至“探索”、“收割”两部分。</p>
+<p>计划冷启动这一扶持项是否能给大盘带来收益，是一个较为困难的问题，但通过合理的实验方式，我们便可以从某些角度测量出其收益。</p>
+<p>我们可以将这个问题简化为以下几点：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实验假设</td>
+<td>计划冷启动扶持可以带来大盘消耗增量</td>
+</tr>
+<tr>
+<td>实验变量</td>
+<td>是否添加计划冷启动这个扶持项</td>
+</tr>
+<tr>
+<td>观测指标</td>
+<td>消耗</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32">3.2 挤压与外溢效应：双边市场的诅咒</h3>
+<h4 id="321">3.2.1 流量实验</h4>
+<ul>
+<li>实验变量：在实验流量上，所有符合条件的计划添加计划冷启动扶持项。</li>
+<li>观测指标：消耗。</li>
+<li>估计值：实验流量与对照流量的消耗 diff。</li>
+</ul>
+<p><a href="https://doc.weixin.qq.com/flowchart-addon">https://doc.weixin.qq.com/flowchart-addon</a></p>
+<p>但是实际上，由于我们只有一个竞价模型，计划在实验流量上因为扶持所带来的展/点/转等特征累积，会间接影响其在对照流量中的竞价，使其高估，从而导致观测出的效应低估（估计值 &lt; 估计目标）。</p>
+<p>例子：</p>
+<p>如果没有任何策略干预，计划 A 可以在 100% 流量中拿到 200 个曝光。</p>
+<p>如果进行了上述的流量实验，计划 A 在 50% 的实验流量中因为扶持，额外拿到了 10 个曝光，共 110 个曝光；在 50% 对照流量中，因为这 10 个曝光给计划带来的特征累积，导致其在对照流量的竞价中额外胜出获得了 1 个曝光，共 101 个曝光。</p>
+<p>我们想要的（估计目标）：110 - 100 = 10 个曝光，所对应的消耗。</p>
+<p>我们得到的（估计值）：110 - 101 = 9 个曝光，所对应的消耗。</p>
+<p>估计值 &lt; 估计目标。
+<img alt="图 3" src="/images/posts/2024/ab-experiment-advanced/03.jpg" /></p>
+<h4 id="322">3.2.2 计划侧实验</h4>
+<ul>
+<li>实验变量：在实验计划上，添加计划冷启动扶持项。</li>
+<li>观测指标：消耗。</li>
+<li>估计值：实验计划与对照计划的消耗 diff。</li>
+</ul>
+<p>广告主侧、素材侧等其他供给相关的标的同理。</p>
+<p><a href="https://doc.weixin.qq.com/flowchart-addon">https://doc.weixin.qq.com/flowchart-addon</a></p>
+<p>但是实际上，由于我们只有一个竞价模型，实验计划会因为扶持所带来的展/点/转等特征累积，间接对对照组计划产生挤压，从而导致观测出的效应高估（估计值 &gt; 估计目标）。</p>
+<p>例子：</p>
+<p>如果没有任何策略干预，计划 A 和计划 B 都各自可以在 100% 流量中拿到 100 个曝光。</p>
+<p>如果进行了上述的计划实验，计划 A 在实验组，因为扶持，额外拿到了 10 个曝光，共 110 个曝光；计划 B 在对照组，因为计划 A 扶持带来的额外竞争力，原本 B 可以竞胜的流量落败，损失了 1 个曝光，最终拿到了 99 个曝光。</p>
+<p>我们想要的（估计目标）：110 - 100 = 10 个曝光。</p>
+<p>我们得到的（估计值）：110 - 99 = 11 个曝光。</p>
+<p>估计值 &gt; 估计目标。
+<img alt="图 4" src="/images/posts/2024/ab-experiment-advanced/04.jpg" /></p>
+<h3 id="33">3.3 解决方案</h3>
+<h4 id="331">3.3.1 双边市场四格表实验</h4>
+<p>同时在流量与计划两个维度上开展 A/B 实验，使实验策略只在实验计划的实验流量上生效（下图蓝色部分），则挤压效应 = y00 - y01，最终的估计值 = (y11 - y01) - (y00 - y01)。</p>
+<p><a href="https://doc.weixin.qq.com/flowchart-addon">https://doc.weixin.qq.com/flowchart-addon</a>
+<img alt="图 5" src="/images/posts/2024/ab-experiment-advanced/05.jpg" />
+<strong>优点：</strong></p>
+<ol>
+<li>可以解决挤压效应。</li>
+<li>解释性强。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li>
+<p>小流量特征累积少的低估问题：在 50% 流量上计划的特征累积少于 100% 流量，会影响计划未来的分发，从而产生低估。这点可以前置进行一个预实验来获得参数，再进行调参的双边实验来解决。
+<img alt="图 6" src="/images/posts/2024/ab-experiment-advanced/06.jpg" />
+Intuition：先开展一个实验，获得“50% 流量下广告效果因为特征累积会损失多少跑量”的结论，将这个结论拟合为一个参数，放入双边实验中对实验组广告进行扶持，来弥补这部分跑量损失。</p>
+</li>
+<li>
+<p>如果存在外溢效应会影响结论，因为 y10 受到的外溢效应会挤压 y00。</p>
+</li>
+</ol>
+<p><a href="https://doc.weixin.qq.com/flowchart-addon">https://doc.weixin.qq.com/flowchart-addon</a></p>
+<p>这一点可以结合 3.3.2 或者 3.3.3 来解决。
+<img alt="图 7" src="/images/posts/2024/ab-experiment-advanced/07.jpg" /></p>
+<h4 id="332">3.3.2 预算分桶流量实验</h4>
+<p>一种纯工程角度的方法：将广告复制为影子计划，共享一个预算，原始广告和复制广告进行流量隔离，分别使用不同的策略，从而解决外溢效应。</p>
+<p><a href="https://doc.weixin.qq.com/flowchart-addon">https://doc.weixin.qq.com/flowchart-addon</a>
+<img alt="图 8" src="/images/posts/2024/ab-experiment-advanced/08.jpg" />
+<strong>优点：</strong></p>
+<ol>
+<li>可以解决外溢效应。</li>
+<li>解释性强。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li>工程难度高：线上模块多，策略和模型比较复杂，较难做到影子计划与原计划表现一致。</li>
+<li>计算成本大：广告数量膨胀，线上检索有压力。</li>
+<li>小流量特征累积少的低估问题。</li>
+</ol>
+<h4 id="333">3.3.3 双边市场列联表联合采样实验</h4>
+<p>如果对四格表实验进行泛化，同时在流量与计划两个维度上开展多个组，则可以根据每个组作为一个样本构建模型，拟合出“挤压效应”与“外溢效应”的分布情况。</p>
+<p><a href="https://doc.weixin.qq.com/flowchart-addon">https://doc.weixin.qq.com/flowchart-addon</a>
+<img alt="图 9" src="/images/posts/2024/ab-experiment-advanced/09.jpg" />
+假设外溢效应与挤压效应与受到处理的流量占比呈线性关系，令：</p>
+<ul>
+<li>yij 为第 i 个计划在第 j 份流量上的表现；</li>
+<li>Wij 代表是否接受处理；</li>
+<li>Wi· 代表第 i 个广告接受处理的比例；</li>
+<li>W·j 代表第 j 份流量接受处理的比例。</li>
+</ul>
+<p>则可以通过模型拟合出相关参数。</p>
+<p><strong>优点：</strong></p>
+<ol>
+<li>可以同时解决溢出效应/挤压效应。</li>
+<li>泛化能力强。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li>需要的样本量多。</li>
+<li>假设溢出效应/挤压效应与受处理流量占比为线性关系。</li>
+<li>小流量特征累积少的低估问题。</li>
+</ol>
+<p>除了可解释性强的双边市场表格实验，为了解决溢出和挤压问题，业界也有一些其他方法，例如 <a href="https://research.facebook.com/publications/a-counterfactual-framework-for-seller-side-a-b-testing-on-marketplaces/">Facebook 的 Counterfactual interleaving 实验</a>。</p>
+<h2 id="4">4. 其他效应</h2>
+<h3 id="41">4.1 新奇效应/学习效应</h3>
+<p>新奇效应/学习效应是指，在一个处理上线后，效应的变化会随着时间衰退/增加。例如“如果 B 站 App Logo 变成绿色”，短期因为好奇可能 DAU 会提升很大，长期来看可能是没有提升的。如何衡量这一部分效应有两种方法：长期流量预留实验与 CCD 实验。</p>
+<h4 id="411">4.1.1 长期流量预留实验</h4>
+<p>一句话 = 小流量长时间的实验。</p>
+<p>可以预留一个长期对照组不添加该处理，通过长时间观测来看效应的变化情况，从而判断新奇效应/学习效应的影响。</p>
+<h4 id="412-ccd">4.1.2 长期轮转实验（CCD 实验）</h4>
+<p>CCD（Cookie-Cookie By Day）与上述多表格实验的思想相同，分两个维度多组地进入实验，只不过这里其中一个维度为时间。通过对比不同时间进入组之后实验群体的处理效应，既可以拟合出实验群体的新奇效应/学习效应的分布情况。
+<a href="https://doc.weixin.qq.com/flowchart-addon">https://doc.weixin.qq.com/flowchart-addon</a></p>
+<h3 id="42">4.2 长期效应</h3>
+<p>广义上来讲，新奇效应/学习效应是长期效应的一种（前者是短期有效长期无效，后者相反），而长期效应则是内生效应中的一部分。长期效应的衡量也可以使用上述的长期流量预留实验以及 CCD 实验。这些内生效应，在因果推断领域会有一些方法可以更好地解决，例如：</p>
+<ol>
+<li>代理指标 by Google / 代理指数 by LinkedIn：寻找一个代理指标/拟合一个代理指数来替代长期效应指标。</li>
+<li>META 分析：根据历史实验来拟合长期效应的分布情况。</li>
+</ol>
+<h2 id="5">5. 总结</h2>
+<p>上述各种实验方案总结对比如下：</p>
+<table>
+<thead>
+<tr>
+<th>实验方案</th>
+<th>目的</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>流量侧实验</td>
+<td>基础实验</td>
+<td>低成本</td>
+<td>有溢出效应</td>
+</tr>
+<tr>
+<td>计划侧实验</td>
+<td>基础实验</td>
+<td>低成本</td>
+<td>有挤压效应</td>
+</tr>
+<tr>
+<td>四格表实验</td>
+<td>解决挤压效应</td>
+<td>解释性强</td>
+<td>1. 有溢出效应<br>2. 小流量特征累积少的低估问题</td>
+</tr>
+<tr>
+<td>预算分桶实验</td>
+<td>解决溢出效应</td>
+<td>解释性强</td>
+<td>1. 有挤压效应<br>2. 小流量特征累积少的低估问题<br>3. 工程难度<br>4. 计算成本</td>
+</tr>
+<tr>
+<td>列联表联合采样实验</td>
+<td>解决挤压/溢出效应</td>
+<td>1. 同时解决两种偏差<br>2. 泛化能力强</td>
+<td>1. 样本量需求<br>2. 开发/分析成本<br>3. 小流量特征累积少的低估问题</td>
+</tr>
+<tr>
+<td>长期流量预留实验</td>
+<td>解决时间相关效应</td>
+<td>低成本</td>
+<td>长期大盘成本有损</td>
+</tr>
+<tr>
+<td>CCD 实验</td>
+<td>解决时间相关效应</td>
+<td>解释性强</td>
+<td>开发成本</td>
+</tr>
+</tbody>
+</table>
+<p>由于我们不是全知全能的，我们永远无法掌握绝对意义上的真实全貌，也就是所谓的 “ground truth”。但这并不意味着束手无策，我们可以像盲人摸象一样，通过不断采用更科学的方法，逐步去逼近真实，持续缩小估计值（Estimate）与目标值（Estimand）之间的差距。</p>
+<p>但是采用科学方法是以成本为代价的。另一方面，我们也需要关注对实验本身的投入成本与产出效益之间的关系，在成本可行性的约束之下获得最科学的结论。</p>
+<h2 id="6">6. 附录</h2>
+<ul>
+<li>Udacity AB 实验课程 by Google：<a href="https://www.udacity.com/course/ab-testing--ud257">https://www.udacity.com/course/ab-testing--ud257</a></li>
+<li>Udacity AB 实验课程笔记：<a href="https://lifanyiran.com/2021/05/13/abtesting_intro">https://lifanyiran.com/2021/05/13/abtesting_intro</a></li>
+<li>The Effect: An Introduction to Research Design and Causality By Nick Huntington-Klein：<a href="https://theeffectbook.net/index.html">https://theeffectbook.net/index.html</a></li>
+<li>列联表联合采样实验 by Tencent：<a href="https://arxiv.org/abs/2401.15811">[2401.15811] Seller-Side Experiments under Interference Induced by Feedback Loops in Two-Sided Platforms</a></li>
+<li>快手双边市场的复杂实验设计问题：<a href="https://www.51cto.com/article/748974.html">https://www.51cto.com/article/748974.html</a></li>
+<li>代理指标 by Google：<a href="https://dl.acm.org/doi/pdf/10.1145/3534678.3539073">https://dl.acm.org/doi/pdf/10.1145/3534678.3539073</a></li>
+<li>代理指标 by Netflix：<a href="https://dl.acm.org/doi/pdf/10.1145/2843948">https://dl.acm.org/doi/pdf/10.1145/2843948</a></li>
+<li>代理指数 by LinkedIn：<a href="https://arxiv.org/pdf/2106.01421">https://arxiv.org/pdf/2106.01421</a></li>
+</ul>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2022/12/12/ad-platform-auction-mechanism/">广告平台拍卖机制简述<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
