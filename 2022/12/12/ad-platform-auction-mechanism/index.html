@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>广告平台拍卖机制简述 - 屹然的空间</title>
+
+  <meta name="description" content="从帕累托最优和公地悲剧出发，简要介绍广告平台中的估价、RTB 以及一价、二价和 VCG 三种常见拍卖机制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="广告平台拍卖机制简述">
+<meta property="og:url" content="https://lifanyiran.com/2022/12/12/ad-platform-auction-mechanism/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="从帕累托最优和公地悲剧出发，简要介绍广告平台中的估价、RTB 以及一价、二价和 VCG 三种常见拍卖机制。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2022/ad-platform-auction-mechanism.jpg">
+<meta property="article:published_time" content="2022-12-12T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-07-26T16:14:06.490329+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="广告平台">
+<meta property="article:tag" content="拍卖机制">
+<meta property="article:tag" content="RTB">
+<meta property="article:tag" content="GSP">
+<meta property="article:tag" content="VCG">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2022/ad-platform-auction-mechanism.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/notes/">书签</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#_1">广告平台拍卖机制简述</a><ul>
+<li><a href="#1">1. 引言：帕累托最优</a></li>
+<li><a href="#2">2. 估价</a></li>
+<li><a href="#3">3. 拍卖</a><ul>
+<li><a href="#31-gfp">3.1 一价（GFP）</a></li>
+<li><a href="#32-gsp-or-vickrey-auction">3.2 二价（GSP or Vickrey Auction）</a></li>
+<li><a href="#33-vcgvickrey-clarke-groves">3.3 VCG（Vickrey-Clarke-Groves）</a></li>
+</ul>
+</li>
+<li><a href="#4">4. 总结</a></li>
+<li><a href="#5">5. 附</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><span class="cap breadcrumb-link">商业化</span></div><div id="post-meta">发布于&nbsp;<time datetime="2022-12-12T00:00:00+08:00">2022-12-12</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>广告平台拍卖机制简述</span></h1>
+<p class="post-hero"><img src="/images/covers/2022/ad-platform-auction-mechanism.jpg" alt="广告平台拍卖机制简述"></p>
+<h1 id="_1">广告平台拍卖机制简述</h1>
+<h2 id="1">1. 引言：帕累托最优</h2>
+<p>一个经典的经济学例子：公地悲剧（The Tragedy of the Commons）。设想有一个公共牧场，许多牧民都可以在此放牧。每个牧民都会尽力放牧以最大化自己的收益，但这会导致过度放牧和牧场退化。当牧场退化到一定程度时，所有牧民的收益都会受到影响。但是如果每个牧民都限制自己的放牧数量以保护牧场质量，那么整个牧场的价值将会最大化，这个最大化的资源分配状态就称为帕累托最优。但对于每个牧民而言，不限制放牧数量是其自己最好的选择，于是陷入了囚徒困境。因此需要一个外部调控者来进行管理，例如政府或者协会等，限制牧民的行为，使得资源分配进入帕累托最优。</p>
+<p>换到我们的场景中，牧场 = 媒体（B 站），草 = 用户，牧民 = 广告主，而调控者 = 广告平台。</p>
+<p>它们之间的关系，看起来像一个四角恋爱：广告主追求媒体的目标用户，互联网用户追求媒体的内容和社区，媒体追求广告平台变现能力的最大化，广告平台追求广告主手中的预算。在这种相互博弈的状态下，广告平台成为资源调整的核心，它是整个循环的宏观调控中心。</p>
+<blockquote>
+<p>原文中此处有一个流程图链接：https://doc.weixin.qq.com/flowchart-addon</p>
+</blockquote>
+<h2 id="2">2. 估价</h2>
+<p>通常广告主投放有两种形式：买断和计费。</p>
+<ol>
+<li>买断：通常是 CPT（cost per time）计费，根据某个时间段买断这个资源位的所有流量，比如开屏页。</li>
+<li>RTB（实时竞价，real-time bidding）：对流量根据估价来进行拍卖，价高者得。</li>
+</ol>
+<p>对于 RTB 场景，大部分媒体平台通常使用 eCPM 排序：</p>
+<pre><code class="language-text">eCPM = eCTR × eCVR × bid
+</code></pre>
+<p>排序使用不同标的，决定于平台的导向。比如 PDD 的商品投放排序标的为“预估转化率”（ePVR = eCTR × eCVR），这样的标的相比于 eCPM 忽略了 bid 的存在，从而通过流量系统来倒逼广告主为了提升跑量能力对商品降价，以满足“低价”的平台导向。</p>
+<h2 id="3">3. 拍卖</h2>
+<p>有三种常用的拍卖机制，分别为一价、二价和 VCG 竞价。其中绝大部分媒体和场景均为二价。</p>
+<h3 id="31-gfp">3.1 一价（GFP）</h3>
+<p>一价全称为广义第一出价（Generalized First Pricing），是一种“密封”式拍卖，并且买方出价是同时性，而非序贯性；众多买方以书面投标方式竞买拍卖品，出价最高者将以其出价水平获取拍卖品。第一价格拍卖的多单位同质商品拍卖，称作“歧视性拍卖”，即不同单位的拍卖品由该单位的最高出价者以最高出价购买。在竞价过程中，竞买人不知道参加竞拍的总人数及标的价格，通常竞买人往往会比自己的估价稍低一些。</p>
+<p>它的优势是简单、收入可保证，但是稳定性较差。各个广告主为了获得最佳收益，可以通过频繁修改投放价格来实现。举例来说：</p>
+<ol>
+<li>一个广告主为了获得展现，会不断增加价格；在获得展现后，又会开始不断减少价格以降低成本。这种竞争是相对武断的，而且很容易知晓竞争对手的出价。</li>
+<li>当出价最高的广告主停止投放后，容易对广告平台收入产生较大波动。</li>
+</ol>
+<p>在 2002 年之前，所有的搜索引擎都是第一出价法则。</p>
+<p><strong>例子</strong></p>
+<p>假设以 eCPM 为排序标的，所有广告主的 eCTR 和 eCVR 相同，只需要考虑 bid 这一个条件。我们现在有 110 个转化，希望拍卖出去，其中 100 个给第一名，10 个给第二名。最后的结果为：</p>
+<table>
+<thead>
+<tr>
+<th>广告主</th>
+<th style="text-align: right;">bid</th>
+<th style="text-align: right;">转化数</th>
+<th style="text-align: right;">计费</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">5 × 100 = 500</td>
+</tr>
+<tr>
+<td>B</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3 × 10 = 30</td>
+</tr>
+<tr>
+<td>C</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td><strong>总计</strong></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><strong>530</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>pro</strong>：简单，解释性强。</p>
+<p><strong>con</strong>：不稳定。</p>
+<h3 id="32-gsp-or-vickrey-auction">3.2 二价（GSP or Vickrey Auction）</h3>
+<p>第二价格密封拍卖（Generalized Second Pricing，Vickrey Auction），即维克里拍卖，也叫二级价格密封拍卖。在这种拍卖中，竞买者同样以密封的形式独立出价，商品也出售给出价最高的投标者。但是，获胜者支付的是所有投标价格中的第二高价，所以它被称为第二价格密封拍卖。</p>
+<p><strong>Q：在第二价格密封拍卖中，每个投标者提交密封的交易价格，出价最高者赢得商品，但交易却以所有出价中的第二高价进行。针对这种拍卖方式的具体运作特点，投标者应该如何制定自己的竞拍策略？</strong></p>
+<p><strong>A：</strong> 维克里指出，如果执行这种程序，每个投标者的最优战略就是使出价等于他自己对这件商品的完全估价，或者说，此时诚实才是最好的竞拍策略。因为在第二价格密封拍卖中，当一个投标人获胜时，他最后支付的成交价格独立于其出价。所以，在没有串通的情况下，每个投标者的最优战略就是依照自己对拍卖商品的估价据实竞标。当低于这个价格时，将减少投标者赢得商品的概率；而高于此价格，虽然可以提高投标者赢的概率，但他获得了一场无利润的交易，因为他必须支付的价格可能高于其对商品的估价。</p>
+<p>原论文的数学证明：https://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1961.tb02789.x</p>
+<p>由于在第二价格拍卖中，诚实就是最好的竞拍策略，所以维克里进一步指出，用“第二价格”的方法解决密封式投标具有很多优点：</p>
+<ol>
+<li>在很多情况下，由于投标者之间的不对称、错误的评估、战略错误，使得“最高价”或者说第一价格拍卖方法的结果不是最优。</li>
+<li>在第二价格拍卖法中，投标者的最好竞拍策略就是依照自己对标的物的评价而给出标价，因此不管是从个人收益还是从整体资源配置考虑，它使得对其他竞争对手的出价情况、投标策略和整体市场评估变得多余。每个投标者只需要将他的努力和注意力放在从自身方面评价商品价值上，因此大量节省了脑力劳动和费用支出。这种节约可以导致更好的资源配置，并增加可被买卖双方分享的总收益。因为投标者的信息搜寻费用减少了，收益就增加，这就会吸引更多人参与竞标，对卖者而言也可能产生更高的价格。</li>
+</ol>
+<p>那么，在第二价格密封拍卖的具体实践中，诚实是否真的是投标者的最优策略？此时，搜集其他竞争对手的需求信息以及评估整体市场形式是否真的不再必要？简单来讲是理论可行，但与现实仍然会有差异。维克里认为，在第二价格拍卖法中，投标人的出价由他对拍卖商品的估价决定，而估价则产生于投标者各自相互独立的概率分布函数。由于每个投标人对拍卖商品的估价与其他竞买者相独立，所以就算知道竞争对手对该商品的估价，投标者也不会改变自己对竞拍品的评价，从而也不必要去搜集其他信息。但是在大多数竞拍中，投标者的估价极有可能会受到其他竞争对手估价的影响，或者说投标者估价的概率分布函数可能不是完全独立的。比如，当投标者认为有人出的价格会比自己高时，他们就可能将自己的心理价位进行上调。所以，现实中，维克里所指出的第二价格拍卖法下的竞拍策略和优点是否完全存在，还值得进一步探讨。</p>
+<p><strong>例子</strong></p>
+<p>还是上面的例子，每个广告主的计费则使用第二名的出价：</p>
+<table>
+<thead>
+<tr>
+<th>广告主</th>
+<th style="text-align: right;">bid</th>
+<th style="text-align: right;">转化数</th>
+<th style="text-align: right;">计费</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">3 × 100 = 300</td>
+</tr>
+<tr>
+<td>B</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2 × 10 = 20</td>
+</tr>
+<tr>
+<td>C</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td><strong>总计</strong></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><strong>320</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>pro</strong>：稳定。</p>
+<p><strong>con</strong>：可以破坏对手（第二名提升出价）；相比一价解释性略弱；竞争不充分时可能会收入减少过多（二价差过大）。</p>
+<p>目前 B 站大多数资源位为二价，消耗 = 二价收入，而广告主价值 ≈ 一价收入。</p>
+<h3 id="33-vcgvickrey-clarke-groves">3.3 VCG（Vickrey-Clarke-Groves）</h3>
+<p>VCG 的名字来源于三个牛人的名字，其中最有名的 Vickrey 是一个出生在加拿大的经济学家，1996 年获得诺贝尔经济学奖。他在竞拍理论上有突出的贡献，也就是上面二价拍卖理论的提出者。</p>
+<p>VCG 是一种比第二价格还要晦涩的方法，它的基本原理是计算竞价者赢得广告位后，给整个竞价收入带来的机会收益/损失，理论上这种损失就是竞价获胜者应该支付的费用。VCG 与二价相比最大的差异为，不仅参考了第二名的出价，而是参考了全局所有人的出价。在 VCG 拍卖系统中，说实话是一种优势策略，容易达到全局的帕累托最优。</p>
+<p><strong>例子</strong></p>
+<table>
+<thead>
+<tr>
+<th>广告主</th>
+<th style="text-align: right;">bid</th>
+<th style="text-align: right;">转化数</th>
+<th>计费</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">100</td>
+<td>1. 假如 A 不参加拍卖，则 B 和 C 获得转化数，总收益为 3 × 100 + 2 × 10 = 320<br>2. 如果 A 参加拍卖，B 带来的总收益为 3 × 10 = 30<br>则 A 需要支付：A 不参加拍卖带来的收益 - A 参加拍卖其他竞争者带来的收益 = 320 - 30 = 290</td>
+</tr>
+<tr>
+<td>B</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">10</td>
+<td>1. 假如 B 不参加拍卖，C 获得转化数，总收益为 2 × 10 = 20<br>2. 如果 B 参加拍卖，C 带来的总收益为 0<br>则 B 需要支付：20 - 0 = 20</td>
+</tr>
+<tr>
+<td>C</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">-</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>总计</strong></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td><strong>310</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>pro</strong>：可以达到全局最优。</p>
+<p><strong>con</strong>：复杂，实时实现成本高。</p>
+<h2 id="4">4. 总结</h2>
+<p>从收入视角来看，GFP ≥ GSP ≥ VCG；从稳定性的角度来看则是相反的。对于广告平台来讲，通常希望广告主的出价以及生态较为稳定，所以通常会使用 GSP 而不是 GFP。</p>
+<p>对于 VCG 而言，诚然在理论上更加符合全局帕累托最优，GSP 容易陷入局部最优；但目前各大互联网公司基于 GSP 的竞价机制运行多年且非常完善，规则更加清晰、容易理解，广告主接受度也很高，所以各大互联网公司并没有动力将平台的竞价机制由 GSP 切换到 VCG。</p>
+<p>FB 曾有过短暂的 VCG 尝试，不过后续仅保留在了极少数资源位上，猜测是对客户解释性问题导致。</p>
+<h2 id="5">5. 附</h2>
+<ul>
+<li><a href="https://www.woshipm.com/pd/5947912.html">商业化策略产品经理必读系列—广告竞价拍卖机制设计 | 人人都是产品经理</a></li>
+<li><a href="https://blog.csdn.net/weixin_44441131/article/details/111319654">计算广告——第二竞价机制和 VCG 机制_第二竞价原理-CSDN 博客</a></li>
+<li>二价的原论文：https://onlinelibrary.wiley.com/doi/10.1111/j.1540-6261.1961.tb02789.x</li>
+</ul>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+<p class="fs12">封面图片：<a target="_blank" rel="noopener" href="https://commons.wikimedia.org/w/index.php?curid=153860860">Digital Advertising Consortium Inc. - Jul 17, 2013</a> / Dick Thomas Johnson / BY 2.0（Openverse）</p></div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2022/06/15/computational_advertising_3/">计算广告 - 合约广告<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
