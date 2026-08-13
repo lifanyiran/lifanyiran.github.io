@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>Large Language Model Agent in Financial Trading - 屹然的空间</title>
+
+  <meta name="description" content="基于《Large Language Model Agent in Financial Trading》综述，梳理 LLM as a Trader 与 LLM as an Alpha Miner 两条路线，以及新闻驱动、反思记忆、多角色辩论、RL 反馈和 alpha mining 的代表工作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Large Language Model Agent in Financial Trading">
+<meta property="og:url" content="https://lifanyiran.com/2026/06/28/large-language-model-agent-in-financial-trading/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="基于《Large Language Model Agent in Financial Trading》综述，梳理 LLM as a Trader 与 LLM as an Alpha Miner 两条路线，以及新闻驱动、反思记忆、多角色辩论、RL 反馈和 alpha mining 的代表工作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2026/large-language-model-agent-in-financial-trading.jpg">
+<meta property="article:published_time" content="2026-06-28T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-08-13T15:13:06.516840+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="Trading">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2026/large-language-model-agent-in-financial-trading.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css?v=20260726-masonry">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/about/">About Me</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#_1">一句话理解两大方向</a></li>
+<li><a href="#11-news-driven">1.1 News-driven：新闻驱动交易员</a></li>
+<li><a href="#12-reflection-driven">1.2 Reflection-driven：带记忆和复盘的交易员</a></li>
+<li><a href="#13-debate-driven">1.3 Debate-driven：多角色辩论交易员</a></li>
+<li><a href="#14-rl-driven">1.4 RL-driven：用交易反馈训练或修正交易员</a></li>
+<li><a href="#15-llm-as-an-alpha-miner-llm">1.5 LLM as an Alpha Miner：让 LLM 做量化研究员</a></li>
+<li><a href="#_2">综述里提到的评测方式</a></li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/LLM/">LLM</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-06-28T00:00:00+08:00">2026-06-28</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>Large Language Model Agent in Financial Trading</span></h1>
+<p>团队/作者：Han Ding、Yinheng Li、Junhao Wang、Hang Chen、Doudou Guo、Yunbai Zhang。日期：arXiv 初版提交于 2024-07-26，当前版本 v2 修订于 2026-03-01。</p>
+<p>这篇综述适合用来建立领域地图。它把 LLM 交易系统分成两大方向：<strong>LLM as a Trader</strong> 和 <strong>LLM as an Alpha Miner</strong>。可以把前者理解成“让 LLM 扮演交易员”，后者理解成“让 LLM 扮演量化研究员”。</p>
+<p>面向非技术听众的开场解释：LLM 在这里不是万能预测器，而是一种能阅读大量文本、总结线索、组织推理并调用工具的组件。关键问题是：我们把它放在交易链路的哪个位置？是让它直接参与交易判断，还是让它帮助研究员生成可回测的因子和策略？</p>
+<pre><code class="language-text">LLM Trading Agent
+|
++-- LLM as a Trader：LLM 扮演交易员
+|   |
+|   +-- News-driven：读新闻和财报，判断影响偏正面还是负面
+|   +-- Reflection-driven：读新闻 + 查历史记忆 + 写复盘，再判断
+|   +-- Debate-driven：多个角色争论，多头/空头/风险方互相挑战
+|   +-- RL-driven：把回测结果当反馈，让系统逐步修正行为
+|
++-- LLM as an Alpha Miner：LLM 扮演量化研究员
+    |
+    +-- 生成 alpha factor
+    +-- 生成策略代码
+    +-- 通过 backtest / judge agent 迭代优化
+</code></pre>
+<h2 id="_1">一句话理解两大方向</h2>
+<table>
+<thead>
+<tr>
+<th>方向</th>
+<th>简明解释</th>
+<th>系统输出</th>
+<th>更像谁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LLM as a Trader</td>
+<td>让 LLM 直接参与交易决策，读取信息后输出买入、卖出、持有，或给股票排序。</td>
+<td>交易动作、方向判断、仓位建议、股票排序。</td>
+<td>交易员 / 投资经理</td>
+</tr>
+<tr>
+<td>LLM as an Alpha Miner</td>
+<td>让 LLM 辅助提出因子、生成策略代码、解释市场规律，再交给回测系统验证。</td>
+<td>因子公式、策略代码、研究假设、回测报告。</td>
+<td>量化研究员 / 策略开发助手</td>
+</tr>
+</tbody>
+</table>
+<h2 id="11-news-driven">1.1 News-driven：新闻驱动交易员</h2>
+<p>News-driven 是最直观的一条路线：把新闻、财报、宏观事件和价格摘要交给 LLM，让模型判断这些信息对股票未来价格是正面、负面还是中性。它的底层逻辑是：金融市场会对信息做反应，而 LLM 擅长读文本和总结语义。</p>
+<pre><code class="language-text">输入：当天新闻 / 财报 / 宏观事件 / 价格摘要
+↓
+LLM 做信息理解
+- 这条新闻讲了什么？
+- 是利好、利空还是中性？
+- 影响的是收入、成本、监管、竞争还是情绪？
+↓
+转成交易信号
+- positive → buy / long
+- negative → sell / short
+- neutral → hold
+↓
+进入回测或模拟交易
+</code></pre>
+<p>第一篇细讲：<a href="https://arxiv.org/abs/2304.07619">Can ChatGPT Forecast Stock Price Movements?</a></p>
+<p>团队/作者：Alejandro Lopez-Lira、Yuehua Tang。日期：arXiv 初版提交于 2023-04-15，当前版本 v6 修订于 2025-10-28。</p>
+<p>这篇论文是 News-driven 路线中的经典工作。它关注的问题很直接：传统金融 NLP 模型通常需要训练数据、标签和专门模型，那么通用 LLM 是否可以仅依靠 prompt，从新闻标题中判断股票短期方向？</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>做法</th>
+<th>效果/结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新闻是否包含可交易信息？</td>
+<td>给 ChatGPT 输入公司新闻标题，要求判断该新闻对公司股价是 good、bad 还是 unknown，并要求解释理由。</td>
+<td>ChatGPT 生成的情绪分数与后续股票收益存在正相关，说明 LLM 能从新闻标题中提取一定方向性信号。</td>
+</tr>
+<tr>
+<td>如何从语言判断变成量化信号？</td>
+<td>把 good/bad/unknown 映射成数值情绪分数，再用这些分数预测下一交易日收益或构造交易组合。</td>
+<td>LLM 输出从自然语言解释变成可回测的 signal，这是它对 trading agent 的启发。</td>
+</tr>
+<tr>
+<td>它解决了什么旧问题？</td>
+<td>避免为每个金融情绪任务重新标注训练集；用 zero-shot prompt 直接处理新闻。</td>
+<td>证明通用 LLM 在金融文本理解上可以作为快速信号生成器。</td>
+</tr>
+</tbody>
+</table>
+<p>演讲提示：这篇不是让 ChatGPT 承担完整交易员职责，而是把它作为“新闻打分器”。它读取一条新闻标题，判断这条新闻大概率利好还是利空，再把这个判断转化为可回测的数值信号。</p>
+<table>
+<thead>
+<tr>
+<th>其他代表 paper</th>
+<th>技术思想</th>
+<th>简明解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Can Large Language Models Beat Wall Street? / Fatouros et al., 2024；综述中称 MarketSenseAI</td>
+<td>把每日新闻、基本面、宏观和价格动量先总结，再交给 LLM 做股票选择。</td>
+<td>不是只看一条新闻，而是让助理先写一份“今日市场简报”，再给投资建议。</td>
+</tr>
+<tr>
+<td>LLMFactor / Wang, Izumi &amp; Sakaji, 2024</td>
+<td>先让 LLM 从历史新闻与股价反应中抽取重要因素，再用这些因素解释和预测后续走势。</td>
+<td>让模型先学会“市场通常在意什么”，例如业绩、监管、供应链，再用这套因素看新新闻。</td>
+</tr>
+<tr>
+<td>Sentiment trading with large language models / Kirtac &amp; Germano, 2024</td>
+<td>用 LLM 情绪信号构造 long-short 策略，并和传统基线比较。</td>
+<td>把 LLM 作为新闻情绪分类器，再检验情绪信号是否能够转化为收益。</td>
+</tr>
+<tr>
+<td>Unveiling the Potential of Sentiment / Zhang et al., 2024，中国股票市场</td>
+<td>研究 LLM 情绪信号是否能预测中国股票价格变化，并按信号强弱分组回测。</td>
+<td>同样是新闻打分，但换到 A 股语境，检查它是否还能工作。</td>
+</tr>
+</tbody>
+</table>
+<p>这条路线的主要风险：新闻发布时间必须严格对齐交易时间。如果模型读取的是收盘后才发布的新闻，却在回测中被设定为开盘前已经可见，收益会被严重高估。</p>
+<h2 id="12-reflection-driven">1.2 Reflection-driven：带记忆和复盘的交易员</h2>
+<p>Reflection-driven 可以理解成 News-driven 的增强版。它不只是读当天新闻，而是会把过去的新闻、判断和交易结果保存成 memory；新一天做决策时，先检索相似历史情境，再让 LLM 写 reflection，最后输出交易判断。</p>
+<pre><code class="language-text">当天信息
+↓
+写入 memory
+- 新闻摘要
+- 财报摘要
+- 价格变化
+- 上次交易结果
+↓
+新决策时检索相关 memory
+- 最近发生过什么？
+- 历史上类似事件如何演化？
+- 上次判断错在哪里？
+↓
+LLM 生成 reflection
+↓
+输出 buy / sell / hold
+</code></pre>
+<p>第一篇细讲：<a href="https://arxiv.org/abs/2311.13743">FinMem: A Performance-Enhanced LLM Trading Agent with Layered Memory and Character Design</a></p>
+<p>团队/作者：Yangyang Yu、Haohang Li、Zhi Chen、Yuechen Jiang、Yang Li、Denghui Zhang、Rong Liu、Jordan W. Suchow、Khaldoun Khashanah。日期：arXiv 初版提交于 2023-11-23，当前版本 v2 修订于 2023-12-03。</p>
+<p>FinMem 试图解决单次 prompt 的短视问题：如果模型只看当天新闻，就难以记住某家公司过去几周的连续事件，也难以从历史错误中形成经验。FinMem 因此把 trading agent 设计成一个带分层记忆和角色特征的系统。</p>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>做法</th>
+<th>解决的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layered Memory</td>
+<td>把新闻、财报、市场观察总结成记忆，并按短期/中期/长期或不同抽象层保存。</td>
+<td>让 agent 不必每次从零开始看市场，能带着历史上下文做判断。</td>
+</tr>
+<tr>
+<td>Memory Retrieval</td>
+<td>新决策到来时，按 recency、relevance、importance 检索相关记忆。</td>
+<td>避免把所有历史都塞进 prompt，只取和当前决策最相关的经验。</td>
+</tr>
+<tr>
+<td>Reflection</td>
+<td>LLM 根据当前观察和检索到的记忆，总结高层经验和投资判断。</td>
+<td>把零散新闻变成“这家公司当前处于什么状态”的研究结论。</td>
+</tr>
+<tr>
+<td>Character Design</td>
+<td>为 agent 设置风险偏好或交易风格，使不同角色在决策上呈现差异。</td>
+<td>模拟不同交易员风格，观察风格对决策和收益的影响。</td>
+</tr>
+</tbody>
+</table>
+<p>效果怎么理解：论文报告 FinMem 相比简单新闻/情绪型基线有更好的回测表现；但它更重要的架构价值在于提出“记忆检索 + 反思 + 决策”的 agent loop。</p>
+<table>
+<thead>
+<tr>
+<th>其他代表 paper</th>
+<th>技术思想</th>
+<th>简明解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FinAgent / Zhang et al., 2024</td>
+<td>在记忆和反思基础上加入多模态输入，包括文本、数值、技术指标和 K 线图。</td>
+<td>让交易员不只读新闻，还能看图表、看指标、看分析师意见。</td>
+</tr>
+<tr>
+<td>Learning to Generate Explainable Stock Predictions using Self-Reflective LLMs / Koa et al., 2024；综述称 SEP</td>
+<td>利用历史预测对错生成自我反思，用反思来提高后续预测解释性和准确性。</td>
+<td>类似复盘机制：每次判断后都追问“为什么错，下一次如何避免”。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="13-debate-driven">1.3 Debate-driven：多角色辩论交易员</h2>
+<p>Debate-driven 的出发点是：单个 LLM 容易沿着同一叙事不断强化自身判断。于是系统会设置多个角色，让它们从不同视角互相挑战，例如多头、空头、风险、情绪、逻辑检查。最后再由一个 manager 或裁判 agent 汇总结论。</p>
+<pre><code class="language-text">同一批市场信息
+↓
+多个角色分别分析
+- 多头：为什么可以买？
+- 空头：为什么不能买？
+- 风险：最大风险是什么？
+- 情绪：市场现在是否过热？
+↓
+角色之间辩论
+↓
+裁判 / manager 汇总
+↓
+最终交易判断
+</code></pre>
+<p>第一篇细讲：<a href="https://arxiv.org/abs/2309.03736">TradingGPT: Multi-Agent System with Layered Memory and Distinct Characters for Enhanced Financial Trading Performance</a></p>
+<p>团队/作者：Yang Li、Yangyang Yu、Haohang Li、Zhi Chen、Khaldoun Khashanah。日期：arXiv 初版提交于 2023-09-07。</p>
+<p>TradingGPT 试图解决“单个 agent 判断视角过窄”的问题。它在记忆型 agent 的基础上加入多角色和辩论，让不同 agent 带着不同 character 读取记忆、生成反思，并对彼此的交易动作提出质疑。</p>
+<table>
+<thead>
+<tr>
+<th>设计</th>
+<th>怎么做</th>
+<th>解决的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layered Memory</td>
+<td>和 FinMem 类似，保留历史新闻、观察和交易经验。</td>
+<td>让 debate 不只是围绕当天新闻，而是能引用历史上下文。</td>
+</tr>
+<tr>
+<td>Distinct Characters</td>
+<td>不同 agent 拥有不同交易偏好、风险态度或分析角度。</td>
+<td>制造观点差异，降低单一模型沿着同一叙事持续偏离的风险。</td>
+</tr>
+<tr>
+<td>Debate on Actions</td>
+<td>agent 不只生成自己的动作，还会讨论其他 agent 的动作和反思。</td>
+<td>让系统在最终决策前经历反方质询。</td>
+</tr>
+</tbody>
+</table>
+<p>效果怎么理解：论文报告多 agent 和角色设计提升了交易表现；但对团队分享来说，更重要的是它展示了“记忆 + 角色 + 辩论”的可解释决策工作流。</p>
+<table>
+<thead>
+<tr>
+<th>其他代表 paper</th>
+<th>技术思想</th>
+<th>简明解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Designing Heterogeneous LLM Agents for Financial Sentiment Analysis / Xing, 2024；综述称 HAD</td>
+<td>设计异构角色，例如 mood、rhetoric、dependency 等，从不同语言线索判断金融情绪。</td>
+<td>同一条新闻，找不同“专家”分别看语气、因果关系和情绪，再综合判断。</td>
+</tr>
+</tbody>
+</table>
+<p>注意：多 agent 的价值必须靠消融实验验证。如果去掉 debate 后结果差不多，那多出来的 agent 可能只是增加了成本和复杂度。</p>
+<h2 id="14-rl-driven">1.4 RL-driven：用交易反馈训练或修正交易员</h2>
+<p>RL-driven 希望让系统不只是“会解释”，还可以从交易结果里学习。直觉上，这条路线很容易理解：如果一次买入导致亏损，系统应该收到负反馈；如果风险调整后收益较好，系统应该强化类似行为。但金融市场噪声极高，reward 设计非常难。</p>
+<pre><code class="language-text">历史市场环境
+↓
+agent 做交易决策
+↓
+回测得到反馈
+- 收益
+- 回撤
+- Sharpe
+- 是否预测正确
+↓
+更新系统
+- 更新 prompt / memory
+- 训练 policy network
+- 微调模型或优化策略
+↓
+下一轮交易
+</code></pre>
+<p>第一篇细讲：<a href="https://arxiv.org/abs/2402.03659">Learning to Generate Explainable Stock Predictions using Self-Reflective Large Language Models</a></p>
+<p>团队/作者：Kelvin J.L. Koa、Yunshan Ma、Ritchie Ng、Tat-Seng Chua。日期：arXiv 初版提交于 2024-02-06，当前版本 v3 修订于 2024-02-29；论文发表于 WWW 2024。</p>
+<p>这篇论文关注“可解释股票预测”。它不只是让模型输出涨跌，而是让模型学习生成解释，并利用历史预测对错来进行自我反思。综述把它放在 RL-driven 附近，是因为它把历史反馈用于修正模型行为。</p>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>怎么做</th>
+<th>解决的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prediction</td>
+<td>LLM 基于金融文本和市场信息生成股票方向预测。</td>
+<td>从文本信息中提取对未来价格有用的判断。</td>
+</tr>
+<tr>
+<td>Explanation</td>
+<td>要求模型说明为什么做出这个预测。</td>
+<td>避免只给黑盒标签，让人能审查推理链条。</td>
+</tr>
+<tr>
+<td>Self-reflection</td>
+<td>根据历史正确/错误样本，总结失败原因和可迁移经验。</td>
+<td>把预测错误转化为后续 prompt 或模型行为的改进信号。</td>
+</tr>
+</tbody>
+</table>
+<p>演讲提示：这类似给模型建立“复盘记录”。不是只告诉它预测错误，而是让它说明为什么错，下次遇到类似新闻和财务条件时应该注意什么。</p>
+<table>
+<thead>
+<tr>
+<th>其他代表 paper</th>
+<th>技术思想</th>
+<th>简明解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Integrating Stock Features and Global Information via LLMs / Ding et al., 2023</td>
+<td>LLM 生成新闻 embedding，再与股票特征结合，输入 PPO 等强化学习策略网络。</td>
+<td>LLM 不直接下单，而是把新闻转化为模型可用的特征，最终决策由 RL 策略完成。</td>
+</tr>
+</tbody>
+</table>
+<p>这条路线的主要风险：回测表现容易被过拟合放大。agent 可能在历史数据上学到许多阶段性有效的规则，但换一个市场环境后迅速失效。</p>
+<h2 id="15-llm-as-an-alpha-miner-llm">1.5 LLM as an Alpha Miner：让 LLM 做量化研究员</h2>
+<p>Alpha Miner 路线和 Trader 路线最大的不同是：它不急于让 LLM 直接参与交易动作，而是让 LLM 产生可验证的研究产物，比如因子公式、策略代码、特征组合或投资假设。然后用标准回测系统检验这些研究假设是否有效。</p>
+<pre><code class="language-text">人类给研究方向 / 市场现象
+↓
+LLM 生成因子假设或策略代码
+↓
+自动回测
+↓
+Judge agent 分析表现
+- 收益是否稳定？
+- 回撤是否可接受？
+- 换时间段是否还有效？
+↓
+LLM 修改因子或代码
+↓
+进入下一轮迭代
+</code></pre>
+<p>第一篇细讲：<a href="https://arxiv.org/abs/2402.03755">QuantAgent: Seeking Holy Grail in Trading by Self-Improving Large Language Model</a></p>
+<p>团队/作者：Saizhuo Wang、Hang Yuan、Lionel M. Ni、Jian Guo。日期：arXiv 初版提交于 2024-02-06。</p>
+<p>QuantAgent 试图把 LLM 用在量化研究中较耗人力的一步：从研究想法生成可执行 alpha，并根据回测反馈持续改进。它不是让 LLM 直接输出买卖动作，而是让 LLM 进入“写代码、跑回测、看反馈、再修改”的研究循环。</p>
+<table>
+<thead>
+<tr>
+<th>机制</th>
+<th>怎么做</th>
+<th>解决的问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Inner loop</td>
+<td>Writer agent 根据人类 idea 生成策略/因子代码，Judge agent 对代码和结果给反馈。</td>
+<td>把研究员的自然语言想法快速转化为可运行实验。</td>
+</tr>
+<tr>
+<td>Outer loop</td>
+<td>把提交的代码放到真实市场数据上回测，用结果反过来改进 judge。</td>
+<td>让系统不只会写代码，还能逐步学习哪些代码更可能有效。</td>
+</tr>
+<tr>
+<td>Self-improvement</td>
+<td>多轮迭代后，agent 根据历史尝试持续逼近更好的 alpha。</td>
+<td>提高 alpha mining 的效率，减少人工试错成本。</td>
+</tr>
+</tbody>
+</table>
+<p>效果怎么理解：论文报告 QuantAgent 能逐步改进生成的 alpha；但最值得借鉴的是它把 LLM 放在“研究自动化”而不是“直接实盘交易”的位置，工程边界更清晰。</p>
+<table>
+<thead>
+<tr>
+<th>其他代表 paper</th>
+<th>技术思想</th>
+<th>简明解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AlphaGPT / Wang et al., 2023</td>
+<td>Human-in-the-loop alpha mining，让人类研究员和 LLM 共同生成、修改和验证 alpha。</td>
+<td>不是全自动交易，而是把 LLM 当作研究搭档，加速找因子。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_2">综述里提到的评测方式</h2>
+<table>
+<thead>
+<tr>
+<th>评测类别</th>
+<th>常见指标</th>
+<th>适用对象</th>
+<th>面向非技术听众的解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>组合表现</td>
+<td>累计收益、年化收益、Sharpe、最大回撤。</td>
+<td>Trader agent、完整策略。</td>
+<td>最终收益是否成立，过程是否过于波动，最大亏损有多深。</td>
+</tr>
+<tr>
+<td>信号质量</td>
+<td>Accuracy、F1、win rate、Information Coefficient。</td>
+<td>情绪信号、因子信号、股票排序。</td>
+<td>模型给出的分数和未来涨跌有没有关系。</td>
+</tr>
+<tr>
+<td>系统成本</td>
+<td>token cost、推理延迟、训练时间。</td>
+<td>多 agent、实时系统、Alpha Miner。</td>
+<td>系统单次运行的成本、延迟和实际部署可行性。</td>
+</tr>
+</tbody>
+</table>
+<p>阅读这篇综述时需要保留审慎态度：它提到一些 agent 在回测中相对 baseline 取得更好表现，但对交易成本、执行价格、幸存者偏差、严格时间切分和可复现 artifact 的审计不深。分享时可以把它定位为“地图型综述”，不是“可信度审计报告”。</p>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+<p class="fs12">封面图片：<a target="_blank" rel="noopener" href="https://www.flickr.com/photos/26373139@N08/6093690339">Graph With Stacks Of Coins</a> / kenteegardin / BY-SA 2.0（Openverse）</p></div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2026/05/23/self-evolving-agents-survey/">自进化Agent综述<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
