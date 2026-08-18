@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>Hybrid KDA–MLA：Kimi K3 注意力机制解析 - 屹然的空间</title>
+
+  <meta name="description" content="解析 Kimi K3 的 Hybrid KDA–MLA 注意力机制：用 KDA 低成本处理超长上下文，用 Gated MLA 周期性保留全局 softmax attention 能力。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hybrid KDA–MLA：Kimi K3 注意力机制解析">
+<meta property="og:url" content="https://lifanyiran.com/2026/07/30/hybrid-kda-mla-kimi-k3-attention/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="解析 Kimi K3 的 Hybrid KDA–MLA 注意力机制：用 KDA 低成本处理超长上下文，用 Gated MLA 周期性保留全局 softmax attention 能力。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2026/hybrid-kda-mla-kimi-k3-attention.jpg">
+<meta property="article:published_time" content="2026-07-30T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-08-18T17:01:14.299998+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="Kimi">
+<meta property="article:tag" content="Attention">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2026/hybrid-kda-mla-kimi-k3-attention.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css?v=20260726-masonry">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/about/">About Me</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#attention">先从普通 attention 的问题说起</a></li>
+<li><a href="#kda">KDA：把历史压进一个会遗忘的状态</a></li>
+<li><a href="#kda-linear-attention">KDA 和普通 linear attention 有什么区别？</a><ul>
+<li><a href="#linear-attention">普通 linear attention：通常是累加式记忆</a></li>
+<li><a href="#kda_1">KDA：不是简单累加，而是“遗忘 + 误差修正”</a></li>
+<li><a href="#kda-decay">KDA 还有一个很工程化的 decay 设计</a></li>
+</ul>
+</li>
+<li><a href="#kda-kernel">KDA kernel：怎么把递归做快？</a></li>
+<li><a href="#mla-kv-cache-attention">MLA：压缩 KV cache 的全局 attention</a></li>
+<li><a href="#gated-mla-nopek3">Gated MLA 和 NoPE：K3 里的两个改动</a></li>
+<li><a href="#agent">为什么这个组合适合 agent？</a></li>
+<li><a href="#_1">一个简短总结</a></li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/LLM/">LLM</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-07-30T00:00:00+08:00">2026-07-30</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>Hybrid KDA–MLA：Kimi K3 注意力机制解析</span></h1>
+<p>研究了下 K3 的注意力机制，不是把所有 attention 都换成某种线性 attention，而是用了一个很工程化的组合：</p>
+<pre><code class="language-text">3 层 KDA + 1 层 Gated MLA
+</code></pre>
+<p>报告里的整体配置大致是：</p>
+<pre><code class="language-text">69 层 KDA + 24 层 Gated MLA
+</code></pre>
+<p>这个比例很有意思。它背后其实是一个取舍：</p>
+<pre><code class="language-text">KDA 负责便宜地处理超长上下文
+MLA 负责周期性地保留全局 softmax attention 能力
+</code></pre>
+<p>如果只用普通 attention，1M token 的 KV cache 和计算成本会非常重。如果只用线性 attention，又可能损失一些精确的 token-to-token 全局交互。Kimi K3 的路线是：大部分层用 KDA 扛长上下文成本，少数层插入 MLA 做全局信息交换。</p>
+<p>这篇只讲这件事。</p>
+<hr />
+<h2 id="attention">先从普通 attention 的问题说起</h2>
+<p>普通 Transformer attention 做的是：</p>
+<pre><code class="language-text">当前 token 的 query，去看历史所有 token 的 key/value
+</code></pre>
+<p>公式上是：</p>
+<p>$$
+\mathrm{Attention}(Q, K, V)
+=
+\mathrm{softmax}
+\left(
+\frac{QK^\top}{\sqrt{d}}
+\right)V
+$$</p>
+<p>它的好处是表达力强。每个 token 都可以精确地和任意历史 token 建立关系。</p>
+<p>但代价也很明显：</p>
+<pre><code class="language-text">上下文越长，历史 K/V 越多
+每生成一个 token，都要读越来越长的 KV cache
+</code></pre>
+<p>如果上下文是几千、几万 token，这还能扛。如果是 1M token，就麻烦了。</p>
+<p>想象你在做一个 coding agent 任务：</p>
+<pre><code class="language-text">系统提示 + 工具说明 + repo 文件 + grep 结果 + 测试日志 + 多轮修复记录
+</code></pre>
+<p>这些东西很容易堆成长上下文。普通 attention 要把每个历史 token 的 K/V 都留下来，后续每一步都要读它们。模型还没开始认真思考，显存和带宽先开始尖叫。</p>
+<p>所以 Kimi K3 需要新的 attention 结构。</p>
+<hr />
+<h2 id="kda">KDA：把历史压进一个会遗忘的状态</h2>
+<p>KDA，全称 Kimi Delta Attention。可以先别把它想成 attention，而是想成一本“会遗忘、会修正”的笔记本。</p>
+<p>普通 attention 是：</p>
+<pre><code class="language-text">保存所有历史 token
+当前 token 去翻所有历史
+</code></pre>
+<p>KDA 是：</p>
+<pre><code class="language-text">不保存所有历史 token
+而是维护一个固定大小的状态 S
+每来一个 token，就更新 S
+当前 token 只读取 S
+</code></pre>
+<p>这个状态是：</p>
+<p>$$
+S_t \in \mathbb{R}^{d_k \times d_v}
+$$</p>
+<p>你可以把它理解成模型当前对历史上下文的压缩记忆。</p>
+<p>每来一个 token，KDA 大致做三步：</p>
+<pre><code class="language-text">1. 先遗忘一部分旧状态
+2. 看旧状态对当前 key 已经能预测出什么
+3. 只把预测错的部分写进去
+</code></pre>
+<p>核心更新可以写成：</p>
+<p>$$
+\bar{S}<em t-1="t-1">t
+=
+\operatorname{Diag}(\alpha_t) S</em>
+$$</p>
+<p>$$
+S_t
+=
+\bar{S}_t
++
+\beta_t k_t
+\left(
+v_t - \bar{S}_t^\top k_t
+\right)^\top
+$$</p>
+<p>输出是：</p>
+<p>$$
+\tilde{o}_t = S_t^\top q_t
+$$</p>
+<p>这里几个量的含义是：</p>
+<pre><code class="language-text">alpha_t：每个 channel 保留多少旧状态
+beta_t：当前 token 写入力度
+k_t：当前信息的地址
+v_t：当前信息的内容
+q_t：当前 token 读取状态时用的 query
+</code></pre>
+<p>最关键的是这一项：</p>
+<p>$$
+v_t - \bar{S}_t^\top k_t
+$$</p>
+<p>它是 prediction error。</p>
+<p>也就是说，KDA 不是简单把新信息硬塞进状态，而是先问：</p>
+<blockquote>
+<p>旧状态用当前 key 查出来，已经能预测出什么 value？</p>
+</blockquote>
+<p>如果预测得很准，那就少写一点。如果预测得不准，就把误差写进去。</p>
+<p>这就是 delta rule 的味道。</p>
+<p>举个例子。假设模型在读代码：</p>
+<pre><code class="language-python">user = get_user()
+print(user.name)
+</code></pre>
+<p>前面状态里可能已经记住了：</p>
+<pre><code class="language-text">这里和 user 有关
+</code></pre>
+<p>后面又看到一段异常日志：</p>
+<pre><code class="language-text">AttributeError: 'NoneType' object has no attribute 'name'
+</code></pre>
+<p>KDA 不需要把整段日志完整背下来，而是会把“user 可能是 None”这种对现有状态有增量的信息写进去。下一次再遇到相关 query，它就能从状态里读到这部分信息。</p>
+<p>这就是 KDA 适合长上下文的地方：历史不是一长串 KV，而是持续压缩进状态。</p>
+<hr />
+<h2 id="kda-linear-attention">KDA 和普通 linear attention 有什么区别？</h2>
+<p>这块很容易混在一起。KDA 属于 linear attention / recurrent attention 的大方向，但它不是最朴素的 linear attention。</p>
+<h3 id="linear-attention">普通 linear attention：通常是累加式记忆</h3>
+<p>很多普通 linear attention 可以粗略理解成：</p>
+<p>$$
+S_t = S_{t-1} + \phi(k_t)v_t^\top
+$$</p>
+<p>输出类似：</p>
+<p>$$
+o_t = S_t^\top \phi(q_t)
+$$</p>
+<p>它的思路是：</p>
+<pre><code class="language-text">把历史 key/value 映射后累加进一个状态
+当前 query 去读这个累加状态
+</code></pre>
+<p>这种结构很简单，也很快。但它有几个问题：</p>
+<pre><code class="language-text">1. 历史信息不断累加，旧信息不容易主动忘掉
+2. 新信息容易覆盖/污染旧状态
+3. 状态更新通常是加法，表达能力有限
+</code></pre>
+<p>当然，不同 linear attention 变体会有 normalization、decay 或 gating，但最基础的版本可以先这样理解。</p>
+<h3 id="kda_1">KDA：不是简单累加，而是“遗忘 + 误差修正”</h3>
+<p>KDA 的更新不是：</p>
+<p>$$
+S_t = S_{t-1} + k_t v_t^\top
+$$</p>
+<p>而是：</p>
+<p>$$
+S_t
+=
+\bar{S}_t
++
+\beta_t k_t
+\left(
+v_t - \bar{S}_t^\top k_t
+\right)^\top
+$$</p>
+<p>差别有两个。</p>
+<p>第一，KDA 有 channel-wise forgetting：</p>
+<p>$$
+\bar{S}<em t-1="t-1">t
+=
+\operatorname{Diag}(\alpha_t) S</em>
+$$</p>
+<p>每个 key channel 都有自己的保留系数：</p>
+<p>$$
+\alpha_t \in (0, 1)^{d_k}
+$$</p>
+<p>所以它不是整块状态一起忘，而是不同维度以不同速度遗忘。</p>
+<p>第二，KDA 是 delta-rule update。</p>
+<p>它会先算：</p>
+<p>$$
+\mathrm{pred}_t = \bar{S}_t^\top k_t
+$$</p>
+<p>然后只写入误差：</p>
+<p>$$
+\mathrm{error}_t = v_t - \mathrm{pred}_t
+$$</p>
+<p>所以：</p>
+<p>$$
+S_t = \bar{S}_t + \beta_t k_t \mathrm{error}_t^\top
+$$</p>
+<p>这比简单累加更像一个在线学习过程：</p>
+<pre><code class="language-text">旧状态已经知道的，不重复写
+旧状态不知道的，用误差修正
+</code></pre>
+<h3 id="kda-decay">KDA 还有一个很工程化的 decay 设计</h3>
+<p>Kimi K3 里，遗忘系数不是随便预测的。它先预测 log-decay：</p>
+<p>$$
+g_t = g_{\min} \cdot \mathrm{Sigmoid}(e^A z_t)
+$$</p>
+<p>然后：</p>
+<p>$$
+\alpha_t = \exp(g_t)
+$$</p>
+<p>报告里：</p>
+<p>$$
+g_{\min} = -5
+$$</p>
+<p>所以：</p>
+<p>$$
+\alpha_t \in (e^{-5}, 1)
+$$</p>
+<p>这意味着每一步不能忘得太狠。</p>
+<p>这不是为了好看，而是为了 kernel。KDA 在 chunk 内并行时会用到连续遗忘系数的乘积：</p>
+<p>$$
+\gamma = \prod_t \alpha_t
+$$</p>
+<p>也会用到：</p>
+<p>$$
+\frac{1}{\gamma}
+$$</p>
+<p>如果 (\alpha_t) 太小，(\gamma) 会极小，(\frac{1}{\gamma}) 会数值爆炸。K3 给 decay 加下界后，一个 16-token tile 内的数值范围可控，很多原本需要特殊处理的 diagonal tile 也能走 Tensor Core GEMM。</p>
+<p>这就是 KDA 和普通 linear attention 的一个重要区别：</p>
+<pre><code class="language-text">KDA 不只是换了个线性公式
+它的 recurrence、decay、数值范围和 kernel 是一起设计的
+</code></pre>
+<hr />
+<h2 id="kda-kernel">KDA kernel：怎么把递归做快？</h2>
+<p>KDA 公式看起来还是递归的：</p>
+<p>$$
+S_t = f(S_{t-1}, x_t)
+$$</p>
+<p>如果逐 token 做：</p>
+<pre><code class="language-python">for token in tokens:
+    S = update(S, token)
+</code></pre>
+<p>GPU 会很不开心。因为 GPU 喜欢大块矩阵乘，不喜欢一个 token 一个 token 串行。</p>
+<p>所以 KDA 的 kernel 会把序列切成 chunk：</p>
+<pre><code class="language-text">chunk 1 -&gt; chunk 2 -&gt; chunk 3 -&gt; ...
+</code></pre>
+<p>chunk 之间传递状态：</p>
+<p>$$
+S_{\mathrm{out}}^{(i)}
+\rightarrow
+S_{\mathrm{in}}^{(i+1)}
+$$</p>
+<p>但 chunk 内部尽量并行。</p>
+<p>chunk 内输出可以拆成两部分：</p>
+<p>$$
+O
+=
+(\Gamma \odot Q) S_{\mathrm{in}}
++
+A \tilde{V}
+$$</p>
+<p>第一项：</p>
+<p>$$
+(\Gamma \odot Q) S_{\mathrm{in}}
+$$</p>
+<p>表示当前 chunk 读取前面 chunk 传进来的历史状态。</p>
+<p>第二项：</p>
+<p>$$
+A \tilde{V}
+$$</p>
+<p>表示当前 chunk 内部 token 之间的因果交互。</p>
+<p>其中：</p>
+<p>$$
+A =
+\operatorname{Tril}
+\left[
+(Q \odot \Gamma)
+(K / \Gamma)^\top
+\right]
+$$</p>
+<p>(\operatorname{Tril}) 表示只保留下三角，保证 causal。</p>
+<p>你不用死盯这个公式，只需要抓住一点：</p>
+<blockquote>
+<p>KDA 把 chunk 内的递归关系改写成矩阵乘，让 Tensor Core 可以跑起来。</p>
+</blockquote>
+<p>FlashKDA 做的事情，就是把 chunk 内矩阵计算和 chunk 间状态传播重叠起来，减少 GPU 空转。</p>
+<p>所以它不是魔法。它的工程思路是：</p>
+<pre><code class="language-text">原始：token -&gt; token -&gt; token，太串行
+优化：chunk -&gt; chunk，chunk 内用 GEMM 并行
+</code></pre>
+<p>这也是为什么 lower-bounded decay 很重要：它让 chunk 内的矩阵计算数值稳定，可以更充分地使用 dense GEMM。</p>
+<hr />
+<h2 id="mla-kv-cache-attention">MLA：压缩 KV cache 的全局 attention</h2>
+<p>KDA 很适合长上下文，但它毕竟不是完整的 softmax attention。为了保留周期性的全局 token-to-token 交互，Kimi K3 插入了 Gated MLA。</p>
+<p>MLA，全称 Multi-head Latent Attention。它的核心是：</p>
+<pre><code class="language-text">仍然做 softmax attention
+但不缓存完整 K/V
+而是缓存低维 latent
+</code></pre>
+<p>普通 attention 对每个 token 缓存：</p>
+<pre><code class="language-text">K_t, V_t
+</code></pre>
+<p>MLA 缓存：</p>
+<pre><code class="language-text">c_t = W_c x_t
+</code></pre>
+<p>这个 (c_t) 是一个低维 latent。后续需要 key/value 时，再从 latent 中投影或融合出各个 head 需要的信息。</p>
+<p>可以用一个很土但好懂的比喻：</p>
+<pre><code class="language-text">普通 attention：每个历史 token 都保存完整档案
+MLA：每个历史 token 只保存一个压缩包
+KDA：不保存每个历史 token，只维护一本总笔记
+</code></pre>
+<p>MLA 的优势是，它仍然保留了全局 attention 的能力。当前 token 还是能和历史 token 做 softmax 交互，只是历史 token 的缓存变小了。</p>
+<p>这和 KDA 的区别很大：</p>
+<pre><code class="language-text">KDA：历史 token 被压进状态 S，不再逐个查历史 token
+MLA：历史 token 还在，只是每个 token 的 KV 被压缩了
+</code></pre>
+<hr />
+<h2 id="gated-mla-nopek3">Gated MLA 和 NoPE：K3 里的两个改动</h2>
+<p>Kimi K3 里的 MLA 不是裸 MLA，而是 Gated MLA。</p>
+<p>MLA 的原始输出记作：</p>
+<p>$$
+\tilde{o}_t
+$$</p>
+<p>K3 会加一个输入相关的 gate：</p>
+<p>$$
+y_t
+=
+W_o
+\left[
+\mathrm{Sigmoid}(W_g x_t)
+\odot
+\mathrm{RMSNorm}(\tilde{o}_t)
+\right]
+$$</p>
+<p>这个 gate 可以理解成通道级阀门：</p>
+<pre><code class="language-text">哪些 attention 输出通道要放大
+哪些要压下去
+由当前输入 x_t 决定
+</code></pre>
+<p>另外，K3 的 MLA 使用 NoPE，也就是没有显式位置编码。</p>
+<p>这听起来有点反直觉。普通 attention 通常需要 RoPE 这类位置编码，否则 token 顺序会变模糊。</p>
+<p>K3 能这么做，是因为它不是纯 MLA。大量 KDA 层已经通过 recurrent decay 提供了位置感和近因偏置。于是 MLA 可以更专注于内容级全局交互。</p>
+<p>分工大概是：</p>
+<pre><code class="language-text">KDA：提供顺序感、近因记忆、长上下文状态压缩
+MLA：提供周期性的全局内容检索
+</code></pre>
+<p>这也是 Hybrid KDA–MLA 的精髓。</p>
+<hr />
+<h2 id="agent">为什么这个组合适合 agent？</h2>
+<p>Hybrid KDA–MLA 特别适合长程 agent 任务。</p>
+<p>比如一个 coding agent 正在修 bug：</p>
+<pre><code class="language-text">1. 读 README
+2. 搜索相关函数
+3. 打开多个源码文件
+4. 修改代码
+5. 跑测试
+6. 测试失败
+7. 继续读日志
+8. 再修改
+</code></pre>
+<p>这个过程里，上下文会越来越长，而且信息类型很多：</p>
+<pre><code class="language-text">代码结构
+错误日志
+之前做过的尝试
+工具返回结果
+用户约束
+</code></pre>
+<p>KDA 像一个持续更新的工作记忆。它不会把每个历史 token 都完整留下，而是把重要信息不断压进状态。</p>
+<p>MLA 则像定期全局回看。它让模型仍然有机会在压缩记忆之外，做更精确的 token-to-token 交互。</p>
+<p>所以这个组合不是为了论文结构好看，而是服务于真实任务：</p>
+<pre><code class="language-text">上下文很长
+任务步骤很多
+需要记住历史
+也需要偶尔精确回查
+</code></pre>
+<hr />
+<h2 id="_1">一个简短总结</h2>
+<p>Kimi K3 的 Hybrid KDA–MLA 可以概括成：</p>
+<pre><code class="language-text">KDA：固定状态、可遗忘、delta 更新，适合 1M 长上下文
+MLA：压缩 KV cache 的 softmax attention，保留全局交互
+Hybrid：多数层用 KDA 省成本，少数层用 MLA 补表达力
+</code></pre>
+<p>KDA 和普通 linear attention 的关键区别是：</p>
+<pre><code class="language-text">普通 linear attention 更像累加式记忆
+KDA 是 channel-wise forgetting + delta-rule error correction
+</code></pre>
+<p>再加上 lower-bounded decay 和 FlashKDA kernel，KDA 不只是一个公式改造，而是一套从模型结构到 GPU 执行都一起设计的长上下文方案。</p>
+<p>这也是 Kimi K3 这篇技术报告里我最喜欢的地方：它没有假装“只要上下文拉长就行”，而是认真处理了长上下文模型最麻烦的部分——记忆怎么存、怎么忘、怎么读、怎么跑得动。</p>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2026/06/28/large-language-model-agent-in-financial-trading/">Large Language Model Agent in Financial Trading<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
