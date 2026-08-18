@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>我发了一个币，送给朋友当作礼物 - 屹然的空间</title>
+
+  <meta name="description" content="记录一次把朋友梗做成链上 MEME 币的过程：从 NFT 到发币、pump.fun 与 Four.meme 的差异、初始供应、如何转给朋友，以及为什么它更像一个被链保存下来的内部笑话。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我发了一个币，送给朋友当作礼物">
+<meta property="og:url" content="https://lifanyiran.com/2026/08/11/meme-coin-as-a-gift-for-friends/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="记录一次把朋友梗做成链上 MEME 币的过程：从 NFT 到发币、pump.fun 与 Four.meme 的差异、初始供应、如何转给朋友，以及为什么它更像一个被链保存下来的内部笑话。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2026/meme-coin-as-a-gift-for-friends.jpg">
+<meta property="article:published_time" content="2026-08-11T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-08-18T17:31:43.495196+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="crypto">
+<meta property="article:tag" content="MEME">
+<meta property="article:tag" content="Solana">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2026/meme-coin-as-a-gift-for-friends.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css?v=20260726-masonry">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/about/">About Me</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#_1">先展示一下我发的币</a></li>
+<li><a href="#nft">NFT 和发币的感觉不太一样</a></li>
+<li><a href="#_2">新币一开始在谁手里？</a></li>
+<li><a href="#pumpfun">如果在 pump.fun 上发</a></li>
+<li><a href="#fourmeme">如果在 Four.meme 上发</a></li>
+<li><a href="#pancakeswap">如果自己部署合约再加 PancakeSwap 池子</a></li>
+<li><a href="#_3">到底怎么送给朋友？</a></li>
+<li><a href="#_4">币的地址是什么？</a></li>
+<li><a href="#_5">我最后觉得，送礼版发币应该是什么样</a></li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/crypto/">crypto</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-08-11T00:00:00+08:00">2026-08-11</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>我发了一个币，送给朋友当作礼物</span></h1>
+<p>组里同学陆陆续续离职了，我想送朋友一个有意思的礼物。除了吃饭、红包、实物，还有没有更奇怪一点的方式？</p>
+<p>一开始我想的是 NFT。比如用朋友的照片做一个 1/1 NFT，或者做一个只有我们几个人懂的纪念章。后来想想，既然都已经到了链上，能不能更抽象一点，发个 MEME 币得了，于是就研究了一下。</p>
+<h2 id="_1">先展示一下我发的币</h2>
+<p>这是我发来送给朋友的币：
+<img alt="图 1" src="/images/posts/2026/meme-coin-as-a-gift-for-friends/01.jpg" />
+<a href="https://pump.fun/coin/6jGpA9nvEnBvuAJLzHMUA6TdYUaud9et3J2UjJTzpump">https://pump.fun/coin/6jGpA9nvEnBvuAJLzHMUA6TdYUaud9et3J2UjJTzpump</a></p>
+<p>它不是什么严肃项目，也没有什么宏大叙事，就是一个链上的小礼物。</p>
+<p>描述：</p>
+<pre><code class="language-text">Seven frogs. One LLM agent. One unforgettable build. INSIGHTAGENT was built by an seven-person team united by two things: agentic AI and froge-head avatars. IAFROGE is an on-chain farewell keepsake for a teammate moving on — a memory of what we built together. No roadmap. No utility. No promise of value. Just froges, agents, and shared context
+</code></pre>
+<p>持币地址：
+<img alt="图 2" src="/images/posts/2026/meme-coin-as-a-gift-for-friends/02.jpg" />
+重点是：</p>
+<pre><code class="language-text">这段有趣的合作时间，真的被写到链上了。一定程度上，只要人类文明存在就不会消失。
+</code></pre>
+<h2 id="nft">NFT 和发币的感觉不太一样</h2>
+<p>NFT 更像一件作品。</p>
+<p>比如我给朋友做一张图，铸造成一枚 NFT，然后转给他。这件东西可以是唯一的，也可以铸造多份。它更接近“纪念品”“徽章”“链上相册”。</p>
+<p>发币就不一样了。</p>
+<p>币是同质化的。你可以有 1 枚，也可以有 1314 枚，也可以有 1,000,000 枚。它天然会让人想到流通、价格、交易、池子、K 线。</p>
+<p>所以如果只是送朋友，我觉得最好把它定位成：</p>
+<p><strong>这是一个链上的玩笑和纪念，不是一个投资项目。</strong></p>
+<p>这个边界挺重要的。不然朋友收到之后，可能第一反应不是“好有意思”，而是“你是不是拿我开盘了”。</p>
+<h2 id="_2">新币一开始在谁手里？</h2>
+<p>这个问题是我最开始真正没想明白的地方。</p>
+<p>答案取决于你怎么发。</p>
+<p>如果你是自己部署一个 BEP-20 或 ERC-20 合约，那么通常是你在合约里设置总供应量，然后这些币一开始全部 mint 到部署者钱包里。</p>
+<p>比如：</p>
+<pre><code class="language-text">总供应量：1,000,000,000 BFF
+部署钱包：0xABC...
+部署完成后：0xABC... 持有全部 1,000,000,000 BFF
+</code></pre>
+<p>这时候你就像拿着全部初始供应量的人。之后你可以自己决定：</p>
+<pre><code class="language-text">一部分送朋友
+一部分放进 PancakeSwap 池子
+一部分自己留着
+一部分销毁
+一部分锁起来
+</code></pre>
+<p>但如果你用 pump.fun 或 Four.meme 这种 launchpad，就不是这个逻辑。</p>
+<p>在这种平台上，币通常不是一开始全部给你。更像是平台帮你创建一个可以被买入的 meme coin，你自己要先买一部分，买到多少，手里才有多少。</p>
+<p>所以如果我想送朋友，实际流程不是“我创建，然后直接把全部币分给朋友”，而是：</p>
+<pre><code class="language-text">我创建这个币
+我自己先买一批
+我拿着买到的这批币
+再转给朋友们
+</code></pre>
+<p>这个区别很关键。</p>
+<h2 id="pumpfun">如果在 pump.fun 上发</h2>
+<p>pump.fun 是 Solana 上的 meme coin 平台，适合很轻量、很梗、很快的玩法。</p>
+<p>我的理解是，它特别适合这种场景：</p>
+<pre><code class="language-text">突然有一个朋友梗
+想把它变成一个币
+不用写合约
+不用自己搭交易池
+直接创建、买入、分享
+</code></pre>
+<p>大概流程是：</p>
+<ol>
+<li>准备一个 Solana 钱包，比如 Phantom 或 Solflare。</li>
+<li>钱包里放一点 SOL。</li>
+<li>在 pump.fun 上创建币。</li>
+<li>填币名、ticker、描述和图片。</li>
+<li>创建时自己 first buy 一点。</li>
+<li>你买到的币会进入你的钱包。</li>
+<li>然后你再把这些币转给朋友。</li>
+</ol>
+<p>假设我创建了一个叫 <code>Best Friend Coin</code> 的币，ticker 是 <code>BFF</code>。</p>
+<p>我 first buy 后拿到了：</p>
+<pre><code class="language-text">2,000,000 BFF
+</code></pre>
+<p>然后我可以这样送：</p>
+<pre><code class="language-text">朋友 A：520,000 BFF
+朋友 B：520,000 BFF
+朋友 C：520,000 BFF
+自己保留：440,000 BFF
+</code></pre>
+<p>这种方式最适合送好几个人。</p>
+<p>每个人给我一个 Solana 钱包地址，我直接转过去就行。</p>
+<p>如果朋友还没有钱包，也可以我先创建几个“礼物钱包”，每个钱包里放一点币和一点 SOL，再把助记词做成纸质卡片送出去。</p>
+<p>但这个方式安全性差一点，因为我也看过助记词。朋友收到之后，最好还是转到自己的新钱包里。</p>
+<h2 id="fourmeme">如果在 Four.meme 上发</h2>
+<p>Four.meme 是 BNB Chain 上的 meme coin launchpad。</p>
+<p>它的感觉和 pump.fun 有点像，只是链不一样。pump.fun 在 Solana 上，Four.meme 在 BNB Chain 上。</p>
+<p>所以钱包地址也不一样：</p>
+<pre><code class="language-text">pump.fun：朋友给我 Solana 地址
+Four.meme：朋友给我 0x... 开头的钱包地址
+</code></pre>
+<p>在 Four.meme 上，我也是先创建币，然后自己买入一部分，再把买到的币转给朋友。</p>
+<p>大概流程是：</p>
+<ol>
+<li>准备 MetaMask、OKX Wallet 或 Trust Wallet。</li>
+<li>切到 BNB Chain。</li>
+<li>钱包里准备一点 BNB。</li>
+<li>在 Four.meme 上创建币。</li>
+<li>填名字、ticker、logo、描述。</li>
+<li>自己买入一部分。</li>
+<li>把币转给朋友们的 <code>0x...</code> 地址。</li>
+<li>最好每个人也送一点 BNB，方便他们以后转账或卖出。</li>
+</ol>
+<p>如果只是朋友之间玩，我会尽量让描述写得轻一点、诚实一点：</p>
+<pre><code class="language-text">This is a personal meme token for friends.
+No roadmap. No promise. Just vibes.
+</code></pre>
+<p>中文也可以更直接：</p>
+<pre><code class="language-text">朋友纪念币，不是投资项目。
+</code></pre>
+<h2 id="pancakeswap">如果自己部署合约再加 PancakeSwap 池子</h2>
+<p>这是更“正式”的做法。</p>
+<p>你自己在 BNB Chain 上部署一个 BEP-20 合约，然后去 PancakeSwap 加流动性池。</p>
+<p>这样做的好处是，你对供应量、分配、合约功能都更可控。</p>
+<p>坏处是，麻烦很多，而且更像一个真的 token 项目。你要考虑合约、验证、流动性、初始价格、LP token、池子大小这些东西。</p>
+<p>比如你创建：</p>
+<pre><code class="language-text">币名：Best Friend Coin
+Ticker：BFF
+总量：1,000,000,000 BFF
+</code></pre>
+<p>部署完成后，所有币都在你的钱包里。然后你拿一部分去 PancakeSwap 加池子：</p>
+<pre><code class="language-text">100,000,000 BFF + 1 BNB
+</code></pre>
+<p>这个比例会决定初始价格：</p>
+<pre><code class="language-text">1 BFF = 1 / 100,000,000 BNB
+</code></pre>
+<p>池子越小，价格越容易大幅波动。</p>
+<p>所以如果只是送礼，我不会把池子做太大，也不会写什么宏大叙事。越像朋友之间的玩笑，反而越安全、越可爱。</p>
+<h2 id="_3">到底怎么送给朋友？</h2>
+<p>我觉得有两种方式。</p>
+<p>第一种，也是我最推荐的：</p>
+<pre><code class="language-text">朋友自己创建钱包
+朋友把地址发给我
+我把币转过去
+我再发给他代币地址和交易链接
+</code></pre>
+<p>这个方式最干净。币直接属于朋友，我不碰他的助记词。</p>
+<p>如果是在 pump.fun 上，朋友需要给我 Solana 钱包地址。</p>
+<p>如果是在 Four.meme 或 BNB Chain 上，朋友需要给我 <code>0x...</code> 钱包地址。</p>
+<p>第二种更像礼盒：</p>
+<pre><code class="language-text">我新建一个钱包
+里面放一些纪念币
+再放一点 SOL 或 BNB
+然后把助记词做成实体卡片送给朋友
+</code></pre>
+<p>这个方式仪式感强，但安全性一般。因为这个钱包的助记词我也看过，所以朋友收到后最好把里面的资产转走。</p>
+<p>如果是小额玩梗，我觉得可以。</p>
+<p>如果金额稍微大一点，还是让朋友自己建钱包比较好。</p>
+<h2 id="_4">币的地址是什么？</h2>
+<p>这里也很容易混。</p>
+<p>朋友的钱包地址，是朋友收币的地方。</p>
+<p>代币地址，是这个币本身的地址。</p>
+<p>在 BNB Chain 上，一般叫：</p>
+<pre><code class="language-text">Token Contract Address
+</code></pre>
+<p>长这样：</p>
+<pre><code class="language-text">0x...
+</code></pre>
+<p>在 Solana 上，一般叫：</p>
+<pre><code class="language-text">Mint Address
+</code></pre>
+<p>这才是别人用来搜索、导入、查看这个币的关键。</p>
+<p>所以我送朋友的时候，不能只说“我给你转了币”。我还应该把这些信息一起发给他：</p>
+<pre><code class="language-text">币名：
+Ticker：
+链：
+代币地址：
+交易链接：
+区块浏览器链接：
+</code></pre>
+<p>不然朋友可能钱包里看不到，还以为我没转。</p>
+<p>有些钱包不会自动显示新币，需要手动导入代币地址。</p>
+<h2 id="_5">我最后觉得，送礼版发币应该是什么样</h2>
+<p>如果是朋友礼物，我会尽量避免把它包装成项目。</p>
+<p>我会这样写：</p>
+<pre><code class="language-text">这是一个朋友纪念币。
+不是投资建议。
+不保证价格。
+不承诺路线图。
+唯一用途：纪念我们认识这件事。
+</code></pre>
+<p>数量可以设计得有点情绪价值：</p>
+<pre><code class="language-text">520 枚
+1314 枚
+2024 枚
+10086 枚
+</code></pre>
+<p>或者干脆每个人不同：</p>
+<pre><code class="language-text">认识最久的人：10,000 枚
+最会迟到的人：迟到税 404 枚
+最会组织饭局的人：88,888 枚
+</code></pre>
+<p>这才是这个东西真正好玩的地方。</p>
+<p>它不是金融产品。</p>
+<p>它是一个被链保存下来的内部笑话。</p>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2026/07/30/hybrid-kda-mla-kimi-k3-attention/">Hybrid KDA–MLA：Kimi K3 注意力机制解析<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
