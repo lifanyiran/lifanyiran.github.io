@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.1">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>业务Agent该怎么设计？ - 屹然的空间</title>
+
+  <meta name="description" content="基于 Anthropic 商业业务 Agent 落地经验，梳理单 Agent 优先、Skill 与 System Prompt 划分、Tool/UI 设计、延迟优化、记忆治理、安全边界、评估与组织协作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="业务Agent该怎么设计？">
+<meta property="og:url" content="https://lifanyiran.com/2026/09/08/business-agent-design-patterns/">
+<meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="基于 Anthropic 商业业务 Agent 落地经验，梳理单 Agent 优先、Skill 与 System Prompt 划分、Tool/UI 设计、延迟优化、记忆治理、安全边界、评估与组织协作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2026/business-agent-design-patterns.jpg">
+<meta property="article:published_time" content="2026-09-08T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-09-08T16:44:32.826426+08:00">
+<meta property="article:author" content="lifanyiran">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2026/business-agent-design-patterns.jpg">
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css?v=20260726-masonry">
+
+  
+
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+
+  
+</head>
+
+<body>
+  
+
+
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/about/">About Me</a></nav></header>
+
+<div class="widgets">
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#1">1. 架构</a><ul>
+<li><a href="#11-agent">1.1. 单 Agent 优先</a></li>
+<li><a href="#12-system-prompt-skill">1.2. System Prompt 和 Skill 的划分</a></li>
+<li><a href="#13-tool">1.3. Tool</a><ul>
+<li><a href="#131-tool">1.3.1. Tool 不应该重写业务逻辑</a></li>
+<li><a href="#132-ui-tool">1.3.2. UI 组件搞成 Tool</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2">2. 优化</a><ul>
+<li><a href="#21">2.1. 减少真实任务延迟</a></li>
+<li><a href="#22">2.2. 感知延迟优化</a></li>
+<li><a href="#23-prompt-caching">2.3. Prompt caching 优化</a></li>
+<li><a href="#24">2.4. 模型选择</a><ul>
+<li><a href="#241">2.4.1. 明确目标</a></li>
+<li><a href="#242-sweep">2.4.2. Sweep</a></li>
+<li><a href="#243">2.4.3. 最终选择</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3">3. 产品化</a><ul>
+<li><a href="#31">3.1. 记忆设计</a><ul>
+<li><a href="#311">3.1.1. 记忆不是完整聊天记录，是结构化事实</a></li>
+<li><a href="#312">3.1.2. 记忆治理</a></li>
+<li><a href="#313">3.1.3. 记忆写入</a></li>
+<li><a href="#314">3.1.4. 记忆读取</a></li>
+</ul>
+</li>
+<li><a href="#32">3.2. 安全设计</a><ul>
+<li><a href="#321">3.2.1. 关键动作，模型不能直接提交</a></li>
+<li><a href="#322-harness">3.2.2. 通过 harness 来维护一个可访问资源</a></li>
+<li><a href="#323-ui-id">3.2.3. UI 展示也只接收 ID</a></li>
+<li><a href="#324">3.2.4. 第三方信息消毒</a></li>
+</ul>
+</li>
+<li><a href="#33">3.3. 评估</a><ul>
+<li><a href="#331">3.3.1. 主要评估结果，不要过度锁死调用路径</a></li>
+<li><a href="#332">3.3.2. 不推荐用模拟用户作为主要度量</a></li>
+<li><a href="#333">3.3.3. 正例 + 负例</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4">4. 组织协作</a><ul>
+<li><a href="#41">4.1. 所有权跟随业务系统</a></li>
+<li><a href="#42-eval-case">4.2. 每个变更必须带 Eval Case</a></li>
+<li><a href="#43-eval">4.3. Eval 每次只跑影响范围</a></li>
+</ul>
+</li>
+<li><a href="#5">5. 总结</a></li>
+</ul>
+</div>
+</div></div></div>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Agent/">Agent</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-09-08T00:00:00+08:00">2026-09-08</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>业务Agent该怎么设计？</span></h1>
+<p>本文为 Anthropic 原文的阅读笔记。</p>
+<p>原文：<a href="https://claude.com/blog/the-anatomy-of-effective-commerce-agents">The anatomy of effective commerce agents</a></p>
+<p>背景：Anthropic 与零售、旅行、票务、电信等企业合作落地商业业务 Agent 的经验。</p>
+<h2 id="1">1. 架构</h2>
+<p><img alt="图 1" src="/images/posts/2026/business-agent-design-patterns/01.jpg" /></p>
+<h3 id="11-agent">1.1. 单 Agent 优先</h3>
+<p>一个主模型在标准 Agent Loop 中持续：理解目标 → 获取上下文 → 调工具 → 观察结果 → 澄清 → 继续行动。Anthropic 认为，传统的 Multi-Agent 架构（orchestrator + subagent）有几个劣势：</p>
+<ol>
+<li>每次委派都会损失状态、增加 token 和秒级延迟。</li>
+<li>业务域是分不清楚的，某一个 subagent 所需要的输入/上下文，可能是另外一个 subagent 的输出，subagent 之间也有重合。</li>
+<li>LLM 是越来越聪明的，要面向未来设计。</li>
+</ol>
+<p>替代方案是 Agent Skills，把分领域的指令包成 Skill，按需加载进已经掌握全部历史的主代理。那什么情况还是适合 Subagent 的方式呢？</p>
+<ol>
+<li>深度研究、代码执行等边界清晰、可压缩成一个结果的任务。</li>
+<li>药品、金融等拥有独立合规体系，需要真正把对话控制权移交出去的场景。</li>
+</ol>
+<h3 id="12-system-prompt-skill">1.2. System Prompt 和 Skill 的划分</h3>
+<p><img alt="图 2" src="/images/posts/2026/business-agent-design-patterns/02.jpg" />
+如果是单 Agent 的话，我们该怎么划分什么信息该放在 System Prompt，什么该放在 Skill 里呢？Anthropic 的答案是：按照频率来。</p>
+<ul>
+<li>约三分之一以上流量都会用到的指令，放 System Prompt。</li>
+<li>长尾能力：放 Skill。</li>
+<li>安全、法律、品牌规范、过敏信息等关键约束：无论频率如何都放 System Prompt。</li>
+<li>如果能根据入口页面提前判断需要哪个 Skill，就由框架预加载，避免多消耗一次模型轮次。</li>
+</ul>
+<p>本质是，利用业务逻辑来优化 Agent Skill loading 策略。</p>
+<h3 id="13-tool">1.3. Tool</h3>
+<h4 id="131-tool">1.3.1. Tool 不应该重写业务逻辑</h4>
+<p>业务逻辑（商品排序、库存、促销、履约、支付等逻辑）应继续由原有系统负责。Agent Tool 只是这些系统的接口。Tool 返回值也是模型上下文，因此要：</p>
+<ul>
+<li>只保留推理需要的字段。</li>
+<li>删除无关的大字段。</li>
+<li>把错误码转成可行动的提示。</li>
+<li>避免让 Tool 本身逐渐堆积大量业务规则。</li>
+</ul>
+<h4 id="132-ui-tool">1.3.2. UI 组件搞成 Tool</h4>
+<p><img alt="图 3" src="/images/posts/2026/business-agent-design-patterns/03.jpg" />
+不要让模型输出自定义 XML/标签再由前端解析。商品卡片、行程单、套餐对比、座位图等都应该是有类型约束的展示 Tool，例如：</p>
+<pre><code class="language-sql">present_products(...)
+</code></pre>
+<p>这样展示结构天然进入消息历史，用户之后说“左边第三个酒店”时，模型知道屏幕上的真实布局。</p>
+<h2 id="2">2. 优化</h2>
+<h3 id="21">2.1. 减少真实任务延迟</h3>
+<p>任务完成延迟概括为：总延迟 = Σ（每轮模型生成时间 + Tool 执行时间）。</p>
+<p>因此有三个杠杆：</p>
+<ul>
+<li>减少轮数：</li>
+<li>预加载页面上下文。</li>
+<li>提高模型能力：更聪明但单轮更慢的模型，有时反而拥有更低的总延迟，因为它规划更好、调用轮数更少。</li>
+<li>并行调用独立工具。</li>
+<li>加速 Tool：</li>
+<li>优化后端接口。</li>
+<li>在参数生成完成后立即执行：单个工具调用的参数已经完整，但模型还在继续生成后续工具调用或文本时，框架就可以先执行这个工具。</li>
+<li>也可以要求模型“最慢的 Tool 先输出”，这样减少整体时长。</li>
+<li>加速生成：通过 Eval 能力来选择与平衡速度和效果。</li>
+</ul>
+<h3 id="22">2.2. 感知延迟优化</h3>
+<p>在总耗时相同的情况下：</p>
+<ul>
+<li>Tool 参数一边生成，前端一边渐进渲染组件。</li>
+<li>工具执行期间展示“正在查找临水酒店”之类的进度信息。</li>
+</ul>
+<p>这样用户看到的是推进过程，而不是五秒钟的加载动画。</p>
+<h3 id="23-prompt-caching">2.3. Prompt caching 优化</h3>
+<p><img alt="图 4" src="/images/posts/2026/business-agent-design-patterns/04.jpg" />
+推荐的上下文顺序是：</p>
+<pre><code class="language-sql">Global：全局稳定内容
+Session：用户/会话内容
+Volatile：当前时间、页面等易变内容
+</code></pre>
+<p><img alt="图 5" src="/images/posts/2026/business-agent-design-patterns/05.jpg" />
+缓存是前缀匹配的。把时间戳放在 System Prompt 顶部，会导致后面的缓存全部失效。Anthropic 称其见到的优秀电商 Agent 可以达到 90%–99% 缓存命中率。</p>
+<h3 id="24">2.4. 模型选择</h3>
+<p>更大的模型：更好的理解、规划和工具调用，更高单 token 成本；生成可能更慢。</p>
+<p>更高的 effort：更充分的推理和检查；更多推理时间和 token。</p>
+<p>更小模型/低 effort：单次调用更快、更便宜；可能多走几轮、出错或任务失败。</p>
+<h4 id="241">2.4.1. 明确目标</h4>
+<p>先定义究竟要优化什么，以及不可突破的底线。例如购物 Agent 可以定义：</p>
+<ul>
+<li>任务完成率 ≥ 92%。</li>
+<li>商品信息有据可查率 ≥ 99%。</li>
+<li>推荐相关性 ≥ 4.2/5。</li>
+<li>p50 总延迟 ≤ 4 秒（代表普通用户体验）。</li>
+<li>p99 总延迟 ≤ 15 秒（代表最慢的那部分用户体验）。</li>
+<li>每个成功任务成本 ≤ 0.08 美元。</li>
+</ul>
+<h4 id="242-sweep">2.4.2. Sweep</h4>
+<p>其实就是模型 + effort，排列组合测试，比如：</p>
+<pre><code class="language-sql">Sonnet + low effort
+Sonnet + medium effort
+Sonnet + high effort
+Opus + low effort
+Opus + medium effort
+Opus + high effort
+</code></pre>
+<p>测试样本要尽量对准线上流量分布，比如：</p>
+<pre><code class="language-sql">60% 简单商品查询；
+25% 多条件推荐；
+10% 售后处理；
+5% 复杂购物规划。
+</code></pre>
+<p>不同模型对于不同 Prompt 的适配程度是不一样的，所以如果 prompt 不变的话，其实测的是模型能力 + Prompt 与该模型的适配程度。</p>
+<p>Anthropic 建议流程是这样：</p>
+<ol>
+<li>先用相同基线 Prompt 跑 Sweep。</li>
+<li>查看每个候选模型的失败案例。</li>
+<li>针对明显的 Prompt 不适配做几轮有限迭代。</li>
+<li>再进行比较。</li>
+<li>记录每个模型使用的 Prompt 版本。</li>
+</ol>
+<p>否则很容易因为一个为 Sonnet 长期调优的 Prompt，对 Opus 或更小模型作出不公平判断。</p>
+<h4 id="243">2.4.3. 最终选择</h4>
+<p>选择分数高的，但是如果有分数接近的，选能力更强的配置。原因：</p>
+<ol>
+<li>更好的复杂请求覆盖。</li>
+<li>更低的长尾失败率。</li>
+<li>给未来新增功能留下能力余量。</li>
+<li>更少的 Prompt 特例和补丁。</li>
+<li>更好的用户采用率、复用率和留存。</li>
+</ol>
+<p>整体流程：</p>
+<pre><code class="language-sql">定义业务指标和硬底线
+↓
+用真实流量构成建立 Eval
+↓
+Sweep 模型 × effort
+↓
+分析各配置失败案例
+↓
+有限度地适配各自 Prompt
+↓
+重新测质量、任务总延迟、成功任务成本
+↓
+剔除不满足硬底线的配置
+↓
+在剩余配置中选择最佳性价比
+</code></pre>
+<h2 id="3">3. 产品化</h2>
+<h3 id="31">3.1. 记忆设计</h3>
+<h4 id="311">3.1.1. 记忆不是完整聊天记录，是结构化事实</h4>
+<p>Anthropic 不建议把所有内容长期放在一份 Markdown 用户画像里。小规模时这样简单，但生产系统通常会遇到：</p>
+<ol>
+<li>用户事实越来越多。</li>
+<li>需要按字段查询。</li>
+<li>其他业务系统也需要读取。</li>
+<li>某些字段要触发确定性规则。</li>
+<li>要支持权限、修改、删除和保留期限。</li>
+<li>要与已有用户、门店和账号数据关联。</li>
+</ol>
+<p>因此，最终应该使用业务数据库，把每条记忆保存为小型、带类型、带来源的事实记录。</p>
+<h4 id="312">3.1.2. 记忆治理</h4>
+<ol>
+<li>建立允许保存的记忆类型，并在写入路径用代码校验，比如：</li>
+</ol>
+<pre><code class="language-sql">ALLOWED_MEMORY_TYPES = {
+  &quot;shoe_size&quot;,
+  &quot;default_store&quot;,
+  &quot;dietary_constraint&quot;,
+  &quot;fulfillment_preference&quot;,
+  &quot;preferred_report_metrics&quot;,
+}
+</code></pre>
+<ol start="2">
+<li>建议记忆必须进入数据权利流程，用户能看到系统记住了什么，也可以改正错误事实。</li>
+<li>偏好会过期，几年前的鞋码、地址或常用门店可能已经失效，因此要设置更新/失效策略。</li>
+</ol>
+<h4 id="313">3.1.3. 记忆写入</h4>
+<p>做成异步的，比如一个工具 <code>save_memory()</code> 让 Agent 调用（依赖 Agent 的推理能力，可能还需要给 Agent 一个 tool output），或者固定时机保存记忆（每轮对话结束）。</p>
+<p>并且，记忆保存工具只能读用户和助手文本，避免把 tool_result，比如商品描述，错误地存成用户偏好，更安全。
+<img alt="图 6" src="/images/posts/2026/business-agent-design-patterns/06.jpg" /></p>
+<h4 id="314">3.1.4. 记忆读取</h4>
+<p>根据频率分层，通常为 3 层：</p>
+<ol>
+<li>每轮固定携带：适合几乎所有请求都会使用的小量事实，比如默认门店、默认配送方式、关键安全约束。</li>
+<li>根据当前请求预取：根据当前页面、请求类型或预加载的 Skill，提前查询相关事实，比如：</li>
+</ol>
+<pre><code class="language-sql">用户搜索鞋子
+→ 预取鞋码、常购品牌、宽脚偏好
+</code></pre>
+<ol start="3">
+<li>通过 Tool 按需查找：低频、数量较多、当前是否需要无法提前判断的事实，通过 <code>lookup_memory()</code> 工具实现。</li>
+</ol>
+<h3 id="32">3.2. 安全设计</h3>
+<p>Prompt 负责表达规则，Harness 负责强制规则。</p>
+<h4 id="321">3.2.1. 关键动作，模型不能直接提交</h4>
+<p>比如广告的下单，Agent 最好从根本上不要有这个工具，而是让用户点击按钮来调用后端接口。</p>
+<h4 id="322-harness">3.2.2. 通过 harness 来维护一个可访问资源</h4>
+<p>Harness 维护一个本会话允许访问的 ID 集合：</p>
+<pre><code class="language-sql">allowed_product_ids
+allowed_order_ids
+allowed_campaign_ids
+allowed_change_ids
+</code></pre>
+<p>写操作和展示操作只接受这些 ID。</p>
+<h4 id="323-ui-id">3.2.3. UI 展示也只接收 ID</h4>
+<p>展示工具不应该让模型直接传完整的商品或订单对象，因为可能会有幻觉。</p>
+<pre><code class="language-sql">bad case:
+{
+  &quot;name&quot;: &quot;某商品&quot;,
+  &quot;price&quot;: &quot;1 元&quot;,
+  &quot;availability&quot;: &quot;现货&quot;
+}
+
+good case:
+{
+  &quot;product_ids&quot;: [&quot;p_123&quot;, &quot;p_456&quot;]
+}
+</code></pre>
+<p>然后服务器自行补全。</p>
+<h4 id="324">3.2.4. 第三方信息消毒</h4>
+<p>如果要用到外部信息（评论、弹幕、商品描述、竞品网页等），需要对内容进行消毒（Sanitize），防止提示词注入攻击：</p>
+<pre><code class="language-sql">移除控制字符；
+移除双向文本控制字符；
+破坏伪造的消息角色和 Tool Call 格式；
+防止伪造系统所使用的内容边界标记；
+限制最大长度；
+使用固定标签和 fence 包裹。
+</code></pre>
+<h3 id="33">3.3. 评估</h3>
+<h4 id="331">3.3.1. 主要评估结果，不要过度锁死调用路径</h4>
+<p>因为多个路径都可能得到正确结果。严格限制路径会导致：</p>
+<ul>
+<li>测试非常脆弱。</li>
+<li>模型升级后无意义失败。</li>
+<li>阻止更高效的新策略。</li>
+<li>团队开始为了通过测试而过度提示模型。</li>
+</ul>
+<h4 id="332">3.3.2. 不推荐用模拟用户作为主要度量</h4>
+<p>Anthropic 认为主要有几个原因：</p>
+<ul>
+<li>用户模型是随机的。</li>
+<li>被测 Agent 也是随机的。</li>
+<li>Judge 仍然是随机的。</li>
+<li>需要更大样本才能稳定。</li>
+<li>失败时不容易定位是谁造成的。</li>
+<li>成本高、运行慢。</li>
+</ul>
+<p>它适合：</p>
+<ul>
+<li>探索未知失败。</li>
+<li>发现 Eval 覆盖盲区。</li>
+<li>做总体体验检查。</li>
+</ul>
+<h4 id="333">3.3.3. 正例 + 负例</h4>
+<p>Anthropic 认为，每个 should serve 都有 should refuse，每个 should ask 都有 should just do it，否则 Agent 很容易通过一种“过度保守策略”取得虚假的高分：遇到任何情况都追问或拒绝。</p>
+<pre><code class="language-sql">positive:
+用户要求退款，符合条件 → 应该暂存退款
+
+negative:
+不符合条件 → 应该拒绝
+缺少订单 → 应该追问
+已有足够信息 → 不应该多余追问
+</code></pre>
+<h2 id="4">4. 组织协作</h2>
+<p>业务 Agent 通常会涉及多个团队一起开发，每个团队都有可能改其中的组件，Agent 没有传统微服务那么强的模块隔离。所有内容最终进入同一个上下文窗口，影响同一个模型决策。Anthropic 不建议做 subagent 来隔离，原因如上。所以通过以下方式来解决。</p>
+<h3 id="41">4.1. 所有权跟随业务系统</h3>
+<p>每个 Tool 和 Skill 必须有唯一 owner，例如：</p>
+<pre><code class="language-sql">定价团队：
+pricing-promotions Skill
+promotion tools
+
+客服团队：
+customer-care Skill
+order/return tools
+
+库存团队：
+inventory-operations Skill
+inventory tools
+</code></pre>
+<p>共享 System Prompt 则分层管理：</p>
+<ul>
+<li>通用部分由 Agent 平台团队统一拥有。</li>
+<li>领域段落由对应领域团队负责。</li>
+<li>最终仍要有一个平台级 owner 对整体负责。</li>
+</ul>
+<p>重点是避免：</p>
+<ul>
+<li>多个团队都能随意修改同一个 Skill。</li>
+<li>Tool 出问题时找不到负责人。</li>
+<li>Prompt 成为没有所有者的公共文档。</li>
+<li>每个团队只对局部分数负责，不对整体 Agent 负责。</li>
+</ul>
+<h3 id="42-eval-case">4.2. 每个变更必须带 Eval Case</h3>
+<p>团队提交新的 Skill 或 Tool 时，不能只交付实现，还要交付：正例、负例、边界案例、交叉案例……</p>
+<p>本质是要写好可执行测试。</p>
+<h3 id="43-eval">4.3. Eval 每次只跑影响范围</h3>
+<p>完整的很慢很贵、有随机性。只跑部分案例，例如：</p>
+<ol>
+<li>修改 Skill：Skill 自身案例 + 相邻 Skill 的交叉案例。</li>
+<li>修改 Tool：所有会调用该 Tool 的案例。</li>
+<li>修改展示组件：相关 UI 和引用位置案例。</li>
+<li>修改共享 System Prompt：完整 Eval。</li>
+<li>修改安全框架：全部安全、写入、权限、注入案例。</li>
+</ol>
+<h2 id="5">5. 总结</h2>
+<p>四部分如何形成闭环：</p>
+<pre><code class="language-sql">用户请求
+│
+主 Agent 进行判断
+│
+┌───────────────┼────────────────┐
+│               │                │
+Memory 提供     Tools 连接业务    Skills 提供流程
+跨会话上下文     系统能力          知识
+│               │                │
+└───────────────┼────────────────┘
+                │
+Harness 强制执行
+权限、ID、限额、审批、串行化
+│
+产生最终业务状态
+│
+Evals 验证结果和边界
+│
+CI、Canary、开关控制发布
+│
+生产事故沉淀为新 Eval
+</code></pre>
+<p>每层解决不同问题：</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>负责什么</th>
+<th>不应该负责什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型</td>
+<td>理解、判断、规划、选择</td>
+<td>最终授权和强制安全</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>保存可复用的用户事实</td>
+<td>无限制保存所有聊天</td>
+</tr>
+<tr>
+<td>Skill</td>
+<td>提供领域流程和程序性知识</td>
+<td>绕过后端规则</td>
+</tr>
+<tr>
+<td>Tool</td>
+<td>连接现有业务能力</td>
+<td>重新实现整个业务系统</td>
+</tr>
+<tr>
+<td>Harness</td>
+<td>权限、校验、审批、不变量</td>
+<td>依赖模型自觉遵守</td>
+</tr>
+<tr>
+<td>Eval</td>
+<td>检测行为和业务结果</td>
+<td>只测调用路径</td>
+</tr>
+<tr>
+<td>发布流程</td>
+<td>控制变更影响面</td>
+<td>把 Prompt 当普通文案上线</td>
+</tr>
+</tbody>
+</table>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
+</div>
+
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2026/08/11/meme-coin-as-a-gift-for-friends/">我发了一个币，送给朋友当作礼物<span class="note">较早</span></a></section></div>
+
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
+<p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.fancybox = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js","css":"https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css","selector":".swiper-slide img"});
+  }
+  if ('false' == 'true') {
+    stellar.plugins.heti = Object.assign({"enable":false,"css":"https://unpkg.com/heti/umd/heti.min.css","js":"https://unpkg.com/heti/umd/heti-addon.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>
