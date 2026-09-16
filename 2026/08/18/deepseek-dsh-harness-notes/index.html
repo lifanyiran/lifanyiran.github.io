@@ -4,12 +4,13 @@
 <head>
   <meta name="generator" content="Hexo 5.4.1">
   <meta charset="utf-8">
-  <meta name="robots" content="noindex,follow">
+  
 
   <meta http-equiv='x-dns-prefetch-control' content='on' />
   <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel='dns-prefetch' href='//unpkg.com'>
+  <link rel="preconnect" href="https://giscus.app" crossorigin>
 
   <meta name="renderer" content="webkit">
   <meta name="force-rendering" content="webkit">
@@ -18,20 +19,22 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" content="#f8f8f8">
-  <title>分类：正则表达式 - 屹然的空间</title>
+  <title>研究了一下梁圣的大肥鲸DSH - 屹然的空间</title>
 
-  
-
-  
-    <meta property="og:type" content="website">
-<meta property="og:title" content="屹然的空间">
-<meta property="og:url" content="http://lifanyiran.com/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/index.html">
+  <meta name="description" content="读 DeepSeek Harness（DSH）后的笔记：它的创新更偏系统工程，通过插件依赖图统一组织 Loop、工具、上下文、UI 和运行形态。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="研究了一下梁圣的大肥鲸DSH">
+<meta property="og:url" content="https://lifanyiran.com/2026/08/18/deepseek-dsh-harness-notes/">
 <meta property="og:site_name" content="屹然的空间">
+<meta property="og:description" content="读 DeepSeek Harness（DSH）后的笔记：它的创新更偏系统工程，通过插件依赖图统一组织 Loop、工具、上下文、UI 和运行形态。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lifanyiran.com/images/covers/2026/deepseek-dsh-harness-notes.jpg">
+<meta property="article:published_time" content="2026-08-18T00:00:00+08:00">
+<meta property="article:modified_time" content="2026-09-16T19:13:11.529021+08:00">
 <meta property="article:author" content="lifanyiran">
-<meta name="twitter:card" content="summary">
-  
-  
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lifanyiran.com/images/covers/2026/deepseek-dsh-harness-notes.jpg">
 
   <!-- feed -->
   
@@ -53,8 +56,10 @@
   
 
 
+
+
   <div class='l_body' id='start'>
-    <aside class='l_left' layout=''>
+    <aside class='l_left' layout='post'>
     
 
 
@@ -64,63 +69,128 @@
 <nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/guestbook/">留言板</a><a class="nav-item" href="/about/">About Me</a></nav></header>
 
 <div class="widgets">
-<div class="widget-wrap" id="markdown"><div class="widget-header cap dis-select"><span class="name">Greetings</span></div><div class="widget-body fs14"><p>一起用离散的视角，观测连续的世界。</p>
-</div></div>
-
-<div class="widget-wrap" id="recent"><div class="widget-header cap dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><div class="more-item"><a class="title" href="/2026/09/08/business-agent-design-patterns/">业务Agent该怎么设计？</a></div><div class="more-item"><a class="title" href="/2026/08/18/deepseek-dsh-harness-notes/">研究了一下梁圣的大肥鲸DSH</a></div><div class="more-item"><a class="title" href="/2026/08/11/meme-coin-as-a-gift-for-friends/">我发了一个币，送给朋友当作礼物</a></div><div class="more-item"><a class="title" href="/2026/07/30/hybrid-kda-mla-kimi-k3-attention/">Hybrid KDA–MLA：Kimi K3 注意力机制解析</a></div><div class="more-item"><a class="title" href="/2026/06/28/large-language-model-agent-in-financial-trading/">Large Language Model Agent in Financial Trading</a></div><div class="more-item"><a class="title" href="/2026/05/23/self-evolving-agents-survey/">自进化Agent综述</a></div><div class="more-item"><a class="title" href="/2026/04/19/agent-harness-architecture-design-patterns/">Harness 架构的通用设计模式及特点</a></div><div class="more-item"><a class="title" href="/2026/03/10/tradingagents-introduction/">TradingAgents介绍</a></div></div></div>
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><div class="toc">
+<ul>
+<li><a href="#1">1. 快速体验</a></li>
+<li><a href="#2">2. 主要特性</a><ul>
+<li><a href="#21">2.1. 核心思想：万物即插件</a></li>
+<li><a href="#22">2.2. 个性化工作模式</a></li>
+<li><a href="#23">2.3. 轨迹回放</a></li>
+</ul>
+</li>
+<li><a href="#3-harness">3. 一些关于 harness 基础能力的补充</a><ul>
+<li><a href="#31">3.1. 工具并发</a></li>
+<li><a href="#32-subagent">3.2. 通过 subagent 驱动子任务</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div></div></div>
 </div>
 <footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/lifanyiran" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/github.png"/></a><a class="social" href="https://www.linkedin.com/in/lifanyiran/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/linkedin.png"/></a><a class="social" href="/images/wechatqr.jpg" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/wechat.png"/></a><a class="social" href="/yiran.lifan@gmail.com" rel="noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/images/email.png"/></a></div></footer>
 
     </aside>
-    <div class='l_main list'>
-      
-  
-
-<header class="header mobile-only">
-
-<div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.2/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/images/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.1/image/2659360.svg';"></a><a class="title" href="/"><div class="main">屹然的空间</div><div class="sub cap">Yiran's Space</div></a></div>
-</header>
-
-
-
-      
-
-  
-
-
-  <div class='nav-wrap'>
-  <nav class='sub post cap'>
-    
-      <a href='/'>近期发布</a>
-    
-    
-      
-        <a class='active' href='/categories'>分类：正则表达式</a>
-      
-    
-    
+    <div class='l_main'>
       
 
       
-    
-    
-      
-        <a href='/archives'>归档</a>
-      
-    
-  </nav>
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Agent/">Agent</a></div><div id="post-meta">发布于&nbsp;<time datetime="2026-08-18T00:00:00+08:00">2026-08-18</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>研究了一下梁圣的大肥鲸DSH</span></h1>
+<p>本文是 A\原文的阅读笔记。</p>
+<p>原文：<a href="https://claude.com/blog/the-anatomy-of-effective-commerce-agents">The anatomy of effective commerce agents</a></p>
+<h2 id="1">1. 快速体验</h2>
+<ol>
+<li>安装 Node.js（建议安装 LTS 版本）。</li>
+<li>一行命令启动 DSH：<code>npx @deepseek-ai/dsh web</code>，然后进入 <a href="http://127.0.0.1:3080/">http://127.0.0.1:3080</a>。</li>
+<li>第一次使用时，会提示填入 DeepSeek API key（在 DeepSeek 开放平台创建）。但设置里其实可以选择各种提供官方云服务的 provider（a/、oai 等），也可以自定义 provider（beats）。</li>
+</ol>
+<h2 id="2">2. 主要特性</h2>
+<h3 id="21">2.1. 核心思想：万物即插件</h3>
+<p>DSH 在基础能力（例如：怎么管理 memory、怎么管理 skills、怎么压缩/组装 context 等）上没有本质创新，但系统架构和经典 harness 架构（loop + hook）有本质区别，对比如下：</p>
+<ul>
+<li>经典架构：以 Agent Loop 为中心，Hook 是 Loop 预留的扩展点。</li>
+<li>DSH：以能力依赖图为中心，Loop 也只是可替换节点，框架统一处理插件的依赖、启停、清理和隔离。</li>
+</ul>
+<p>举个例子：</p>
+<ul>
+<li>经典架构：一个厨房流水线</li>
+</ul>
+<pre><code class="language-text">Loop: 接单 → 备菜 → 炒菜 → 装盘 → 上菜
+hook:
+炒菜前：检查食材、切菜
+炒菜后：拍照、记录成本
+</code></pre>
+<ul>
+<li>DSH：先有插件，再组装厨房</li>
+</ul>
+<pre><code class="language-text">仓库插件：提供食材
+炒菜插件：需要备菜，提供炒菜
+厨师插件：执行备菜 -&gt; 炒菜 -&gt; 装盘流程
+上菜员插件：需要先完成装盘，提供上菜服务
+
+每个插件声明：
+- 我需要什么
+- 我提供什么
+- 我启动和卸载时如何处理资源
+
+框架根据依赖关系把它们连接起来。ReAct Loop 也只是其中一个“厨师插件”，可以整体换掉。
+</code></pre>
+<p>DSH 插件到底能改什么？</p>
+<p>系统提示词、工具、Loop、context manager 等一切 harness 组件（除 <a href="http://agents.md/">AGENTS.md</a>、skills 包等知识型文档）。并且，一个插件可以涉及多个 harness 组件，例如实现一个 Goal 组件，赋予 agent 持续工作、完成具体目标的功能，涉及 tool、sandbox、prompt 等多个配套组件。</p>
+<p>结论：DSH 的创新偏向系统工程，而非 Agent 能力创新。它不会让工具调用更聪明、记忆更准确、上下文更合理，而是提供将各种插件组装在一起的编排能力，把过去散落在代码里的 Hook、规则和约定，变成明确的能力协议、依赖关系和生命周期。对于单一 Loop、少量 Hook 的项目可能过度设计，但当系统要支持多种 Loop、模型、存储、沙箱、UI 和运行形态时，它的统一插件模型才更有价值。</p>
+<h3 id="22">2.2. 个性化工作模式</h3>
+<p><img alt="图 1" src="/images/posts/2026/deepseek-dsh-harness-notes/01.jpg" /></p>
+<h3 id="23">2.3. 轨迹回放</h3>
+<p>可以清楚地看用户和 agent 的完整交互历史：系统提示词的内容、Session 包含了几个 Turn、每个 Turn 中用户说了什么、agent 调用了哪些工具，等等。
+<img alt="图 2" src="/images/posts/2026/deepseek-dsh-harness-notes/02.jpg" /></p>
+<h2 id="3-harness">3. 一些关于 harness 基础能力的补充</h2>
+<h3 id="31">3.1. 工具并发</h3>
+<p>一次 LLM 回复可以产生多个 tool calls。给每个工具一个是否支持并发的标识：<code>is_support_parallel</code>。如果为 <code>True</code>，说明该工具支持并发，否则只能串行执行。</p>
+<p>工具的调用顺序依赖基模能力，例如：</p>
+<pre><code class="language-text">read1 → read2 → read3 → write1 → read4 → read5 → write2 → write3
+</code></pre>
+<p>并发的执行过程依赖 harness：找到第一个不支持并发的工具 <code>write1</code>，则前面的可并发工具（<code>read1</code>、<code>read2</code>、<code>read3</code>）进入滚动并发池，例如容量为 10。然后执行 <code>write1</code>，之后继续按这个逻辑，并发 <code>read4</code>、<code>read5</code>，再执行 <code>write2</code>……</p>
+<p>处理好的工具结果，也应该按照调用顺序排列好返回给 agent。</p>
+<h3 id="32-subagent">3.2. 通过 subagent 驱动子任务</h3>
+<p>子 agent 一般由主 agent 调用某个工具创建，用于完成具体的子任务。DeepAgents 的 task 工具的逻辑就是这样。</p>
+<p>task 工具是支持并发的。假如 agent 一次性产生了 3 个 task tool calls，就可以并发出 3 个子 agent 完成具体的任务。</p>
+<p>主 agent 需要总结、委派任务，生成 prompt 给子 agent。子 agent 首先要返回一个 task id，主 agent 根据 task id 追踪子 agent 运行状态、拿到结果，也可以自主取消任务。</p>
+<p>程序上没问题，但是执行语义方面，主要还是依赖基础模型的能力（harness 也有一定作用，例如写好 prompt）。</p>
+<p>举个例子，就像团队协作开发代码库一样，为了避免冲突，大家都是在自己的分支进行开发，最后 merge。子 agent 也应该遵循类似的逻辑来避免冲突性操作。理想状态下，各 agent 需要合理分工：subagent1 负责读和分析，subagent2 负责写前端，subagent3 负责写后端。或者，每个 subagent 先在各自独立的分支下开发，最后由主 agent merge。</p>
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文使用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+</article>
+
+<div class='related-wrap md reveal' id="comments">
+  <div class='cmt-title cap theme'><p>留言</p></div>
+  <div class='cmt-body giscus-comments'>
+    <div class="giscus"></div>
+    <script src="https://giscus.app/client.js"
+            data-repo="lifanyiran/lifanyiran.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkzOTAyNjA2MjU="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOF0Lnkc4DB_WB"
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark"
+            data-lang="zh-CN"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+  </div>
 </div>
 
-  <div class="post-list post"><a class="post-card post " href="/2021/11/05/regexp_intro/">
-<article class="md"><div class="post-cover"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://s3.bmp.ovh/imgs/2022/04/24/640afcd9e6b8467c.webp"/></div><h2 class="post-title">正则表达式基础</h2><div class="excerpt"><p>本文为正则表达式的基础知识，以及学习笔记。</p></div><div class="meta cap"><span class="cap" id="post-meta">发布于&nbsp;<time datetime="2021-11-05T09:50:00.000Z">2021-11-05</time></span><span class="cap breadcrumb">正则表达式</span></div></article>
-</a></div>
-  
 
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2026/09/08/business-agent-design-patterns/">业务Agent该怎么设计？<span class="note">较早</span></a></section></div>
 
-
-
-
-      
 <footer class="page-footer reveal fs12"><hr><div class="text"><p>All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>.</p>
 <p>Created By <a href="http://lifanyiran.com/">@lifanyiran</a>，powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> and <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.6.1" title="v1.6.1">Stellar</a>.</p>
 </div></footer>
